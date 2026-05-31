@@ -1,7 +1,7 @@
-# tracertools
+# Overview
 The tracertools package is a collection of Python functions deigned to streamline common tasks for connectomics researchers, particularly those related to the proofreading process. 
 
-## Installation
+# Installation
 Quick installation with pip isn't supported yet (but is planned for the future), so you'll have to intall the tracertools package manually from this GitHub repository by doing the following:
 
 1. Open a terminal and navigate to the directory where you want the tracertools package to be stored.
@@ -28,13 +28,13 @@ fresh_ids = tt.get_current_seg_ids(
     seg_ids=[720575941586154052,720575941429544111]
 )
 ```
-## Glossary of Common Terms
+# Glossary of Common Terms
 Some terms used in the function descriptions are either uncommon or are used here to mean something very specific in the context of this package. These are defined below:
 
-### bucket
+**bucket**
 a server where files can be stored and accessed remotely. Often used for publicly hosting neuroglancer volumes containing meshes, annotation layers, or electron microscope (EM) image layers. Can also be used to host data tables for things like cell type labels, proofreading status, or synapse data. The functions that begin with the prefix `bucket_` relate to reading from and writing to buckets using the [cloudfiles](https://github.com/seung-lab/cloud-files) Python package.
 
-### CAVE
+**CAVE**
 connectome annotation versioning engine, the software used to manage and interact with backend information about datastacks . This is done with the [caveclient](https://github.com/CAVEconnectome/CAVEclient) Python package, thorough documentation for which can be found [here](https://caveclient.readthedocs.io/en/latest/).
 
 **chunkedgraph/pychunkedgraph/pcg** - the chunkedgraphis an organizational structure that holds the information about which supervoxels belong to which segments. It's created and managed by the [pychunkedgraph (pcg) python package](https://github.com/CAVEconnectome/PyChunkedGraph). Individual supervoxels are always considered to belong to the lowest layer, making them the "level 1 nodes", or "L1 nodes" for short. All the supervoxels belonging to a segment within a given cube of space, referred to as a "chunk", will be grouped together into a level 2 (L2) node. Multiple L2 nodes are grouped into an L3 node and so on until you reach a layer that contains all the supervoxels in the whole segment. For a more detailed explanation, read [this description](https://caveclient.readthedocs.io/en/latest/guide/chunkedgraph.html). Working with different layers can have advantages. For example, the L1 layer (usually just referred to as "the supervoxels") can provide detailed information at the cost of computational power, while the L2 nodes can provide information faster for less processing power, like cached 3D volume measurements - at the cost of being less reliable in certain contexts.
@@ -75,21 +75,39 @@ connectome annotation versioning engine, the software used to manage and interac
 
 **voxel** - one unit of 3D space, shaped like a rectangular prism, the actual spatial dimensions of which vary from datastack to datastack. Compare to a 2-dimensional pixel.
 
-## Functions
+# Functions
 WORK IN PROGRESS
 Below are basic descriptions of each function in the tracertools package, with instructions on their use. Examples will be added at a alter date.
 
-### bucket_convert_colons
-Converts any colons `:` in a string to triple-underscores `___`. Used to allow creation and downloading of neuroglancer legacy-format volumes (which by necessity must include colons in several file names) on Windows machines (which strictly prohibit the use of colons in file names).
+## bucket_convert_colons
+Takes a string with the `file_path` argument. By default, converts any colons `:` in the string to triple-underscores `___`. If the `to_windows` argument is set to `False`, converts triple underscores back to colons. Used to allow creation and download/upload of neuroglancer legacy-format volumes (which by necessity must include colons in several file names) on Windows machines (which strictly prohibit the use of colons in file names).
 
-### bucket_delete_file
-Takes a file path on a cloudfiles-managed bucket and deletes the file.
+## bucket_delete_file
+Takes an absolute file path on a cloudfiles-managed bucket as a string with the `file_path` argument and deletes the file.
 
-### bucket_delete_folder
-Takes a folder path on a cloudfiles-managed bucket and deletes the folder, including everything contained within. Includes a confirmation window that pops up to prevent accidental deletion.
+## bucket_delete_folder
+Takes an absolute folder path on a cloudfiles-managed bucket as a string with the `folder_path` argument and deletes the folder, including everything contained within. Prompts the user with a confirmation window where they must type `DELETE` and hit enter to prevent accidental deletion.
 
-### bucket_download_file
-Takes a file path on a cloudfiles-managed bucket with the `bucket_path` argument and downloads the file. Tries to find the default Downloads folder automatically, but a specific path can be optionally passed with the `download_path` argument.
+## bucket_download_file
+Takes an absolute file path on a cloudfiles-managed bucket as a string with the `bucket_path` argument and downloads the file. Tries to find a folder called `Downloads` in the home directory by default, but a specific absolute path to a different location can be optionally passed as a string with the `download_path` argument.
 
-## License
+## bucket_download_folder
+Takes an absolute folder path on a cloudfiles-managed bucket as a string with the `bucket_path` argument and downloads the folder and all its contents. Tries to find a folder called `Downloads` in the home directory by default, but a specific absolute path to a different location can be optionally passed as a string with the `download_path` argument.
+
+## bucket_move_file
+Takes an absolute file path on a cloudfiles-managed bucket as a string with the `file_path` argument and moves it to a new folder location on the bucket passed as a string of the absolute path to that folder with the `new_folder_path` argument.
+
+## bucket_rename_file
+Takes an absolute file path on a cloudfiles-managed bucket as a string with the `file_path` argument and renames using a string passed with the `new_name` argument. The new name should just be the name of the file (not an absolute path that includes any folders it was contained within) with the file extension if one was present in the original name.
+
+## bucket_upload_file
+Takes an absolute file path on your local machine to a file you want to upload as a string with the `local_path` argument and an absolute folder path to a bucket folder where you want the file to be saved as a string with the `bucket_path` argument, and coppies your local file to the bucket location specified. If folders that don't yet exist are included in the `bucket_path` argument, they'll be created.
+
+## bucket_upload_folder
+Takes an absolute folder path on your local machine to a folder you want to upload as a string with the `local_path` argument and an absolute folder path to a bucket folder where you want the file to be saved as a string with the `bucket_path` argument, and coppies the contents of your local folder to the folder specified on the bucket. Note that the last folder in the bucket path will be the new top-level folder (i.e. if your local folder is called "image" and you want to put it at a bucket location of "bucket/test_images" you should set the `bucket_path` argument equal to `bucket/test/images/image`). This format is intended to allow you to rename the folder when uploading if desired. If folders that don't yet exist are included in the `bucket_path` argument, they'll be created.
+
+## calc_3d_distance
+Takes two points as lists of 3 integers representing their x,y, and z coordinates with the `point_a` and `point_b` arguments and a the resolution of the coordinate system as a list of 3 integers with the `res` argument, and returns the distance between the two points as a float. Units will be the same as whatever was used for the `res` argument.
+
+# License
 The tracertools package is licensed under the GNU General Public License v3.0. See the [LICENSE](https://github.com/jaybgager/tracertools/blob/main/LICENSE) file for more details.
