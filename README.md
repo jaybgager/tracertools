@@ -98,34 +98,34 @@ one unit of 3D space, shaped like a rectangular prism, the actual spatial dimens
 WORK IN PROGRESS
 Below are basic descriptions of each function in the tracertools package, with instructions on their use. Examples will be added at a alter date.
 
-**bucket_convert_colons**\
+### bucket_convert_colons
 Takes a string with the `file_path` argument. By default, converts any colons `:` in the string to triple-underscores `___`. If the `to_windows` argument is set to `False`, converts triple underscores back to colons. Used to allow creation and download/upload of neuroglancer legacy-format volumes (which by necessity must include colons in several file names) on Windows machines (which strictly prohibit the use of colons in file names).
 
-**bucket_delete_file**\
+### bucket_delete_file
 Takes an absolute file path on a cloudfiles-managed bucket as a string with the `file_path` argument and deletes the file.
 
-## bucket_delete_folder
+### bucket_delete_folder
 Takes an absolute folder path on a cloudfiles-managed bucket as a string with the `folder_path` argument and deletes the folder, including everything contained within. Prompts the user with a confirmation window where they must type `DELETE` and hit enter to prevent accidental deletion.
 
-## bucket_download_file
+### bucket_download_file
 Takes an absolute file path on a cloudfiles-managed bucket as a string with the `bucket_path` argument and downloads the file. Tries to find a folder called `Downloads` in the home directory by default, but a specific absolute path to a different location can be optionally passed as a string with the `download_path` argument.
 
-## bucket_download_folder
+### bucket_download_folder
 Takes an absolute folder path on a cloudfiles-managed bucket as a string with the `bucket_path` argument and downloads the folder and all its contents. Tries to find a folder called `Downloads` in the home directory by default, but a specific absolute path to a different location can be optionally passed as a string with the `download_path` argument.
 
-## bucket_move_file
+### bucket_move_file
 Takes an absolute file path on a cloudfiles-managed bucket as a string with the `file_path` argument and moves it to a new folder location on the bucket passed as a string of the absolute path to that folder with the `new_folder_path` argument.
 
-## bucket_rename_file
+### bucket_rename_file
 Takes an absolute file path on a cloudfiles-managed bucket as a string with the `file_path` argument and renames using a string passed with the `new_name` argument. The new name should just be the name of the file (not an absolute path that includes any folders it was contained within) with the file extension if one was present in the original name.
 
-## bucket_upload_file
+### bucket_upload_file
 Takes an absolute file path on your local machine to a file you want to upload as a string with the `local_path` argument and an absolute folder path to a bucket folder where you want the file to be saved as a string with the `bucket_path` argument, and coppies your local file to the bucket location specified. If folders that don't yet exist are included in the `bucket_path` argument, they'll be created.
 
-## bucket_upload_folder
+### bucket_upload_folder
 Takes an absolute folder path on your local machine to a folder you want to upload as a string with the `local_path` argument and an absolute folder path to a bucket folder where you want the file to be saved as a string with the `bucket_path` argument, and coppies the contents of your local folder to the folder specified on the bucket. Note that the last folder in the bucket path will be the new top-level folder (i.e. if your local folder is called "image" and you want to put it at a bucket location of "bucket/test_images" you should set the `bucket_path` argument equal to `bucket/test/images/image`). This format is intended to allow you to rename the folder when uploading if desired. If folders that don't yet exist are included in the `bucket_path` argument, they'll be created.
 
-## calc_3d_distance
+### calc_3d_distance
 Takes two points as lists of 3 integers representing their x,y, and z coordinates with the `point_a` and `point_b` arguments and a the resolution of the coordinate system as a list of 3 integers with the `res` argument, and returns the distance between the two points as a float. Units will be the same as whatever was used for the `res` argument.
 
 # License
