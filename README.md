@@ -1,5 +1,5 @@
 # Overview
-The tracertools package is a collection of Python functions deigned to streamline common tasks for connectomics researchers, particularly those related to the proofreading process. 
+The tracertools package is a collection of Python functions designed to streamline common tasks for connectomics researchers, particularly those related to the proofreading process. 
 
 # Installation
 Quick installation with pip isn't supported yet (but is planned for the future), so you'll have to intall the tracertools package manually from this GitHub repository by doing the following:
@@ -139,6 +139,13 @@ Takes a line segment as an array of two arrays of 3 floats representing the endp
 
 ### calc_seg_mesh_intersect
 Takes a datastack name as a string with the `datastack` argument, a list of segment IDs as ints with the `seg_ids` argument, and the address of a neuroglancer mesh as a string with the `mesh_address` argument (e.g. "https://c10s.pni.princeton.edu/tracers/jay/mesher_demo/example_01|neuroglancer-precomputed:") and by default returns a list of bool (True/False) values indicating which segments' skeletons intersect the chosen mesh. Optionally setting the `return_intersects` argument to True will instead return a list of values that are either lists of all the point coordinates at which each segment intersects the mesh or a `None` value if no intersection points exist.
+
+### calc_skeleton_mesh_intersect
+Takes a segment's skeleton as an (n,2,3)-shape numpy array of floats with the `bones` argument and a list of triangular mesh faces as an (n,3,3)-shape numpy array of floats with the `mesh_triangles` argument and returns a list of numpy arrays of 3 floats representing the intersection points between the skeleton and the mesh OR a None value if no intersection points were found.
+
+
+### check_seg_freshness
+Takes a datastack name as a string with the `datastack` argument and a list of segment IDs as ints with the `seg_ids` argument and returns a list of bools (True/False values) indicating if each segment ID in the submitted list is current (True) or outdated (False).
 
 # License
 The tracertools package is licensed under the GNU General Public License v3.0. See the [LICENSE](https://github.com/jaybgager/tracertools/blob/main/LICENSE) file for more details.
