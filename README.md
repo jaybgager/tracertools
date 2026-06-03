@@ -99,53 +99,188 @@ WORK IN PROGRESS
 Below are basic descriptions of each function in the tracertools package, with instructions on their use. Examples will be added at a alter date.
 
 ### bucket_convert_colons
-Takes a string with the `file_path` argument. By default, converts any colons `:` in the string to triple-underscores `___`. If the `to_windows` argument is set to `False`, converts triple underscores back to colons. Used to allow creation and download/upload of neuroglancer legacy-format volumes (which by necessity must include colons in several file names) on Windows machines (which strictly prohibit the use of colons in file names).
+Converts file names that include colons to a Windows-safe alternative and back. Takes a string with the `file_path` argument. By default, converts any colons `:` in the string to triple-underscores `___`. If the `to_windows` argument is set to `False`, converts triple underscores back to colons. Used to allow creation and download/upload of neuroglancer legacy-format volumes (which by necessity must include colons in several file names) on Windows machines (which strictly prohibit the use of colons in file names).
+
+Example (to Windows):
+```
+# INPUT
+
+bucket_convert_colons(
+    file_path = "home/user/volumes/vol_01/mesh/1:0:1"
+)
+
+# OUTPUT
+
+"home/user/volumes/vol_01/mesh/1___0___1"
+```
+
+Example (from Windows):
+```
+# INPUT
+
+bucket_convert_colons(
+    file_path = "home/user/volumes/vol_01/mesh/1___0___1",
+    to_windows = False,
+)
+
+# OUTPUT
+
+"home/user/volumes/vol_01/mesh/1:0:1"
+```
 
 ### bucket_delete_file
-Takes an absolute file path on a cloudfiles-managed bucket as a string with the `file_path` argument and deletes the file.
+Deletes a file on a cloudfiles-managed bucket. Takes an absolute file path on a cloudfiles-managed bucket as a string with the `file_path` argument and deletes the file. Requires write access to the chosen bucket.
 
 ### bucket_delete_folder
-Takes an absolute folder path on a cloudfiles-managed bucket as a string with the `folder_path` argument and deletes the folder, including everything contained within. Prompts the user with a confirmation window where they must type `DELETE` and hit enter to prevent accidental deletion.
+Deletes a folder and all its contents on a cloudfiles-managed bucket. Takes an absolute folder path on a cloudfiles-managed bucket as a string with the `folder_path` argument and deletes the folder, including everything contained within. Prompts the user with a confirmation window where they must type `DELETE` and hit enter to prevent accidental deletion. Requires write access to the chosen bucket.
 
 ### bucket_download_file
-Takes an absolute file path on a cloudfiles-managed bucket as a string with the `bucket_path` argument and downloads the file. Tries to find a folder called `Downloads` in the home directory by default, but a specific absolute path to a different location can be optionally passed as a string with the `download_path` argument.
+Downloads a file from a cloudfiles-managed bucket. Takes an absolute file path on a cloudfiles-managed bucket as a string with the `bucket_path` argument and downloads the file. Tries to find a folder called `Downloads` in the home directory by default, but a specific absolute path to a different location can be optionally passed as a string with the `download_path` argument.
 
 ### bucket_download_folder
-Takes an absolute folder path on a cloudfiles-managed bucket as a string with the `bucket_path` argument and downloads the folder and all its contents. Tries to find a folder called `Downloads` in the home directory by default, but a specific absolute path to a different location can be optionally passed as a string with the `download_path` argument.
+Downloads a folder from a cloudfiles-managed bucket. Takes an absolute folder path on a cloudfiles-managed bucket as a string with the `bucket_path` argument and downloads the folder and all its contents. Tries to find a folder called `Downloads` in the home directory by default, but a specific absolute path to a different location can be optionally passed as a string with the `download_path` argument.
 
 ### bucket_move_file
-Takes an absolute file path on a cloudfiles-managed bucket as a string with the `file_path` argument and moves it to a new folder location on the bucket passed as a string of the absolute path to that folder with the `new_folder_path` argument.
+Moves a file from one folder to another on a cloudfiles-managed bucket. Takes an absolute file path on a cloudfiles-managed bucket as a string with the `file_path` argument and moves it to a new folder location on the bucket passed as a string of the absolute path to that folder with the `new_folder_path` argument. Requires write access to the chosen bucket.
 
 ### bucket_rename_file
-Takes an absolute file path on a cloudfiles-managed bucket as a string with the `file_path` argument and renames using a string passed with the `new_name` argument. The new name should just be the name of the file (not an absolute path that includes any folders it was contained within) with the file extension if one was present in the original name.
+Renames a file in-place on a cloudfiles-managed bucket. Takes an absolute file path on a cloudfiles-managed bucket as a string with the `file_path` argument and renames using a string passed with the `new_name` argument. The new name should just be the name of the file (not an absolute path that includes any folders it was contained within) with the file extension if one was present in the original name. Requires write access to the chosen bucket.
 
 ### bucket_upload_file
-Takes an absolute file path on your local machine to a file you want to upload as a string with the `local_path` argument and an absolute folder path to a bucket folder where you want the file to be saved as a string with the `bucket_path` argument, and coppies your local file to the bucket location specified. If folders that don't yet exist are included in the `bucket_path` argument, they'll be created.
+Uploads a file to a cloudfiles-managed bucket. Takes an absolute file path on your local machine to a file you want to upload as a string with the `local_path` argument and an absolute folder path to a bucket folder where you want the file to be saved as a string with the `bucket_path` argument, and copies your local file to the bucket location specified. If folders that don't yet exist are included in the `bucket_path` argument, they'll be created. Requires write access to the chosen bucket.
 
 ### bucket_upload_folder
-Takes an absolute folder path on your local machine to a folder you want to upload as a string with the `local_path` argument and an absolute folder path to a bucket folder where you want the file to be saved as a string with the `bucket_path` argument, and coppies the contents of your local folder to the folder specified on the bucket. Note that the last folder in the bucket path will be the new top-level folder (i.e. if your local folder is called "image" and you want to put it at a bucket location of "bucket/test_images" you should set the `bucket_path` argument equal to `bucket/test/images/image`). This format is intended to allow you to rename the folder when uploading if desired. If folders that don't yet exist are included in the `bucket_path` argument, they'll be created.
+Uploads a folder to a cloudfiles-managed bucket. Takes an absolute folder path on your local machine to a folder you want to upload as a string with the `local_path` argument and an absolute folder path to a bucket folder where you want the file to be saved as a string with the `bucket_path` argument, and coppies the contents of your local folder to the folder specified on the bucket. Note that the last folder in the bucket path will be the new top-level folder (i.e. if your local folder is called "image" and you want to put it at a bucket location of "bucket/test_images" you should set the `bucket_path` argument equal to `bucket/test/images/image`). This format is intended to allow you to rename the folder when uploading if desired. If folders that don't yet exist are included in the `bucket_path` argument, they'll be created. Requires write access to the chosen bucket.
 
 ### calc_3d_distance
-Takes two points as lists of 3 integers representing their x,y, and z coordinates with the `point_a` and `point_b` arguments and a the resolution of the coordinate system as a list of 3 integers with the `res` argument, and returns the distance between the two points as a float. Units will be the same as whatever was used for the `res` argument.
+Calculates the distance between two points in 3D. Takes two points as lists of 3 integers representing their x,y, and z coordinates with the `point_a` and `point_b` arguments and a the resolution of the coordinate system as a list of 3 integers with the `res` argument, and returns the distance between the two points as a float. Units will be the same as whatever was used for the `res` argument.
+
+Example:
+```
+# INPUT
+
+calc_3d_distance(
+    point_a = [1,2,3],
+    point_b = [4,5,6],
+    res = [4,4,45],
+)
+
+# OUTPUT
+
+136.0624856453828
+```
 
 ### calc_avg_point_coords
-Takes a list of point coordinates as lists of 3 ints with the `points` argument and returns coordinates for a single point that represents the average of all the points in the list. By default returns result as list of ints, but exact float values can be obtained insted by setting `exact_value` argument to `True`.
+Gets the average point coordinates from a list of point coordinates. Takes a list of point coordinates as lists of 3 ints with the `points` argument and returns coordinates for a single point that represents the average of all the points in the list. By default returns result as list of nearest int values, but exact float values can be obtained insted by setting `exact_value` argument to `True`.
+
+Example:
+```
+# INPUT
+
+calc_avg_point_coords(
+    points = [
+        [1,4,3],
+        [0,1,2],
+        [2,1,3],
+    ],
+)
+
+# OUTPUT
+
+[1,2,3]
+```
+Example (Exact Values):
+```
+# INPUT
+
+calc_avg_point_coords(
+    points = [
+        [1,4,3],
+        [0,1,2],
+        [2,1,3],
+    ],
+    exact_value = True
+)
+
+# OUTPUT
+
+[1.0, 2.0, 2.6666666666666665]
+```
 
 ### calc_bbox_corners_from_center
-Takes a list of 3 ints with the `center_point` argument and a set of dimensions in the x-, y-, and z-dimensions as a list of ints with the `dims` argument and returns a list of two lists of 3 ints representing the corners of a bounding box of the requested dimensions centered on the requested point. If odd dimension values are submitted they'll be rounded down to the next even integer to avoid using floats for the corner coordinates.
+Calculates the point coordinates for the corners of a rectangular prism shaped bounding box based on a centerpoint and a set of dimensions. Takes a list of 3 ints with the `center_point` argument and a set of dimensions in the x-, y-, and z-dimensions as a list of ints with the `dims` argument and returns a list of two lists of 3 ints representing the corners of a bounding box of the requested dimensions centered on the requested point. If odd dimension values are submitted they'll be rounded down to the next even integer to avoid using floats for the corner coordinates.
+
+Example:
+```
+# INPUT
+
+calc_bbox_corners_from_center(
+    center_point = [1,2,3],
+    dims = [10,7,4],
+)
+
+# OUTPUT
+
+[[-4, -1, 1], [6, 5, 5]]
+```
+
 
 ### calc_line_triangle_intersect
-Takes a line segment as an array of two arrays of 3 floats representing the endpoints with the `line` argument (e.g. `[[x1,y1,z1],[x2,y2,z2]]`) and a triangular plane as an array of 3 arrays of 3 floats representing the point coordinates of the vertices with the `triangle` argument (e.g. `[[x1,y1,z1],[x2,y2,z2],[x3,y3,z3]]`) and returns either an array of 3 floats representing the point coordinates where the line intersects the triangular plane (e.g. `[x,y,z]`) or a `None` value if none exist.
+Calculates the point where a line segment and a triangular plane intersect, if any. Takes a line segment as an array of two arrays of 3 floats representing the endpoints with the `line` argument (e.g. `[[x1,y1,z1],[x2,y2,z2]]`) and a triangular plane as an array of 3 arrays of 3 floats representing the point coordinates of the vertices with the `triangle` argument (e.g. `[[x1,y1,z1],[x2,y2,z2],[x3,y3,z3]]`) and returns either an array of 3 floats representing the point coordinates where the line intersects the triangular plane (e.g. `[x,y,z]`) or a `None` value if none exist.
+
+Example:
+```
+# INPUT
+
+calc_line_triangle_intersect(
+    line = [
+        [0,0,0],
+        [3,3,3]
+    ],
+    triangle = [
+        [3,0,0],
+        [0,3,0],
+        [0,0,3]
+    ],
+)
+
+# OUTPUT
+work in progress
+
+```
 
 ### calc_seg_mesh_intersect
-Takes a datastack name as a string with the `datastack` argument, a list of segment IDs as ints with the `seg_ids` argument, and the address of a neuroglancer mesh as a string with the `mesh_address` argument (e.g. "https://c10s.pni.princeton.edu/tracers/jay/mesher_demo/example_01|neuroglancer-precomputed:") and by default returns a list of bool (True/False) values indicating which segments' skeletons intersect the chosen mesh. Optionally setting the `return_intersects` argument to True will instead return a list of values that are either lists of all the point coordinates at which each segment intersects the mesh or a `None` value if no intersection points exist.
+Calculates all points where the skeleton of a segment intersects a mesh, if any exist. Takes a datastack name as a string with the `datastack` argument, a list of segment IDs as ints with the `seg_ids` argument, and the address of a neuroglancer mesh as a string with the `mesh_address` argument (e.g. "https://c10s.pni.princeton.edu/tracers/jay/mesher_demo/example_01|neuroglancer-precomputed:") and by default returns a list of bool (True/False) values indicating which segments' skeletons intersect the chosen mesh. Optionally setting the `return_intersects` argument to True will instead return a list of values that are either lists of all the point coordinates at which each segment intersects the mesh or a `None` value if no intersection points exist.
 
 ### calc_skeleton_mesh_intersect
-Takes a segment's skeleton as an (n,2,3)-shape numpy array of floats with the `bones` argument and a list of triangular mesh faces as an (n,3,3)-shape numpy array of floats with the `mesh_triangles` argument and returns a list of numpy arrays of 3 floats representing the intersection points between the skeleton and the mesh OR a None value if no intersection points were found.
+Calculates all points where a skeleton intersects a mesh, if any exist. Takes a segment's skeleton as an (n,2,3)-shape numpy array of floats with the `bones` argument and a list of triangular mesh faces as an (n,3,3)-shape numpy array of floats with the `mesh_triangles` argument and returns a list of numpy arrays of 3 floats representing the intersection points between the skeleton and the mesh OR a None value if no intersection points were found.
 
 
 ### check_seg_freshness
-Takes a datastack name as a string with the `datastack` argument and a list of segment IDs as ints with the `seg_ids` argument and returns a list of bools (True/False values) indicating if each segment ID in the submitted list is current (True) or outdated (False).
+Checks if a list of segment IDs are current or outdated. Takes a datastack name as a string with the `datastack` argument and a list of segment IDs as ints with the `seg_ids` argument and returns a list of bools (True/False values) indicating if each segment ID in the submitted list is current (True) or outdated (False).
+
+### check_seg_proofread_status
+Checks if a list of segments have been marked proofread or not. Takes a datastack name as a string with the `datastack` argument and a list of segment IDs as ints with the `seg_ids` argument and returns a list of bools (True/False values) indicating if each segment ID in the submitted list has been marked as "backbone_proofread" in the dataset's default proofreading completion table. Only works for datasets with a default proofreading table; if none exists, returns error indicating such.
+
+### convert_coord_res
+Converts a set of point coordinates from one resolution to another. Takes a list of 3 ints representing the xyz coordinates of a point with the `point_coords` argument, as well as two other lists of 3 ints representing the current and desired resolutions with the `res_current` and `res_desired` arguments, respectively, and returns a list of 3 ints representing the original points translated into the new coordinate resolution.
+
+### count_synapses
+Counts the number of synapses each segment in a list has associated with it. Takes a datastack name as a string with the argument `datastack` and a list of segmnet IDs as a list of ints with the `seg_ids` argument and returns a list of ints representing the total synapses for each segment. Optionally, the `detailed_results` argument can be set to True in order to get the results as a list of dictionaries with specific counts for incoming and outgoing synapses instead. 
+
+### count_user_supervoxel_contribution
+Counts how many unique supervoxels each user was responsible for adding or removing in order to produce a proofread segment. Takes a datastack name as a string with the `datastack` argument and the ID of a proofread segment as an int with the `completed_seg_id` argument
+
+Sample Input:
+```
+count_user_sv_contribution(
+    datastack = "placeholder",
+    completed_seg_id = 000000000000000000,
+)
+```
+
+Sample Output
+
 
 # License
 The tracertools package is licensed under the GNU General Public License v3.0. See the [LICENSE](https://github.com/jaybgager/tracertools/blob/main/LICENSE) file for more details.
