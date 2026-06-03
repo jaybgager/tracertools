@@ -546,6 +546,7 @@ def calc_bbox_corners_from_center(
 def calc_line_triangle_intersect(
     line, 
     triangle,
+    precision=0
 ):
     """
     Calculates the intersection point, if any, of a line segment and a triangular plane.
@@ -557,6 +558,13 @@ def calc_line_triangle_intersect(
         triangle ((3,3)-shape array of floats):
             a 2D array of shape (3,3) for the point coords of a triangle 
             e.g.[[1.0, 2.0, 3.0], [4.0 ,5.0, 6.0], [7.0, 8.0, 9.0]] 
+        precision (int, optional, default=0):
+            how precise to be when calculating intersection points
+            specifically, maximum number of decimal points to include when rounding results
+            default 0 rounds to nearest integer as this is fine for most neuroglancer uses
+            using high precision (e.g 16+ digits) with small coord values (e.g. [1,1,1] 
+            for coordinates can result in false negative results, as the float math involved 
+            sometimes produces very tiny discrepancies when checking results
 
     Returns:
         result ((3)-shape numpy array of floats or None):
@@ -667,9 +675,16 @@ def calc_line_triangle_intersect(
     ray_direction_1 = line[1] - line[0]
     ray_direction_2 = line[0] - line[1]
 
-    # checks if each ray intersects the triangle #
-    intersect_1 = _calc_ray_triangle_intersect(ray_origin_1, ray_direction_1, triangle)
-    intersect_2 = _calc_ray_triangle_intersect(ray_origin_2, ray_direction_2, triangle)
+    # checks if each ray intersects the triangle
+    # rounds results to number of decimals specified by precision argument
+    intersect_1 = np.round(
+        _calc_ray_triangle_intersect(ray_origin_1, ray_direction_1, triangle),
+        decimals=precision,
+    )
+    intersect_2 = np.round(
+        _calc_ray_triangle_intersect(ray_origin_2, ray_direction_2, triangle),
+        decimals=precision,
+    )
 
     # if both rays intersect, returns the intersection point 
     # otherwise returns None 
