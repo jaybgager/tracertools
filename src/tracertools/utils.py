@@ -3532,13 +3532,18 @@ def make_mesh_from_points(
     # makes empty list to fill with annotation layer names
     layer_names = []
 
-    # gets layer names from state json file
+    # selectively gets layer names from state json file
     for layer in json_dict["layers"]:
+        # avoids archived and hidden layers
         if "archived" not in layer:
-            if layer["type"] == "annotation":
-                if len(layer["annotations"]) > 0:
-                    if layer["tool"] == "annotatePoint":
-                        layer_names.append(layer["name"])
+            if "visible" not in layer:
+                # avoids non-annotation layers
+                if layer["type"] == "annotation":
+                    # avoids empty annotation layers
+                    if len(layer["annotations"]) > 0:
+                        # avoids non-point annotation layers
+                        if layer["tool"] == "annotatePoint":
+                            layer_names.append(layer["name"])
 
     # makes empty list to fill with point arrays
     point_arrays = []
