@@ -676,15 +676,20 @@ def calc_line_triangle_intersect(
     ray_direction_2 = line[0] - line[1]
 
     # checks if each ray intersects the triangle
-    # rounds results to number of decimals specified by precision argument
-    intersect_1 = np.round(
-        _calc_ray_triangle_intersect(ray_origin_1, ray_direction_1, triangle),
-        decimals=precision,
-    )
-    intersect_2 = np.round(
-        _calc_ray_triangle_intersect(ray_origin_2, ray_direction_2, triangle),
-        decimals=precision,
-    )
+    intersect_1 = _calc_ray_triangle_intersect(ray_origin_1, ray_direction_1, triangle)
+    intersect_2 = _calc_ray_triangle_intersect(ray_origin_2, ray_direction_2, triangle)
+    
+    # if intersect found, rounds results to requested decimals
+    if intersect_1 is not None:
+        intersect_1 = np.round(
+            intersect_1,
+            decimals=precision,
+        )
+    if intersect_2 is not None:
+        intersect_2 = np.round(
+            intersect_2,
+            decimals=precision,
+        )
 
     # if both rays intersect, returns the intersection point 
     # otherwise returns None 
