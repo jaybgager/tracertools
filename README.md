@@ -7,9 +7,9 @@ Quick installation with pip isn't supported yet (but is planned for the future),
 1. Open a terminal and navigate to the directory where you want the tracertools package to be stored.
 2. Run the code `git clone https://github.com/jaybgager/tracertools.git` to make a local copy of the package at the location you naviagated to in step one. This will be create a folder named tracertools in that directory that's linked to the GitHub repository.
 3. In the terminal, navigate one folder down, so that you're in the top-level (root) folder of the tracertools package by running the command `cd tracertools`.
-4. In the terminal, run the command `pip install -e .`. This will tell Python's default installer, pip, to add the folder you're currently in to its list of importable packages. The `-e` modifier causes this installation to be "editable", meaning that if you make changes to the code stored in the tracertools folder, they'll take effect when you import tracertools into a python script. This is important for keeping the package up-to-date, so you don't have to reinatll it every time there are changes and lets you expriment with modifying the tools to meet your own needs. The `.` at the end just tells pip to install everything at the current directory location.
+4. In the terminal, run the command `pip install -e .`. This will tell Python's default installer, pip, to add the folder you're currently in to its list of importable packages. The `-e` modifier causes this installation to be "editable", meaning that if you make changes to the code stored in the tracertools folder, they'll take effect when you import tracertools into a python script. This is important for keeping the package up-to-date, so you don't have to reinstall it every time there are changes. This also lets you expriment with modifying the tools to meet your own needs. The `.` at the end just tells pip to install everything at the current directory location.
 
-Now whenever you need to use a tracertools function, you can simply import it like any other package using the "import tracertools" code in any python script. Then, when you want to use a function, you add tracertools. in front of it. For example, if you wanted to use the get_current_seg_ids() function, you would use the following code:
+Now whenever you need to use a tracertools function, you can simply import it like any other package using the "import tracertools" code in any python script. Then, when you want to use a function, you add `tracertools.` in front of it. For example, if you wanted to use the `get_current_seg_ids()` function, you would use the following code:
 
 ```
 import tracertools
@@ -28,6 +28,7 @@ fresh_ids = tt.get_current_seg_ids(
     seg_ids=[720575941586154052,720575941429544111]
 )
 ```
+
 # Glossary of Common Terms
 Some terms used in the function descriptions are either uncommon or are used here to mean something very specific in the context of this package. These are defined below:
 
@@ -105,8 +106,12 @@ Example (to Windows):
 ```
 # INPUT
 
-bucket_convert_colons(
-    file_path = "home/user/volumes/vol_01/mesh/1:0:1"
+import tracertools as tt
+
+print(
+    tt.bucket_convert_colons(
+        file_path = "home/user/volumes/vol_01/mesh/1:0:1"
+    )
 )
 
 # OUTPUT
@@ -118,9 +123,13 @@ Example (from Windows):
 ```
 # INPUT
 
-bucket_convert_colons(
-    file_path = "home/user/volumes/vol_01/mesh/1___0___1",
-    to_windows = False,
+import tracertools as tt
+
+print(
+    tt.bucket_convert_colons(
+        file_path = "home/user/volumes/vol_01/mesh/1___0___1",
+        to_windows = False,
+    )
 )
 
 # OUTPUT
@@ -159,10 +168,14 @@ Example:
 ```
 # INPUT
 
-calc_3d_distance(
-    point_a = [1,2,3],
-    point_b = [4,5,6],
-    res = [4,4,45],
+import tracertools as tt
+
+print(
+    tt.calc_3d_distance(
+        point_a = [1,2,3],
+        point_b = [4,5,6],
+        res = [4,4,45],
+    )
 )
 
 # OUTPUT
@@ -177,12 +190,16 @@ Example:
 ```
 # INPUT
 
-calc_avg_point_coords(
-    points = [
-        [1,4,3],
-        [0,1,2],
-        [2,1,3],
-    ],
+import tracertools as tt
+
+print(
+    tt.calc_avg_point_coords(
+        points = [
+            [1,4,3],
+            [0,1,2],
+            [2,1,3],
+        ],
+    )
 )
 
 # OUTPUT
@@ -193,13 +210,17 @@ Example (Exact Values):
 ```
 # INPUT
 
-calc_avg_point_coords(
-    points = [
-        [1,4,3],
-        [0,1,2],
-        [2,1,3],
-    ],
-    exact_value = True
+import tracertools as tt
+
+print(
+    tt.calc_avg_point_coords(
+        points = [
+            [1,4,3],
+            [0,1,2],
+            [2,1,3],
+        ],
+        exact_value = True
+    )
 )
 
 # OUTPUT
@@ -213,10 +234,13 @@ Calculates the point coordinates for the corners of a rectangular prism shaped b
 Example:
 ```
 # INPUT
+import tracertools as tt
 
-calc_bbox_corners_from_center(
-    center_point = [1,2,3],
-    dims = [10,7,4],
+print(
+    tt.calc_bbox_corners_from_center(
+        center_point = [1,2,3],
+        dims = [10,7,4],
+    )
 )
 
 # OUTPUT
@@ -226,31 +250,121 @@ calc_bbox_corners_from_center(
 
 
 ### calc_line_triangle_intersect
-Calculates the point where a line segment and a triangular plane intersect, if any. Takes a line segment as an array of two arrays of 3 floats representing the endpoints with the `line` argument (e.g. `[[x1,y1,z1],[x2,y2,z2]]`) and a triangular plane as an array of 3 arrays of 3 floats representing the point coordinates of the vertices with the `triangle` argument (e.g. `[[x1,y1,z1],[x2,y2,z2],[x3,y3,z3]]`) and returns either an array of 3 floats representing the point coordinates where the line intersects the triangular plane (e.g. `[x,y,z]`) or a `None` value if none exist.
+Calculates the point where a line segment and a triangular plane intersect, if any. Takes a line segment as an array of two arrays of 3 floats or ints representing the endpoints with the `line` argument (e.g. `[[x1,y1,z1],[x2,y2,z2]]`) and a triangular plane as an array of 3 arrays of 3 floats or ints representing the point coordinates of the vertices with the `triangle` argument (e.g. `[[x1,y1,z1],[x2,y2,z2],[x3,y3,z3]]`) and returns either an array of 3 floats representing the point coordinates where the line intersects the triangular plane (e.g. `[x,y,z]`) or a `None` value if none exist. By default, rounds the results to the nearest integer, but more detailed results can be obtained by setting the `precision` argument to the number of decimal places desired. Warning: using high precision (e.g. 16+ decimal places) with low numbers (e.g. [1,1,1]) can cause false negatives. This is due to extremely small rounding errors when calculating floating point math.
 
 Example:
 ```
 # INPUT
 
-calc_line_triangle_intersect(
-    line = [
-        [0,0,0],
-        [3,3,3]
-    ],
-    triangle = [
-        [3,0,0],
-        [0,3,0],
-        [0,0,3]
-    ],
+import tracertools as tt
+import numpy as np
+
+print(
+    tt.calc_line_triangle_intersect(
+        line = np.array(
+            [
+                [0,0,0],
+                [1,2,3]
+            ]
+        ),
+        triangle = np.array(
+            [
+                [2,0,0],
+                [0,3,0],
+                [0,0,4]
+            ]
+        ),
+    )
 )
 
 # OUTPUT
-work in progress
+
+[1.,1.,2.]
+
+```
+
+Example (higher precision):
+```
+# INPUT
+
+import tracertools as tt
+import numpy as np
+
+print(
+    tt.calc_line_triangle_intersect(
+        line = np.array(
+            [
+                [0,0,0],
+                [1,2,3]
+            ]
+        ),
+        triangle = np.array(
+            [
+                [2,0,0],
+                [0,3,0],
+                [0,0,4]
+            ]
+        ),
+        precision=3,
+    )
+)
+
+# OUTPUT
+
+[0.522 1.043 1.565]
 
 ```
 
 ### calc_seg_mesh_intersect
 Calculates all points where the skeleton of a segment intersects a mesh, if any exist. Takes a datastack name as a string with the `datastack` argument, a list of segment IDs as ints with the `seg_ids` argument, and the address of a neuroglancer mesh as a string with the `mesh_address` argument (e.g. "https://c10s.pni.princeton.edu/tracers/jay/mesher_demo/example_01|neuroglancer-precomputed:") and by default returns a list of bool (True/False) values indicating which segments' skeletons intersect the chosen mesh. Optionally setting the `return_intersects` argument to True will instead return a list of values that are either lists of all the point coordinates at which each segment intersects the mesh or a `None` value if no intersection points exist.
+
+Example:
+```
+# INPUT
+
+import tracertools as tt
+
+tt.calc_seg_mesh_intersect(
+    datastack="brain_and_nerve_cord", 
+    seg_ids=[720575941526718564,720575941524165453], 
+    mesh_address="https://c10s.pni.princeton.edu/tracers/examples/banc_mesh_01|neuroglancer-precomputed:",
+)
+
+#OUTPUT
+
+[True,False]
+```
+
+Example (return intersects):
+```# INPUT
+
+import tracertools as tt
+
+tt.calc_seg_mesh_intersect(
+    datastack="brain_and_nerve_cord", 
+    seg_ids=[720575941526718564,720575941524165453], 
+    mesh_address="https://c10s.pni.princeton.edu/tracers/examples/banc_mesh_01|neuroglancer-precomputed:",
+    return_intersects=True,
+)
+
+#OUTPUT
+
+[
+    [
+        array([121305., 181906.,   4627.]),
+        array([123200., 172384.,   4720.]),
+        array([124027., 174945.,   5243.]),
+        array([124240., 176101.,   5346.]),
+        array([123934., 175092.,   5244.]),
+        array([127158., 175525.,   4693.]),
+        array([125175., 175250.,   5344.]),
+        array([125127., 174504.,   5263.]),
+        array([125315., 175057.,   5311.]),
+        array([122142., 175971.,   4855.])
+    ],
+    None
+]
+```
 
 ### calc_skeleton_mesh_intersect
 Calculates all points where a skeleton intersects a mesh, if any exist. Takes a segment's skeleton as an (n,2,3)-shape numpy array of floats with the `bones` argument and a list of triangular mesh faces as an (n,3,3)-shape numpy array of floats with the `mesh_triangles` argument and returns a list of numpy arrays of 3 floats representing the intersection points between the skeleton and the mesh OR a None value if no intersection points were found.
