@@ -336,7 +336,8 @@ tt.calc_seg_mesh_intersect(
 ```
 
 Example (return intersects):
-```# INPUT
+```
+# INPUT
 
 import tracertools as tt
 
@@ -369,31 +370,218 @@ tt.calc_seg_mesh_intersect(
 ### calc_skeleton_mesh_intersect
 Calculates all points where a skeleton intersects a mesh, if any exist. Takes a segment's skeleton as an (n,2,3)-shape numpy array of floats with the `bones` argument and a list of triangular mesh faces as an (n,3,3)-shape numpy array of floats with the `mesh_triangles` argument and returns a list of numpy arrays of 3 floats representing the intersection points between the skeleton and the mesh OR a None value if no intersection points were found.
 
+Example:
+
+Since this code requires a skeleton's bones and a mesh's triangles, here's an example of how you could get those using other tracertools functions.
+
+```
+import tracertools as tt
+
+# this part gets the skeleton for a given segment
+skel = tt.get_seg_skeletons(
+    datastack="brain_and_nerve_cord",
+    seg_ids=[720575941526718564]
+)[0]
+
+# this part gets the list of individual skeleton edges, or "bones", from the skeleton
+bone_list = tt.get_bones(
+    datastack="brain_and_nerve_cord", 
+    skeleton=skel
+)
+
+# this part gets a list of all the mesh's faces, or "triangles"
+triangles = tt.get_mesh_triangles(
+    volume_path="https://c10s.pni.princeton.edu/tracers/examples/banc_mesh_01|neuroglancer-precomputed:"
+)
+```
+
+Now that you have a list of bones and triangles, you can use the following code to check if any of the bones intersect any of the triangles:
+
+```
+# INPUT
+
+intersections = tt.calc_skeleton_mesh_intersect(
+    bones=bone_list, 
+    mesh_triangles=triangles
+)
+
+print(intersections)
+
+# OUTPUT
+
+[array([121305., 181906.,   4627.]),
+ array([123200., 172384.,   4720.]),
+ array([124027., 174945.,   5243.]),
+ array([124240., 176101.,   5346.]),
+ array([123934., 175092.,   5244.]),
+ array([127158., 175525.,   4693.]),
+ array([125175., 175250.,   5344.]),
+ array([125127., 174504.,   5263.]),
+ array([125315., 175057.,   5311.]),
+ array([122142., 175971.,   4855.])]
+```
 
 ### check_seg_freshness
 Checks if a list of segment IDs are current or outdated. Takes a datastack name as a string with the `datastack` argument and a list of segment IDs as ints with the `seg_ids` argument and returns a list of bools (True/False values) indicating if each segment ID in the submitted list is current (True) or outdated (False).
 
+Example:
+```
+# INPUT
+import tracertools as tt
+
+# defines a list of potentially-outdated IDs
+stale_ids = [
+    720575940379940739, # outdated #
+    720575941535667946, # current #
+    720575941539599858, # current #
+    720575940380068115, # outdated #
+    720575941609391725, # current #
+    720575940380207581, # outdated #
+]
+
+is_fresh = tt.check_seg_freshness(
+    datastack="brain_and_nerve_cord", 
+    seg_ids=stale_ids,
+)
+
+print(is_fresh)
+
+# OUTPUT
+
+[False, True, True, False, True, False]
+```
+
 ### check_seg_proofread_status
 Checks if a list of segments have been marked proofread or not. Takes a datastack name as a string with the `datastack` argument and a list of segment IDs as ints with the `seg_ids` argument and returns a list of bools (True/False values) indicating if each segment ID in the submitted list has been marked as "backbone_proofread" in the dataset's default proofreading completion table. Only works for datasets with a default proofreading table; if none exists, returns error indicating such.
+
+Example:
+```
+# INPUT
+
+import tracertools as tt
+
+segments = [
+    720575940379940739, # not proofread #
+    720575941535667946, # not proofread #
+    720575941539599858, # not proofread #
+    720575940380068115, # not proofread #
+    720575941609391725, # proofread #
+    720575940380207581, # not proofread #
+]
+
+is_proofread = tt.check_seg_proofread_status(
+    datastack="brain_and_nerve_cord", 
+    seg_ids=segments,
+)
+
+print(is_proofread)
+
+# OUTPUT
+
+[False, False, False, False, True, False]
+```
 
 ### convert_coord_res
 Converts a set of point coordinates from one resolution to another. Takes a list of 3 ints representing the xyz coordinates of a point with the `point_coords` argument, as well as two other lists of 3 ints representing the current and desired resolutions with the `res_current` and `res_desired` arguments, respectively, and returns a list of 3 ints representing the original points translated into the new coordinate resolution.
 
+Example:
+
+```
+# INPUT
+
+import tracertools as tt
+
+# creates a list of banc-resolution coordinates
+banc_coords = [125283, 118263, 2860]
+
+# converts the banc-resolution coords to nanometer-resolution coords
+# this is often necessary for performing spatial math calculations on points
+nm_coords = tt.convert_coord_res(
+    point_coords = banc_coords, 
+    res_current=[4, 4, 45], 
+    res_desired=[1, 1, 1],
+)
+
+print(nm_coords)
+
+# OUTPUT
+
+[501132, 473052, 128700]
+```
+
 ### count_synapses
 Counts the number of synapses each segment in a list has associated with it. Takes a datastack name as a string with the argument `datastack` and a list of segmnet IDs as a list of ints with the `seg_ids` argument and returns a list of ints representing the total synapses for each segment. Optionally, the `detailed_results` argument can be set to True in order to get the results as a list of dictionaries with specific counts for incoming and outgoing synapses instead. 
 
-### count_user_supervoxel_contribution
-Counts how many unique supervoxels each user was responsible for adding or removing in order to produce a proofread segment. Takes a datastack name as a string with the `datastack` argument and the ID of a proofread segment as an int with the `completed_seg_id` argument
-
-Sample Input:
+Example:
 ```
-count_user_sv_contribution(
-    datastack = "placeholder",
-    completed_seg_id = 000000000000000000,
+# INPUT
+
+import tracertools as tt
+
+synapses = tt.count_synapses(
+    datastack="brain_and_nerve_cord", 
+    seg_ids = [
+        720575940380068115,
+        720575941609391725,
+        720575940380207581,
+    ], 
 )
+
+print(synapses)
+
+# OUTPUT
+
+[0, 336, 0]
 ```
 
-Sample Output
+Example (detailed results)
+```
+# INPUT
+
+import tracertools as tt
+
+synapses = tt.count_synapses(
+    datastack="brain_and_nerve_cord", 
+    seg_ids = [
+        720575940380068115,
+        720575941609391725,
+        720575940380207581,
+    ], 
+    detailed_results=True,
+)
+
+print(synapses)
+
+# OUTPUT
+
+{720575940380068115: {'all': 0, 'in': 0, 'out': 0},
+ 720575940380207581: {'all': 0, 'in': 0, 'out': 0},
+ 720575941609391725: {'all': 336, 'in': 45, 'out': 291}}
+```
+
+### count_user_sv_contribution
+Counts how many unique supervoxels each user was responsible for adding or removing in order to produce a proofread segment. Takes a datastack name as a string with the `datastack` argument and the ID of a proofread segment as an int with the `completed_seg_id` argument and returns a dictionary of string user IDs as keys and total supervoxel assignments as int values.
+
+Example:
+```
+# INPUT
+
+import tracertools as tt
+
+contribs = tt.count_user_sv_contribution(
+    datastack = "brain_and_nerve_cord",
+    completed_seg_id = 720575941609391725,
+)
+
+print(contribs)
+
+# OUTPUT
+
+{'5098': 2957, '5017': 7366, '2815': 253}
+```
+
+
+
 
 
 # License
