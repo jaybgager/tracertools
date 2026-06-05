@@ -985,6 +985,13 @@ def count_synapses(
     in_counts = in_df[post_name].value_counts()
     out_counts = out_df[pre_name].value_counts()
 
+    # handles 0-synapse segments
+    for seg_id in seg_ids:
+        if seg_id not in in_counts:
+            in_counts[seg_id] = 0
+        if seg_id not in out_counts:
+            out_counts[seg_id] = 0
+
     # handles output formatting if detailed results requested
     if detailed_results == True:
 
