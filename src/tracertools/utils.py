@@ -1121,7 +1121,7 @@ def fix_mesh_error(
     """
 
     # converts bbox coords into correct format for get_leaves method
-    bbox_bound = np.array([sorted([c1, c2]) for c1, c2 in zip(bbox[0], bbox[1])])
+    bbox_bounds = np.array([sorted([c1, c2]) for c1, c2 in zip(bbox[0], bbox[1])])
 
     # sets cave client
     client = CAVEclient(datastack)
