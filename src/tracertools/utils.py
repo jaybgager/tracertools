@@ -1099,38 +1099,51 @@ def count_user_sv_contribution(
 
     return counts
 
-def fix_mesh_error(
-    datastack, 
-    seg_id, 
-    bbox,
-):
-    """
-    Tries to fix a mesh issue by remeshing a specific chunk of a specific neuron.
+# def fix_mesh_error(
+#     datastack, 
+#     seg_id, 
+#     bbox,
+# ):
+#     """
+#     Tries to fix a mesh issue by remeshing a specific chunk of a specific neuron.
 
-    WARNING: THIS FUNCTION IS CURRENTLY UNTESTED, USE AT YOUR OWN RISK
+#     WARNING: THIS FUNCTION IS CURRENTLY BROKEN
 
-    Args:
-        datastack (str):
-            name of CAVE datastack you're working with as a string
-            e.g. "brain_and_nerve_cord"
-        seg_id (int)
-            segment id of the neuron you want to remesh
-        bbox (list of lists of ints):
-            xyz coords of bounding box annotation corners for the region of space you want to remesh
-            e.g. [[x1,y1,z1],[x2,y2,z2]]
-    """
+#     Args:
+#         datastack (str):
+#             name of CAVE datastack you're working with as a string
+#             e.g. "brain_and_nerve_cord"
+#         seg_id (int)
+#             segment id of the neuron you want to remesh
+#         bbox (list of lists of ints):
+#             xyz coords of bounding box annotation corners for the region of space you want to remesh
+#             e.g. [[x1,y1,z1],[x2,y2,z2]]
+#     """
 
-    # converts bbox coords into correct format for get_leaves method
-    bbox_bounds = np.array([sorted([c1, c2]) for c1, c2 in zip(bbox[0], bbox[1])])
+#     # gets config dict
+#     config = get_config(datastack=datastack)
 
-    # sets cave client
-    client = CAVEclient(datastack)
+#     # sets resolution using config
+#     res = config["resolution"]
 
-    # gets L2 node IDs
-    L2_ids = client.chunkedgraph.get_leaves(root_id=seg_id, bounds=bbox_bounds)
+#     # converts bbox corner point coords to nanometer resolution
+#     bbox = [tt.convert_coord_res(bound,res_current=res) for bound in bbox]
 
-    # remeshes the selected neuron in the selected region
-    client.chunkedgraph.remesh_level2_chunks(chunk_ids=L2_ids)
+#     # converts bbox coords into correct format for get_leaves method
+#     bbox_bounds = np.array([sorted([c1, c2]) for c1, c2 in zip(bbox[0], bbox[1])])
+
+#     # sets cave client
+#     client = CAVEclient(datastack)
+
+#     # gets L2 node IDs
+#     L2_ids = client.chunkedgraph.get_leaves(
+#         root_id=seg_id, 
+#         bounds=bbox_bounds, 
+#         stop_layer=2
+#     )
+
+#     # remeshes the selected neuron in the selected region
+#     client.chunkedgraph.remesh_level2_chunks(chunk_ids=L2_ids)
 
 
 def get_anno_array_from_json_state_file(
