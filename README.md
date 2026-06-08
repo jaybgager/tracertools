@@ -44,6 +44,9 @@ The chunkedgraph is an organizational structure that holds the information about
 **cloudvolume**\
 A Python package that allows reading and writing of neuroglancer volumes directly in RAM without having to write to a hard drive, documentation for which can be found [here](https://github.com/seung-lab/cloud-volume). Used in a number of processes including mesh-related operations, creating and hosting volumes both locally or on a bucket, and spatial segment lookup.
 
+**DataFrame/df**\
+A type of python object generated using the [Pandas](https://www.w3schools.com/python/pandas/default.asp) python package. Similar to a table or spreadsheet, but with various optimizations for searching and performing calculations on the data it contains. Commonly used as the storage format for CAVE tables of anntoations, edits, or segment information. Often abbreviated "df".
+
 **dataset**\
 The original image data (usually in the form of raw electron microscope images) for a specific brain (or other piece of tissue). Often identified by a descriptive acronym (e.g. Brain and Nerve Cord (BANC), Female Adult Fly Brain (FAFB)) or by the name of the organism that the tissue came from (e.g. "Minnie", "Basil"). This term is sometimes used interchangeably with "datastack" in other media, but won't be here.
 
@@ -659,6 +662,128 @@ print(bones)
     ]
 ]
 ```
+
+### get_cable_lengths
+Gets the total length of all the edges (sometimes called "bones") in each segment's skeleton for a list of segments. When talking about a neuron, this is a measurement of the combined length of all the neuron's branches. Units will be whatever the default unit type the datastack uses, typically nanometers. Takes a datastack name as a str with the `datastack` argument and a list of segment IDs as ints with the `seg_ids` argument and returns a list of floats representing the cable lengths of each segment. Will also print out a time estimate for skeletonization of the requested segments. These skeletons will be cached, so requesting the same skeletons multiple times won't require recalculation.
+
+Example:
+
+```
+# INPUT
+
+import tracertools as tt
+
+cable_lengths = tt.get_cable_lengths(
+    datastack="brain_and_nerve_cord",
+    seg_ids=[
+        720575941490813872,
+        720575941533316995,
+    ],
+)
+
+print(cable_lengths)
+
+# OUTPUT
+
+[1712022.370770976, 2109110.992525338]
+```
+
+### get_cave_stacks
+Gets a list of all the datastacks currently available trhough the CAVE service. Requires no arguments. Returns list of strings representaing the names of all the available datastacks. These can be used to get a lot of other information like available tables, stack metadata, and tracer-format config info, as well as to set the client name for CAVEclient objects.
+
+Example:
+
+```
+# INPUT
+
+import tracertools as tt
+
+stacks = tt.get_cave_stacks()
+
+print(stacks)
+
+# OUTPUT
+
+[
+    "stack_name_1", 
+    "stack_name_2",
+    ...
+    "last_stack_name"
+]
+```
+
+### get_cave_stack_info
+Gets the official metadata information for a specific CAVE datastack, directly from the publisher of the datastack. Takes a datastack name as a string with the `datastack` argument and returns a dictionary containing the relevant stack's metadata.
+
+Example:
+
+```
+# INPUT
+
+import tracertools as tt
+
+stack_info = tt.get_cave_stack_info(datastack="brain_and_nerve_cord")
+
+print(stack_info)
+
+# OUTPUT (as of 8 June 2026)
+
+{'aligned_volume': {'description': 'The BANC (said "the bank") is the Brain '
+                                   'And Nerve Cord, a GridTape transmission '
+                                   'electron microscopy dataset of a female '
+                                   "adult Drosophila melanogaster's entire "
+                                   'central nervous system. Visit '
+                                   'https://banc.community for more '
+                                   'information.',
+                    'display_name': 'BANC',
+                    'id': 9,
+                    'image_source': 'precomputed://gs://seunglab_lee_fly_cns_001_alignment/aligned/v0',
+                    'name': 'brain_and_nerve_cord'},
+ 'analysis_database': None,
+ 'cell_identification_table': 'cell_info',
+ 'description': None,
+ 'local_server': 'https://cave.fanc-fly.com',
+ 'proofreading_review_table': None,
+ 'proofreading_status_table': 'backbone_proofread',
+ 'segmentation_source': 'graphene://https://cave.fanc-fly.com/segmentation/table/wclee_fly_cns_001',
+ 'skeleton_source': 'precomputed://https://cave.fanc-fly.com/skeletoncache/api/v1/brain_and_nerve_cord/precomputed/skeleton',
+ 'soma_table': None,
+ 'synapse_table': 'synapses_v2',
+ 'viewer_resolution_x': 4.0,
+ 'viewer_resolution_y': 4.0,
+ 'viewer_resolution_z': 45.0,
+ 'viewer_site': 'https://spelunker.cave-explorer.org/'}
+```
+
+The dictionary output above has been formatted for ease of reading using the pretty-print python module, which can be installed with `pip install pprint` and used by adding `from pprint import pprint` to your imports and replacing the `print()` command with `pprint()`. The actual default output would all be on a single line.
+
+### get_cave_stack_tables
+Gets a list of all the currently-available backend CAVE tables associated with a datastack. Takes a datastack name as a string with the `datastack` argument and returns a list of strings representing the names of the various available tables.
+
+Example:
+
+```
+# INPUT
+
+import tracertools as tt
+
+tables = tt.get_cave_stack_tables(datastack="brain_and_nerve_cord")
+
+print(tables)
+
+# OUTPUT (as of 6 June 2026, truncated)
+
+['peripheral_nerves',
+ 'neck_connective_y121000',
+ 'cell_ids',
+...
+ 'leg_mn_segment_reftable_v0',
+ 'cell_info',
+ 'mitochondria_v1']
+```
+
+### get_cave_table
+Gets all the data for a specific CAVE table as a pandas DataFrame object. Takes a datastack name as a string with the `datastack` argument and a table name as a string with the `table_name` argument and returns a DataFrame object containing the requested information. These tables can be very large (e.g. the table listing all the synapses for the "flywire_fafb_production" datastack has roughly 50 million entries), and may become truncated in some circumstances. For more detailed CAVE table queries, the caveclient python module can be used.
 
 # License
 The tracertools package is licensed under the GNU General Public License v3.0. See the [LICENSE](https://github.com/jaybgager/tracertools/blob/main/LICENSE) file for more details.
