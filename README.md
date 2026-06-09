@@ -726,7 +726,7 @@ stack_info = tt.get_cave_stack_info(datastack="brain_and_nerve_cord")
 
 print(stack_info)
 
-# OUTPUT (as of 8 June 2026)
+# OUTPUT (as of 9 June 2026)
 
 {'aligned_volume': {'description': 'The BANC (said "the bank") is the Brain '
                                    'And Nerve Cord, a GridTape transmission '
@@ -771,7 +771,7 @@ tables = tt.get_cave_stack_tables(datastack="brain_and_nerve_cord")
 
 print(tables)
 
-# OUTPUT (as of 6 June 2026, truncated)
+# OUTPUT (as of 9 June 2026, truncated)
 
 ['peripheral_nerves',
  'neck_connective_y121000',
@@ -799,9 +799,184 @@ table_df = tt.get_cave_table(
 
 table_df.head()
 ```
-OUTPUT (as of 7 June 2026):
+OUTPUT (as of 9 June 2026):
 
 ![get_cave_table_example](readme_images/get_cave_table_example.png)
+
+### get_cave_table_info
+Gets the metadata about a specific CAVE table as a dictionary. Takes a datastack name as a string with the `datastack` argument and a table name as a string with the `table_name` argument and returns a dictionary of the table's metadata.
+
+Example:
+
+```
+# INPUT
+
+import tracertools as tt
+
+table_info = tt.get_cave_table_info(
+    datastack="brain_and_nerve_cord",
+    table_name="cell_info"
+)
+
+print(table_info)
+
+# OUTPUT (as of 9 June 2026)
+
+{'aligned_volume': 'brain_and_nerve_cord',
+ 'created': '2023-10-30T00:00:01.188701',
+ 'description': 'A general-purpose cell type / cell information table... (truncated)',
+ 'flat_segmentation_source': None,
+ 'id': 18382,
+ 'last_modified': '2026-06-09T02:34:36.131912',
+ 'last_updated': '2026-06-09T01:00:00.159181',
+ 'notice_text': None,
+ 'pcg_table_name': 'wclee_fly_cns_001',
+ 'read_permission': 'PUBLIC',
+ 'reference_table': None,
+ 'schema': 'bound_double_tag_user',
+ 'schema_type': 'bound_double_tag_user',
+ 'segmentation_source': None,
+ 'table_name': 'cell_info',
+ 'user_id': '4741',
+ 'valid': True,
+ 'voxel_resolution': [4.0, 4.0, 45.0],
+ 'write_permission': 'PRIVATE'}
+```
+The dictionary output above has been formatted for ease of reading using the pretty-print python module, which can be installed with `pip install pprint` and used by adding `from pprint import pprint` to your imports and replacing the `print()` command with `pprint()`. The actual default output would all be on a single line.
+
+### get_config
+Gets the tracer-format config dictionary for a specific datastack if one exists. To get a list of the datastacks that currently have config support, use the `get_supported_configs()` function. Takes a datastack name as a string with the `datastack` argument and returns a dictionary that can be used for a number of other functions. Each dictionary will have the following keys:
+
+**"resolution"**\
+The dimensions in nanometers used by the datastack's default viewer for a single voxel.
+
+**"volume_size"**\
+The overall dimensions in nanometers of the volume for the datastack's segmentation.
+
+**"em_source_url"**\
+The address where the electron microscope images used for the 2D layer in neuroglancer are hosted. This address can be pasted into the `source` field of a neuroglancer image layer to view the corresponding EM image stack, provided the user has read access.
+
+**seg_source_url**\
+The address where the chunkedgraph-linked segmentation is hosted. This address can be pasted into the `source` field of a neuroglancer segmentation layer to load the corresponding segmentation in both 2D and 3D, provided the user has read access.
+
+**skeleton_source_url**\
+The address where the precomputed cache of segment skeletons for this datastack is stored, if one exists.
+
+**synapse_table_name**\
+The name of the official synapse table for this datastack, if one exists. Can be used with `get_cave_table()` and `get_cave_table_info()` functions.
+
+**"syn_pre_coord_col" / "syn_post_coord_col"**\
+The names of the columns in the synapse table that contain the point coordinates associated with the pre- and post-synaptic sides of a given synapse annotation. Useful when automating the process of adding synapses to a programmatically-generated link.
+
+**"syn_pre_seg_col" / "syn_post_seg_col"**\
+The names of the columns in the synapse table that contain the segment ID associated with the pre- and post-synaptic sides of a given synapse annotation. Useful when automating the process of adding segment-linked synapses to a programmatically-generated link.
+
+**"syn_pre_sv_col" / "syn_post_sv_col"**\
+The names of the columns in the synapse table that contain the supervoxel ID associated with the pre- and post-synaptic sides of a given synapse annotation.
+
+**"syn_nt_col"**\
+The name of the column in the synapse table that contains the most likely neurotransmitter prediction for a given synapse, if one is available. Methods for predicting neurotransmitters may vary from one datastack to another.
+
+**"syn_cleft_score_col"**\
+The name of the column in the synapse table that contains the cleft score calculation for a given synapse, if one is available. Often used as a rough metric for how reliable the automated detection of a given synapse is.
+
+**"cell_info_table_name"**\
+The name of the information table for known cells in a dataset, if one exists.
+
+**"soma_table_name"**\
+The name of the table for detected somas / cell bodies, if one exists.
+
+**"proofreading_table_name"**\
+The name of the table containing a list of all neurons and their current proofreading status, if one exists. Format may vary.
+
+**"proofreading_table_seg_col"**\
+The name of the column in the proofreading table corresponding to the ID of a given segment, if one exists. Useful for segment-ID-based lookup.
+
+**"proofreading_table_status_col"**\
+The name of the column in the proofreading table corresponding to the proofreading status of a given segment, if one exists.
+
+**"local_server_url"**\
+The address of the local server for the backend data of this datastack. Will often be used in the construction of segmentation and skeleton host urls.
+
+**"viewer_site_url"**\
+The base address of the version of neuroglancer this datastack is built to work with.
+
+**"main_stack_mesh_url"**\
+The address where the volume containintg the overall mesh encompassing a whole datastack is hosted, if one exists. These are usually formatted as precomputed static meshes.
+
+**"neuropil_mesh_url"**\
+The address where the volume containing any neuropil meshes are hosted, if one exists. These are usually formatted as precomputed static meshes.
+
+**"default_view_point"**\
+A list of point coordinates for the tracer-chosen default focal point used when generating neuroglancer links programmatically. Often close to the center of the overall 3D mesh.
+
+**"default_zoom_2d"**\
+A float or int value for setting the tracer-chosen default 2D/EM viewer zoom level when constructing programmatically-generated neuroglancer links.
+
+**"default_zoom_3d"**\
+A float or int value for setting the tracer-chosen default 3D viewer zoom level when constructing programmatically-generated neuroglancer links.
+
+**"default_angle_3d"**\
+A list of 4 float or int values for setting the tracer-chosen default 3D viewer angle when constructing programmatically-generated neuroglancer links.
+
+**"shortlink_server_url"**\
+The address for the link-shortening state service to compress the default full neuroglancer url into shortlinks pointing to saved states that are more usable with common messaging services which impose character limits, if one exists for this datastack.
+
+**"here_be_monsters"**\
+The address for the tracer-created legacy-format neuroglancer volume containing precomputed single-resolution unsharded static meshes of all the known rough spots in a given datastack. Useful for triaging lists of segments during proofreading with the `calc_seg_mesh_intersect()` function. Used by the `triage_segs()` function for this purpose. These maps are living documents that may be updated at any time during the life of a datastack as new rough spots are found or existing meshes are improved.
+
+**Unique Config Entries**\
+Some datastacks may also have their own unique config entries to suit the needs of the project. Common examples are host urls for the segmentations or meshes of other datastacks that have been aligned for comparison purposes, custom mesh hosting urls for specific structures like nerve bundles, or precomputed annotation layers for synapses, nuclei, organelles, or other structures.
+
+Example:
+
+```
+# INPUT
+
+import tracertools as tt
+
+config = tt.get_config("brain_and_nerve_cord")
+
+print(config)
+
+# OUTPUT (as of 9 June 2026)
+
+{'cell_id_table_name': 'cell_info',
+ 'default_angle_3d': [0, 1, 0, 0],
+ 'default_view_point': [125563, 118181, 2850],
+ 'default_zoom_2d': 4.12,
+ 'default_zoom_3d': 360849,
+ 'em_source_url': 'precomputed://gs://seunglab_lee_fly_cns_001_alignment/aligned/v0',
+ 'local_server_url': 'https://cave.fanc-fly.com',
+ 'manc_seg': 'precomputed://gs://lee-lab_brain-and-nerve-cord-fly-connectome/imported_meshes/manc_v1.2.1_meshes_elastix_tpsreg_240721',
+ 'neuropil_mesh_url': None,
+ 'proofreading_table_name': 'backbone_proofread',
+ 'proofreading_table_seg_col_name': 'pt_root_id',
+ 'proofreading_table_status_col_name': 'proofread',
+ 'region_mesh_url': 'precomputed://gs://lee-lab_brain-and-nerve-cord-fly-connectome/region_outlines',
+ 'resolution': [4, 4, 45],
+ 'rough_spots': 'nokura://tracers/triage_meshes/banc/image',
+ 'seg_source_url': 'graphene://middleauth+https://cave.fanc-fly.com/segmentation/table/wclee_fly_cns_001',
+ 'shortlink_server_url': None,
+ 'skeleton_source_url': 'precomputed://https://cave.fanc-fly.com/skeletoncache/api/v1/brain_and_nerve_cord/precomputed/skeleton',
+ 'soma_table_name': None,
+ 'syn_cleft_score_col': None,
+ 'syn_nt_cols': None,
+ 'syn_post_coord_col': 'post_pt_position',
+ 'syn_post_seg_col': 'post_pt_root_id',
+ 'syn_post_sv_col': 'post_pt_supervoxel_id',
+ 'syn_pre_coord_col': 'pre_pt_position',
+ 'syn_pre_seg_col': 'pre_pt_root_id',
+ 'syn_pre_sv_col': 'pre_pt_supervoxel_id',
+ 'synapse_table_name': 'synapses_v2',
+ 'viewer_site_url': 'https://spelunker.cave-explorer.org/',
+ 'volume_size': [262144, 294912, 7010]}
+ ```
+
+The dictionary output above has been formatted for ease of reading using the pretty-print python module, which can be installed with `pip install pprint` and used by adding `from pprint import pprint` to your imports and replacing the `print()` command with `pprint()`. The actual default output would all be on a single line.
+
+
+
 
 
 
