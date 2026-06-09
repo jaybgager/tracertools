@@ -1427,7 +1427,7 @@ def get_config(datastack):
             "proofreading_table_status_col": "proofread",
             "local_server_url": "https://cave.fanc-fly.com",
             "viewer_site_url": "https://spelunker.cave-explorer.org/",
-            "region_mesh_url": "precomputed://gs://lee-lab_brain-and-nerve-cord-fly-connectome/region_outlines",
+            "main_stack_mesh_url": "precomputed://gs://lee-lab_brain-and-nerve-cord-fly-connectome/region_outlines",
             "neuropil_mesh_url": None,
             "default_view_point": [125563, 118181, 2850],
             "default_zoom_2d": 4.12,
@@ -1460,7 +1460,7 @@ def get_config(datastack):
             "proofreading_table_status_col": "proofread",
             "local_server_url": "https://prod.flywire-daf.com",
             "viewer_site_url": "https://ngl.flywire.ai/",
-            "region_mesh_url": "precomputed://gs://flywire_neuropil_meshes/whole_neuropil/brain_mesh_v141.surf",
+            "main_stack_mesh_url": "precomputed://gs://flywire_neuropil_meshes/whole_neuropil/brain_mesh_v141.surf",
             "neuropil_mesh_url": "precomputed://gs://flywire_neuropil_meshes/neuropils/neuropil_mesh_v141_v3",
             "default_view_point": [131071, 147456, 3505],
             "default_zoom_2d": 13.2,
@@ -1491,7 +1491,7 @@ def get_config(datastack):
             "proofreading_table_status_col": None,
             "local_server_url": None,
             "viewer_site_url": None,
-            "region_mesh_url": "precomputed://gs://flyem-vnc-roi-d5f392696f7a48e27f49fa1a9db5ee3b/all-vnc-roi",
+            "main_stack_mesh_url": "precomputed://gs://flyem-vnc-roi-d5f392696f7a48e27f49fa1a9db5ee3b/all-vnc-roi",
             "neuropil_mesh_url": "precomputed://gs://flyem-vnc-roi-d5f392696f7a48e27f49fa1a9db5ee3b/roi-202208",
             "default_view_point": None,
             "default_zoom_2d": 10,
@@ -1526,7 +1526,7 @@ def get_config(datastack):
             "proofreading_table_status_col": None,
             "local_server_url": "https://minnie.microns-daf.com",
             "viewer_site_url": "https://spelunker.cave-explorer.org",
-            "region_mesh_url": None,
+            "main_stack_mesh_url": None,
             "neuropil_mesh_url": None,
             "default_view_point": [36501, 42459, 1032],
             "default_zoom_2d": 1.6,
@@ -1558,7 +1558,7 @@ def get_config(datastack):
         #     "proofreading_table_status_col" : "",
         #     "local_server_url" : "",
         #     "viewer_site_url" : "",
-        #     "region_mesh_url" : "",
+        #     "main_stack_mesh_url" : "",
         #     "neuropil_mesh_url" : "",
         #     "default_view_point" : [],
         #     "default_zoom_2d" : 10,
@@ -4053,12 +4053,12 @@ def make_ng_link(
         layers[1]["segmentColors"] = color_dict
 
     # adds region mesh layer if present
-    if region_meshes == True and config["region_mesh_url"] != None:
+    if region_meshes == True and config["main_stack_mesh_url"] != None:
         layers.append(
             {
                 "type": seg_type,
                 "name": "Region Outlines",
-                "source": config["region_mesh_url"],
+                "source": config["main_stack_mesh_url"],
                 "segments": [1],
                 "segmentColors": {
                     "1": region_color,
