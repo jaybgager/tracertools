@@ -74,6 +74,9 @@ A user interface (UI) for interacting with the 3D segmentation and rendering of 
 **normal (mesh)**\
 A ray (line with a direction) aimed perpendicular (sometimes reffered to as "orthogonal") to a flat plane. Often used to indicate what direction a mesh face is oriented for the purposes of rendering lighting.
 
+**numpy/np/numpy array**\
+A python package commonly used for various mathematical tasks, often abbreviated as "np". Numpy arrays are similar to lists, but are considered their own object type in python. They're often used by python functions because they're faster and more versatile to work with than standard lists, particularly when doing matrix operations.
+
 **precomputed**\
 A common type of formatting for neuroglancer data layers that relies on doing complex mathematical operations ahead of time (pre-computing) to allow faster use by the end user. If you see the term "precomputed" in the address for a segmentation layer, it generally indicates that it's a static mesh that isn't connected to the chunkedgraph and therefore won't show up as a "painted" overlay in the 2D window of neuroglancer. Contrast with the term "graphene", which indicates that a mesh is linked to the chunkedgraph in some way and will therefore show up as a "painted" overlay in the 2D window of neuroglancer, allowing a user to show or hide segments by double-clicking within them in 2D. 
 
@@ -1106,12 +1109,239 @@ print(config)
 
 The dictionary output above has been formatted for ease of reading using the pretty-print python module, which can be installed with `pip install pprint` and used by adding `from pprint import pprint` to your imports and replacing the `print()` command with `pprint()`. The actual default output would all be on a single line.
 
+### get_current_seg_ids
+Gets the best guess for the current segment IDs for a list of potentially-outdated ("stale") segment IDs. Takes a datastack name as a string with the `datastack` argument, and a list of segment IDs as integers with the `seg_ids` argument and returns the best guess for the current IDs of each segment as integers by default. 
 
+If the `include_ratio` argument is set to `True`, each list item will instead be a list of 2 items: the current ID and the fraction of the original segment's supervoxels that are shared by the current segment as a float between 0 and 1. If the `full_list` argument is set to `True`, each list item will instead be a list of all the potential current-id candidates in order of their likelihood. If both `include_ratio` and `full_list` are set to `True`, each list item will be a list of all candidates as 2-items lists of ID and supervoxel fraction. 
 
+If the `skip_fresh` argument is set to `False`, the function will skip the step where it checks to see if the submitted ID is already current. This is intended to save time for large lists of IDs you know for certain are all outdated. 
 
+If the `detailed_errors` argument is set to `True`, any errors encountered (from things like internet connection hiccups, overly large requests, or server-side issues) will return strings with detailed error information instead of the default `"ERROR"` value.
 
+Extremely large neurons (e.g. the CT1 cells in Drosophila) may exceed the request limit for the supervoxel query and cause an HTTP 413 Client Error.Currently there's no way around this issue.
 
+Example:
 
+```
+# ----------------------------------------------------
+# INPUT
+# ----------------------------------------------------
+
+import tracertools as tt
+
+fresh = tt.get_current_seg_ids(
+    datastack="brain_and_nerve_cord", 
+    seg_ids=[
+        720575941473274509,
+        720575941524660200,
+        720575941565377335,
+    ],
+)
+
+print(fresh)
+
+# ----------------------------------------------------
+# OUTPUT (as of 9 June 2026)
+# ----------------------------------------------------
+
+[720575941441350235, 720575941519923628, 720575941703820762]
+ ```
+
+Example (detailed):
+
+```
+# ----------------------------------------------------
+# INPUT
+# ----------------------------------------------------
+
+import tracertools as tt
+
+fresh = tt.get_current_seg_ids(
+    datastack="brain_and_nerve_cord", 
+    seg_ids=[
+        720575941473274509,
+        720575941524660200,
+        720575941565377335,
+    ],
+    include_ratio=True, 
+    full_list=True, 
+)
+
+print(fresh)
+
+# ----------------------------------------------------
+# OUTPUT (as of 9 June 2026)
+# ----------------------------------------------------
+
+[
+    [
+        [720575941441350235, 0.9747508490618563],
+        [720575941560423027, 0.008444221739695265],
+        [720575941521525579, 0.007154390067368187],
+        [720575941488792551, 0.007005920234582336],
+        [720575941504192535, 0.002644618896497968]
+    ],
+    [
+        [720575941519923628, 0.8846842105263157],
+        [720575941586998071, 0.06591228070175438],
+        [720575941690721688, 0.0387719298245614],
+        [720575941493018032, 0.005070175438596491],
+        [720575941524058615, 0.0040526315789473685],
+        [720575941520296920, 0.0010701754385964912],
+        [720575941537520922, 0.0004385964912280702]
+    ],
+    [
+        [720575941703820762, 0.9805467429911376],
+        [720575941560578472, 0.01842304907065761],
+        [720575941459558800, 0.00046984378771681783],
+        [720575941575975176, 0.00046553329425152594],
+        [720575941428854868, 7.32783889099624e-05],
+        [720575941405357936, 2.1552467326459532e-05]
+    ]
+]
+ ```
+
+ BANDWIDTH WARNING: When looped repeatedly in a short time, as might happen when using this to update a spreadsheet of old IDs one line at a time, this function can get throttled by CAVE due to repeatedly setting the client. Workarounds linclude batching, parallelization, or simply setting a sleep delay to lower the request rate below 60/min.
+
+### get_mesh_triangles
+Gets a numpy array of the vertices for each face of a neuroglancer precomputed mesh in a volume. Takes the path to the neuroglancer volume as a string with the `volume_path` argument and returns an (n,3,3)-shape numpy array of floats representing the point coordinates of each mesh vertex. 
+
+By default, assumes the volume is stored on a remote cloudfiles-managed bucket, but if the `local` argument is set to `True` will instead look for the volume on your local machine. 
+
+Assumes the mesh you want has a segment ID of `1` in the volume by default, but another segment ID can be passed with the `mesh_seg_id` argument instead.
+
+Example:
+
+```
+# ----------------------------------------------------
+# INPUT
+# ----------------------------------------------------
+
+import tracertools as tt
+
+triangles = tt.get_mesh_triangles(
+    volume_path="https://c10s.pni.princeton.edu/tracers/examples/banc_mesh_01|neuroglancer-precomputed:",
+)
+
+print(triangles)
+
+# ----------------------------------------------------
+# OUTPUT
+# ----------------------------------------------------
+
+[
+    [
+        [108968.75       178911.5          4687.48888889]
+        [113279.75       179077.25         4747.48888889]
+        [109466.25       180402.75         4687.48888889]
+    ],
+    ... (output truncated)
+    [
+        [139306.         182083.25         4317.48888889]
+        [139389.         183077.5          4317.48888889]
+        [136902.         183740.25         4427.48888889]
+    ]
+]
+```
+
+### get_original_seg_ids
+Get the IDs of all the segments that contributed pieces to the current version of a segment. Takes a datastack name as a string with the `datastack` argument, and a segment ID as an integer with the `seg_id` argument and returns a list of the original segment IDs as integers.
+
+Example:
+
+```
+# ----------------------------------------------------
+# INPUT
+# ----------------------------------------------------
+
+import tracertools as tt
+
+triangles = tt.get_original_seg_ids(
+    datastack="brain_and_nerve_cord", 
+    seg_id=720575941703820762
+)
+
+print(triangles)
+
+# ----------------------------------------------------
+# OUTPUT
+# ----------------------------------------------------
+
+[720575941594894009,
+ 720575941453072841,
+ 720575941427247558,
+ 720575941356563148,
+ 720575941442544274,
+ 720575940558712717,
+ 720575941455608288,
+ 720575941664593560,
+ 720575941013393435,
+ 720575941548259054,
+ 720575941616650978,
+ 720575941013070107,
+ 720575941412409405,
+ 720575940543066156,
+ 720575941292747824,
+ 720575941405142319,
+ 720575941565377335]
+```
+### get_roots_from_points
+Gets a list of root IDs (either supervoxel or current segment IDs depending on what's requested) at a list of point coordinates. Takes a datastack name as a string with the `datastack` argument and a list of lists of integers representing the point coordinates (in the resolution of the datastack they're from) you want root IDs for with the `points` argument and returns a list of segment IDs as integers at those coordinates by default. If supervoxel IDs are required instead, the `sv` argument can be set to `True`.
+
+Example:
+
+```
+# ----------------------------------------------------
+# INPUT
+# ----------------------------------------------------
+
+import tracertools as tt
+
+seg_ids = tt.get_roots_from_points(
+    datastack="brain_and_nerve_cord",
+    points=[
+        [128563, 169944, 4093],
+        [136207, 175201, 4812],
+        [101370, 215228, 5264],
+    ],
+)
+
+print(seg_ids)
+
+# ----------------------------------------------------
+# OUTPUT (as of 9 June 2026)
+# ----------------------------------------------------
+
+[720575941643797624, 720575941429439959, 720575941561135887]
+```
+
+Example (supervoxel IDs):
+
+```
+# ----------------------------------------------------
+# INPUT
+# ----------------------------------------------------
+
+import tracertools as tt
+
+seg_ids = tt.get_roots_from_points(
+    datastack="brain_and_nerve_cord",
+    points=[
+        [128563, 169944, 4093],
+        [136207, 175201, 4812],
+        [101370, 215228, 5264],
+    ],
+    sv=True,
+)
+
+print(seg_ids)
+
+# ----------------------------------------------------
+# OUTPUT
+# ----------------------------------------------------
+
+[76426092181762338, 76707773517849702, 75512879390421881]
+```
 
 # License
 The tracertools package is licensed under the GNU General Public License v3.0. See the [LICENSE](https://github.com/jaybgager/tracertools/blob/main/LICENSE) file for more details.
