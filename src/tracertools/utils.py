@@ -1581,95 +1581,6 @@ def get_config(datastack):
         return
 
 
-def get_current_seg_id(
-    datastack, 
-    seg_id, 
-    include_ratio=False, 
-    full_list=False, 
-    skip_fresh=True
-):
-    """
-    Gets the most likely candidate for the current version of a stale segment id.
-
-    DEPRECATION WARNING: When use repeatedly in a short time, this function can get throttled by CAVE 
-    due to an inefficiency in setting the client. It will eventually be merged with update_seg_list() 
-    to become get_current_seg_ids().
-
-    Args:
-        datastack (str):
-            the name of the CAVE datastack the segment id is from
-            e.g. "brain_and_nerve_cord"
-        seg_id (int):
-            the potentially-outdated ID of the segment you want the current ID for
-        include_ratio (bool, optional, default=False):
-            if True will include proportion of stale segment's supervoxels that
-            are contained within fresh rosegmentot
-        full_list (bool, optional, default=False):
-            if True will return a list of all the fresh IDs associated with 
-            supervoxels from the "stale" ID instead of just the top candidate
-        skip_fresh (bool, optional, default=True):
-            if False, skips checking if the ID is already current, 
-            main usage is a slight performance increase on a long list of 
-            IDs known to all be outdated
-
-    Returns:
-        result (varies):
-            output depends on input toggles
-            by default returns the integer segment id of the most likely current segment
-            if include_ratio is True, retruns a 2-item list [seg_id, ratio]
-            if full_list is true, returns list of all associate seg_ids as ints
-            if both include_ratio and full_list are True, returns list of 2-item lists [seg_id, ratio]
-    """
-
-    # prints deprecation warning
-    print("DEPRECATION WARNING: When use repeatedly in a short time, this function can get throttled by CAVE") 
-    print("due to an inefficiency in setting the client. It will eventually be merged with update_seg_list()") 
-    print("to become get_current_seg_ids().")
-
-    # checks if seg_id is already fresh, returns if so
-    if skip_fresh == True and check_seg_freshness(datastack, [seg_id])[0] == True:
-        return seg_id
-
-    # sets client using datastack
-    client = CAVEclient(datastack)
-
-    # gets a list of all the supervoxels associated with a stale id
-    svs = client.chunkedgraph.get_leaves(seg_id)
-
-    # gets total number of supevoxels in stale id
-    total_sv = len(svs)
-
-    # makes list of the fresh seg id for each supervoxel
-    # returns "ERROR" value if neuron is too large
-    seg_ids = list(client.chunkedgraph.get_roots(svs))
-
-    # gets unique fresh seg ids from list
-    usegs = list(set(seg_ids))
-
-    # makes dict of how many original supervoxels fresh ids contain
-    sv_counts = {str(useg): seg_ids.count(useg) for useg in usegs}
-
-    # gets fraction of stale seg supervoxels in each fresh seg
-    sv_fracs = [[int(useg), (sv_counts[str(useg)] / total_sv)] for useg in usegs]
-
-    # sorts segs by fraction of original supervoxels
-    sv_fracs.sort(key=lambda x: x[1], reverse=True)
-
-    # handles confidence ratio request conditions
-    if include_ratio == True:
-        result = sv_fracs
-    else:
-        result = [frac[0] for frac in sv_fracs]
-
-    # handles full list request conditions
-    if full_list == True:
-        return result
-    else:
-        return result[0]
-
-
-
-
 def get_current_seg_ids(
     datastack, 
     seg_ids, 
@@ -1679,10 +1590,10 @@ def get_current_seg_ids(
     detailed_errors=False,
 ):
     """
-    Gets the most likely candidate for the current version of a stale segment id.
+    Gets the most likely candidates for the current versions of a list of stale segment ids.
 
     BANDWIDTH WARNING: When looped repeatedly in a short time, as might happen
-    when using this to update a spreadsheet one line at a time, this function can get 
+    when using this to update a spreadsheet of old IDs one line at a time, this function can get 
     throttled by CAVE due to repeatedly setting the client. Workarounds linclude batching,
     parallelization, or simply setting a sleep delay to lower the request rate below 60/min
     Extremely large neurons may exceed the request limit for the supervoxel query and cause
@@ -1692,8 +1603,8 @@ def get_current_seg_ids(
         datastack (str):
             the name of the CAVE datastack the segment id is from
             e.g. "brain_and_nerve_cord"
-        seg_id (int):
-            the potentially-outdated ID of the segment you want the current ID for
+        seg_ids (list of ints):
+            the potentially-outdated IDs of the segments you want the current IDs for
         include_ratio (bool, optional, default=False):
             if True will include proportion of stale segment's supervoxels that
             are contained within fresh rosegmentot
@@ -1711,10 +1622,10 @@ def get_current_seg_ids(
     Returns:
         result (varies):
             output depends on input toggles
-            by default returns the integer segment id of the most likely current segment
-            if include_ratio is True, retruns a 2-item list [seg_id, ratio]
-            if full_list is true, returns list of all associate seg_ids as ints
-            if both include_ratio and full_list are True, returns list of 2-item lists [seg_id, ratio]
+            by default returns a list of integer segment ids of the most likely current segments
+            if include_ratio is True, retruns a list of 2-item lists [seg_id, ratio]
+            if full_list is true, returns a list of lists of all candidate current ids as ints
+            if both include_ratio and full_list are True, returns list of lists of 2-item lists [seg_id, ratio]
     """
 
     # sets client using datastack
@@ -1728,10 +1639,13 @@ def get_current_seg_ids(
     # make empty list to fill with current seg ids #
     fresh_segs = []
 
-    # if seg is already fresh, add to list, otherwise use freshener
+    # loops through segment ID list, adding tqdm progress bar for user feedback
     for seg_id in tqdm(seg_ids, total=len(seg_ids),desc="Calculating candidate scores"):
-    # for seg_id in seg_ids:
+
         try:
+
+            # checks if id is already fresh
+            # if so, formats results according to requested parameters
             if df.loc[df["stale_seg"] == seg_id, "already_fresh"].values[0] == True:
                 fresh_seg = [seg_id]
                 
@@ -1744,8 +1658,10 @@ def get_current_seg_ids(
                     fresh_seg = [fresh_seg]
 
                 fresh_segs.append(fresh_seg)
-            else:
-        
+
+            # if id isn't already fresh, runs freshener
+            else:        
+
                 # gets a list of all the supervoxels associated with a stale id
                 svs = client.chunkedgraph.get_leaves(seg_id)
 
@@ -1779,6 +1695,8 @@ def get_current_seg_ids(
                     fresh_segs.append(result)
                 else:
                     fresh_segs.append(result[0])
+        
+        # handles error behavior
         except HTTPError as h:
             if detailed_errors == True:
                 fresh_segs.append(f"{h}")
@@ -1791,53 +1709,6 @@ def get_current_seg_ids(
                 fresh_segs.append("ERROR")
 
     return fresh_segs
-
-
-def update_seg_list(datastack, seg_ids):
-    """
-    Gets the most current seg IDs for a list of seg IDs that may be outdated.
-
-    DEPRECATION WARNING: This function can get throttled by CAVE due to an inefficiency.
-    It will eventually be merged with get_current_seg_id() to become get_current_seg_ids().
-
-    Args:
-        datastack (str):
-            the name of the datastack the segment ids are from
-        seg_ids (list of ints):
-            a list of segment ids you want to update
-
-    Returns:
-        fresh_segs (list of ints):
-            a list of current seg ids
-    """
-
-    # prints deprecation warning
-    print("DEPRECATION WARNING: This function can get throttled by CAVE due to an inefficiency.") 
-    print("It will eventually be merged with get_current_seg_id() to become get_current_seg_ids().")
-
-    # make df with columns for stale segs and T/F result of freshness checker
-    df = pd.DataFrame(
-        {"stale_seg": seg_ids, "already_fresh": check_seg_freshness(datastack, seg_ids)}
-    )
-
-    # make empty list to fill with current seg ids #
-    fresh_segs = []
-
-    # if seg is already fresh, add to list, otherwise use freshener
-    for seg_id in seg_ids:
-        if df.loc[df["stale_seg"] == seg_id, "already_fresh"].values[0] == True:
-            fresh_segs.append(seg_id)
-        else:
-            fresh_segs.append(get_current_seg_id(datastack=datastack, seg_id=seg_id))
-
-    return fresh_segs
-
-
-
-
-
-
-
 
 def get_mesh_triangles(
     volume_path, 
@@ -2115,7 +1986,7 @@ def get_seg_details(
 
     # gets current ids for each seg
     fresh_segs = [
-        str(get_current_seg_id(datastack=datastack, seg_id=seg_id)) for seg_id in seg_ids
+        list(map(str,get_current_seg_ids(datastack=datastack, seg_ids=seg_ids)))
     ]
 
     # makes list of segment volumes using fresh segs
@@ -2605,10 +2476,10 @@ def gsheet_add_seg_details(
 
         # gets fresh seg ID
         try:
-            fresh_seg = get_current_seg_id(datastack=datastack, seg_id=seg_id)
+            fresh_seg = get_current_seg_ids(datastack=datastack, seg_id=[seg_id])[0]
         except:
             try:
-                fresh_seg = get_current_seg_id(datastack=datastack, seg_id=seg_id)
+                fresh_seg = get_current_seg_ids(datastack=datastack, seg_ids=[seg_id])[0]
             except:
                 fresh_seg = "ERROR"
 
@@ -4525,46 +4396,6 @@ def triage_segs(
         results = [i != None for i in intersects]
 
     return results
-
-
-def update_seg_list(datastack, seg_ids):
-    """
-    Gets the most current seg IDs for a list of seg IDs that may be outdated.
-
-    DEPRECATION WARNING: This function can get throttled by CAVE due to an inefficiency.
-    It will eventually be merged with get_current_seg_id() to become get_current_seg_ids().
-
-    Args:
-        datastack (str):
-            the name of the datastack the segment ids are from
-        seg_ids (list of ints):
-            a list of segment ids you want to update
-
-    Returns:
-        fresh_segs (list of ints):
-            a list of current seg ids
-    """
-
-    # prints deprecation warning
-    print("DEPRECATION WARNING: This function can get throttled by CAVE due to an inefficiency.") 
-    print("It will eventually be merged with get_current_seg_id() to become get_current_seg_ids().")
-
-    # make df with columns for stale segs and T/F result of freshness checker
-    df = pd.DataFrame(
-        {"stale_seg": seg_ids, "already_fresh": check_seg_freshness(datastack, seg_ids)}
-    )
-
-    # make empty list to fill with current seg ids #
-    fresh_segs = []
-
-    # if seg is already fresh, add to list, otherwise use freshener
-    for seg_id in seg_ids:
-        if df.loc[df["stale_seg"] == seg_id, "already_fresh"].values[0] == True:
-            fresh_segs.append(seg_id)
-        else:
-            fresh_segs.append(get_current_seg_id(datastack=datastack, seg_id=seg_id))
-
-    return fresh_segs
 
 
 def visualize_skeletons(seg_ids, datastack="brain_and_nerve_cord"):
