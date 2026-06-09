@@ -1434,7 +1434,7 @@ def get_config(datastack):
             "default_zoom_3d": 360849,
             "default_angle_3d": [0, 1, 0, 0],
             "shortlink_server_url": None,
-            "rough_spots": "nokura://tracers/triage_meshes/banc/image",
+            "here_be_monsters": "nokura://tracers/triage_meshes/banc/image",
             # unique entries below this line #
             "manc_seg": "precomputed://gs://lee-lab_brain-and-nerve-cord-fly-connectome/imported_meshes/manc_v1.2.1_meshes_elastix_tpsreg_240721",
         },
@@ -1467,7 +1467,7 @@ def get_config(datastack):
             "default_zoom_3d": 9600,
             "default_angle_3d": [0, 0, 0, -1],
             "shortlink_server_url": "https://globalv1.flywire-daf.com/nglstate/post",
-            "rough_spots": None,
+            "here_be_monsters": None,
         },
         "male_adult_nerve_cord": {
             "resolution": [8, 8, 8],
@@ -1498,7 +1498,7 @@ def get_config(datastack):
             "default_zoom_3d": 10000,
             "default_angle_3d": [0, 0, 0, 0],
             "shortlink_server_url": None,
-            "rough_spots": None,
+            "here_be_monsters": None,
             # unique entries below this line #
             "nerve_mesh_url": "precomputed://gs://flyem-vnc-roi-d5f392696f7a48e27f49fa1a9db5ee3b/nerve-roi-202301",
             "presyn_anno_layer": "precomputed://gs://manc-seg-v1p2/manc-v1.2-synapse-partners-minconf-0.0.precomputed",
@@ -1533,7 +1533,7 @@ def get_config(datastack):
             "default_zoom_3d": 93293,
             "default_angle_3d": [0, 0, 0, 1],
             "shortlink_server_url": None,  # may be https://spelunker.cave-explorer.org/#!middleauth+https://global.daf-apis.com/nglstate/api/v1/ #
-            "rough_spots": None,
+            "here_be_monsters": None,
         },
         # # template for adding new config dicts #
         # "name" : {
@@ -1565,7 +1565,7 @@ def get_config(datastack):
         #     "default_zoom_3d" : 10000,
         #     "default_angle_3d" : [0,0,0,0],
         #     "shortlink_server_url" : "",
-        #     "rough_spots" : "",
+        #     "here_be_monsters" : "",
         # },
     }
 
@@ -4503,7 +4503,7 @@ def triage_segs(
     catacombs = [get_bones(datastack=datastack, skeleton=skeleton) for skeleton in skeletons]
 
     # gets hosting url of rough spot mesh from config dict
-    rough_spots = config["rough_spots"]
+    rough_spots = config["here_be_monsters"]
 
     # gets list of triangle point trio arrays from rough spot meshes
     triangles = get_mesh_triangles(volume_path=rough_spots)
