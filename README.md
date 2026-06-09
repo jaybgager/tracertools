@@ -931,16 +931,18 @@ Some datastacks may also have their own unique config entries to suit the needs 
 Example:
 
 ```
+----------------------------------------------------
 # INPUT
-
+----------------------------------------------------
 import tracertools as tt
 
 config = tt.get_config("brain_and_nerve_cord")
 
 print(config)
 
+----------------------------------------------------
 # OUTPUT (as of 9 June 2026)
-
+----------------------------------------------------
 {'cell_info_table_name': 'cell_info',
  'default_angle_3d': [0, 1, 0, 0],
  'default_view_point': [125563, 118181, 2850],
