@@ -798,9 +798,9 @@ table_df = tt.get_cave_table(
 )
 
 table_df.head()
-
-# OUTPUT (as of 7 June 2026)
 ```
+OUTPUT (as of 7 June 2026):
+
 ![get_cave_table_example](readme_images/get_cave_table_example.png)
 
 
