@@ -859,8 +859,8 @@ def check_seg_proofread_status(
         return
 
     # gets column names from config
-    seg_col = config["proofreading_table_seg_col_name"]
-    proof_col = config["proofreading_table_status_col_name"]
+    seg_col = config["proofreading_table_seg_col"]
+    proof_col = config["proofreading_table_status_col"]
 
     # makes dataframe of all seg_ids that appear in proofreading table 
     df = client.materialize.query_table(
@@ -1423,8 +1423,8 @@ def get_config(datastack):
             "cell_info_table_name": "cell_info",
             "soma_table_name": None,
             "proofreading_table_name": "backbone_proofread",
-            "proofreading_table_seg_col_name": "pt_root_id",
-            "proofreading_table_status_col_name": "proofread",
+            "proofreading_table_seg_col": "pt_root_id",
+            "proofreading_table_status_col": "proofread",
             "local_server_url": "https://cave.fanc-fly.com",
             "viewer_site_url": "https://spelunker.cave-explorer.org/",
             "region_mesh_url": "precomputed://gs://lee-lab_brain-and-nerve-cord-fly-connectome/region_outlines",
@@ -1456,8 +1456,8 @@ def get_config(datastack):
             "cell_info_table_name": "neuron_information_v2",
             "soma_table_name": "nuclei_v1",
             "proofreading_table_name": "proofreading_status_public_v1",  # there's also "proofreading_review_public_v1" #
-            "proofreading_table_seg_col_name": "pt_root_id",
-            "proofreading_table_status_col_name": "proofread",
+            "proofreading_table_seg_col": "pt_root_id",
+            "proofreading_table_status_col": "proofread",
             "local_server_url": "https://prod.flywire-daf.com",
             "viewer_site_url": "https://ngl.flywire.ai/",
             "region_mesh_url": "precomputed://gs://flywire_neuropil_meshes/whole_neuropil/brain_mesh_v141.surf",
@@ -1487,8 +1487,8 @@ def get_config(datastack):
             "cell_info_table_name": None,
             "soma_table_name": None,
             "proofreading_table_name": None,
-            "proofreading_table_seg_col_name": None,
-            "proofreading_table_status_col_name": None,
+            "proofreading_table_seg_col": None,
+            "proofreading_table_status_col": None,
             "local_server_url": None,
             "viewer_site_url": None,
             "region_mesh_url": "precomputed://gs://flyem-vnc-roi-d5f392696f7a48e27f49fa1a9db5ee3b/all-vnc-roi",
@@ -1522,8 +1522,8 @@ def get_config(datastack):
             "cell_info_table_name": None,
             "soma_table_name": None,
             "proofreading_table_name": None,
-            "proofreading_table_seg_col_name": None,
-            "proofreading_table_status_col_name": None,
+            "proofreading_table_seg_col": None,
+            "proofreading_table_status_col": None,
             "local_server_url": "https://minnie.microns-daf.com",
             "viewer_site_url": "https://spelunker.cave-explorer.org",
             "region_mesh_url": None,
@@ -1554,8 +1554,8 @@ def get_config(datastack):
         #     "cell_info_table_name" : "",
         #     "soma_table_name" : "",
         #     "proofreading_table_name" : "",
-        #     "proofreading_table_seg_col_name" : "",
-        #     "proofreading_table_status_col_name" : "",
+        #     "proofreading_table_seg_col" : "",
+        #     "proofreading_table_status_col" : "",
         #     "local_server_url" : "",
         #     "viewer_site_url" : "",
         #     "region_mesh_url" : "",
