@@ -1884,10 +1884,12 @@ def get_roots_from_points(
             # handles return format choice
             if sv == True:
                 # if supervoxel ID requested, add to output list
-                root_ids.append(sv_id)
+                # root_ids.append(sv_id)
+                root_ids.append(int(sv_id))
             else:
                 # if segment requested, get seg ID using sv ID and add to output list
-                root_ids.append(client.chunkedgraph.get_root_id(supervoxel_id=sv_id))
+                # root_ids.append(client.chunkedgraph.get_root_id(supervoxel_id=sv_id))
+                root_ids.append(int(client.chunkedgraph.get_root_id(supervoxel_id=sv_id)))
         # adds "ERROR" value if something goes wrong so as not to let one failure break long list
         except:
             root_ids.append("ERROR")
