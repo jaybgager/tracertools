@@ -106,8 +106,11 @@ Below are basic descriptions of each function in the tracertools package, with i
 Converts file names that include colons to a Windows-safe alternative and back. Takes a string with the `file_path` argument. By default, converts any colons `:` in the string to triple-underscores `___`. If the `to_windows` argument is set to `False`, converts triple underscores back to colons. Used to allow creation and download/upload of neuroglancer legacy-format volumes (which by necessity must include colons in several file names) on Windows machines (which strictly prohibit the use of colons in file names).
 
 Example (to Windows):
+
 ```
+# ----------------------------------------------------
 # INPUT
+# ----------------------------------------------------
 
 import tracertools as tt
 
@@ -117,14 +120,19 @@ print(
     )
 )
 
+# ----------------------------------------------------
 # OUTPUT
+# ----------------------------------------------------
 
 "home/user/volumes/vol_01/mesh/1___0___1"
 ```
 
 Example (from Windows):
+
 ```
+# ----------------------------------------------------
 # INPUT
+# ----------------------------------------------------
 
 import tracertools as tt
 
@@ -135,7 +143,9 @@ print(
     )
 )
 
+# ----------------------------------------------------
 # OUTPUT
+# ----------------------------------------------------
 
 "home/user/volumes/vol_01/mesh/1:0:1"
 ```
@@ -168,8 +178,11 @@ Uploads a folder to a cloudfiles-managed bucket. Takes an absolute folder path o
 Calculates the distance between two points in 3D. Takes two points as lists of 3 integers representing their x,y, and z coordinates with the `point_a` and `point_b` arguments and a the resolution of the coordinate system as a list of 3 integers with the `res` argument, and returns the distance between the two points as a float. Units will be the same as whatever was used for the `res` argument.
 
 Example:
+
 ```
+# ----------------------------------------------------
 # INPUT
+# ----------------------------------------------------
 
 import tracertools as tt
 
@@ -181,7 +194,9 @@ print(
     )
 )
 
+# ----------------------------------------------------
 # OUTPUT
+# ----------------------------------------------------
 
 136.0624856453828
 ```
@@ -190,8 +205,11 @@ print(
 Gets the average point coordinates from a list of point coordinates. Takes a list of point coordinates as lists of 3 ints with the `points` argument and returns coordinates for a single point that represents the average of all the points in the list. By default returns result as list of nearest int values, but exact float values can be obtained insted by setting `exact_value` argument to `True`.
 
 Example:
+
 ```
+# ----------------------------------------------------
 # INPUT
+# ----------------------------------------------------
 
 import tracertools as tt
 
@@ -205,13 +223,19 @@ print(
     )
 )
 
+# ----------------------------------------------------
 # OUTPUT
+# ----------------------------------------------------
 
 [1,2,3]
 ```
+
 Example (Exact Values):
+
 ```
+# ----------------------------------------------------
 # INPUT
+# ----------------------------------------------------
 
 import tracertools as tt
 
@@ -226,7 +250,9 @@ print(
     )
 )
 
+# ----------------------------------------------------
 # OUTPUT
+# ----------------------------------------------------
 
 [1.0, 2.0, 2.6666666666666665]
 ```
@@ -235,8 +261,12 @@ print(
 Calculates the point coordinates for the corners of a rectangular prism shaped bounding box based on a centerpoint and a set of dimensions. Takes a list of 3 ints with the `center_point` argument and a set of dimensions in the x-, y-, and z-dimensions as a list of ints with the `dims` argument and returns a list of two lists of 3 ints representing the corners of a bounding box of the requested dimensions centered on the requested point. If odd dimension values are submitted they'll be rounded down to the next even integer to avoid using floats for the corner coordinates.
 
 Example:
+
 ```
+# ----------------------------------------------------
 # INPUT
+# ----------------------------------------------------
+
 import tracertools as tt
 
 print(
@@ -246,7 +276,9 @@ print(
     )
 )
 
+# ----------------------------------------------------
 # OUTPUT
+# ----------------------------------------------------
 
 [[-4, -1, 1], [6, 5, 5]]
 ```
@@ -256,8 +288,11 @@ print(
 Calculates the point where a line segment and a triangular plane intersect, if any. Takes a line segment as an array of two arrays of 3 floats or ints representing the endpoints with the `line` argument (e.g. `[[x1,y1,z1],[x2,y2,z2]]`) and a triangular plane as an array of 3 arrays of 3 floats or ints representing the point coordinates of the vertices with the `triangle` argument (e.g. `[[x1,y1,z1],[x2,y2,z2],[x3,y3,z3]]`) and returns either an array of 3 floats representing the point coordinates where the line intersects the triangular plane (e.g. `[x,y,z]`) or a `None` value if none exist. By default, rounds the results to the nearest integer, but more detailed results can be obtained by setting the `precision` argument to the number of decimal places desired. Warning: using high precision (e.g. 16+ decimal places) with low numbers (e.g. [1,1,1]) can cause false negatives. This is due to extremely small rounding errors when calculating floating point math.
 
 Example:
+
 ```
+# ----------------------------------------------------
 # INPUT
+# ----------------------------------------------------
 
 import tracertools as tt
 import numpy as np
@@ -280,15 +315,20 @@ print(
     )
 )
 
+# ----------------------------------------------------
 # OUTPUT
+# ----------------------------------------------------
 
 [1.,1.,2.]
 
 ```
 
 Example (higher precision):
+
 ```
+# ----------------------------------------------------
 # INPUT
+# ----------------------------------------------------
 
 import tracertools as tt
 import numpy as np
@@ -312,7 +352,9 @@ print(
     )
 )
 
+# ----------------------------------------------------
 # OUTPUT
+# ----------------------------------------------------
 
 [0.522 1.043 1.565]
 
@@ -322,8 +364,11 @@ print(
 Calculates all points where the skeleton of a segment intersects a mesh, if any exist. Takes a datastack name as a string with the `datastack` argument, a list of segment IDs as ints with the `seg_ids` argument, and the address of a neuroglancer mesh as a string with the `mesh_address` argument (e.g. "https://c10s.pni.princeton.edu/tracers/jay/mesher_demo/example_01|neuroglancer-precomputed:") and by default returns a list of bool (True/False) values indicating which segments' skeletons intersect the chosen mesh. Optionally setting the `return_intersects` argument to True will instead return a list of values that are either lists of all the point coordinates at which each segment intersects the mesh or a `None` value if no intersection points exist.
 
 Example:
+
 ```
+# ----------------------------------------------------
 # INPUT
+# ----------------------------------------------------
 
 import tracertools as tt
 
@@ -333,14 +378,19 @@ tt.calc_seg_mesh_intersect(
     mesh_address="https://c10s.pni.princeton.edu/tracers/examples/banc_mesh_01|neuroglancer-precomputed:",
 )
 
+# ----------------------------------------------------
 #OUTPUT
+# ----------------------------------------------------
 
 [True,False]
 ```
 
 Example (return intersects):
+
 ```
+# ----------------------------------------------------
 # INPUT
+# ----------------------------------------------------
 
 import tracertools as tt
 
@@ -351,7 +401,9 @@ tt.calc_seg_mesh_intersect(
     return_intersects=True,
 )
 
+# ----------------------------------------------------
 #OUTPUT
+# ----------------------------------------------------
 
 [
     [
@@ -378,7 +430,9 @@ Example:
 Since this code requires a skeleton's bones and a mesh's triangles, here's an example of how you could get those using other tracertools functions.
 
 ```
-# INPUT
+# ----------------------------------------------------
+# INPUT (1/2)
+# ----------------------------------------------------
 
 import tracertools as tt
 
@@ -403,7 +457,9 @@ triangles = tt.get_mesh_triangles(
 Now that you have a list of bones and triangles, you can use the following code to check if any of the bones intersect any of the triangles:
 
 ```
-# INPUT
+# ----------------------------------------------------
+# INPUT (2/2)
+# ----------------------------------------------------
 
 intersections = tt.calc_skeleton_mesh_intersect(
     bones=bone_list, 
@@ -412,7 +468,9 @@ intersections = tt.calc_skeleton_mesh_intersect(
 
 print(intersections)
 
+# ----------------------------------------------------
 # OUTPUT
+# ----------------------------------------------------
 
 [array([121305., 181906.,   4627.]),
  array([123200., 172384.,   4720.]),
@@ -431,7 +489,10 @@ Checks if a list of segment IDs are current or outdated. Takes a datastack name 
 
 Example:
 ```
+# ----------------------------------------------------
 # INPUT
+# ----------------------------------------------------
+
 import tracertools as tt
 
 # defines a list of potentially-outdated IDs
@@ -451,7 +512,9 @@ is_fresh = tt.check_seg_freshness(
 
 print(is_fresh)
 
+# ----------------------------------------------------
 # OUTPUT
+# ----------------------------------------------------
 
 [False, True, True, False, True, False]
 ```
@@ -460,8 +523,11 @@ print(is_fresh)
 Checks if a list of segments have been marked proofread or not. Takes a datastack name as a string with the `datastack` argument and a list of segment IDs as ints with the `seg_ids` argument and returns a list of bools (True/False values) indicating if each segment ID in the submitted list has been marked as "backbone_proofread" in the dataset's default proofreading completion table. Only works for datasets with a default proofreading table; if none exists, returns error indicating such.
 
 Example:
+
 ```
+# ----------------------------------------------------
 # INPUT
+# ----------------------------------------------------
 
 import tracertools as tt
 
@@ -481,7 +547,9 @@ is_proofread = tt.check_seg_proofread_status(
 
 print(is_proofread)
 
+# ----------------------------------------------------
 # OUTPUT
+# ----------------------------------------------------
 
 [False, False, False, False, True, False]
 ```
@@ -492,7 +560,9 @@ Converts a set of point coordinates from one resolution to another. Takes a list
 Example:
 
 ```
+# ----------------------------------------------------
 # INPUT
+# ----------------------------------------------------
 
 import tracertools as tt
 
@@ -509,7 +579,9 @@ nm_coords = tt.convert_coord_res(
 
 print(nm_coords)
 
+# ----------------------------------------------------
 # OUTPUT
+# ----------------------------------------------------
 
 [501132, 473052, 128700]
 ```
@@ -518,8 +590,11 @@ print(nm_coords)
 Counts the number of synapses each segment in a list has associated with it. Takes a datastack name as a string with the argument `datastack` and a list of segmnet IDs as a list of ints with the `seg_ids` argument and returns a list of ints representing the total synapses for each segment. Optionally, the `detailed_results` argument can be set to True in order to get the results as a list of dictionaries with specific counts for incoming and outgoing synapses instead. 
 
 Example:
+
 ```
+# ----------------------------------------------------
 # INPUT
+# ----------------------------------------------------
 
 import tracertools as tt
 
@@ -534,14 +609,19 @@ synapses = tt.count_synapses(
 
 print(synapses)
 
+# ----------------------------------------------------
 # OUTPUT
+# ----------------------------------------------------
 
 [0, 336, 0]
 ```
 
-Example (detailed results)
+Example (detailed results):
+
 ```
+# ----------------------------------------------------
 # INPUT
+# ----------------------------------------------------
 
 import tracertools as tt
 
@@ -557,7 +637,9 @@ synapses = tt.count_synapses(
 
 print(synapses)
 
+# ----------------------------------------------------
 # OUTPUT
+# ----------------------------------------------------
 
 {720575940380068115: {'all': 0, 'in': 0, 'out': 0},
  720575940380207581: {'all': 0, 'in': 0, 'out': 0},
@@ -568,8 +650,11 @@ print(synapses)
 Counts how many unique supervoxels each user was responsible for adding or removing in order to produce a proofread segment. Takes a datastack name as a string with the `datastack` argument and the ID of a proofread segment as an int with the `completed_seg_id` argument and returns a dictionary of string user IDs as keys and total supervoxel assignments as int values.
 
 Example:
+
 ```
+# ----------------------------------------------------
 # INPUT
+# ----------------------------------------------------
 
 import tracertools as tt
 
@@ -580,7 +665,9 @@ contribs = tt.count_user_sv_contribution(
 
 print(contribs)
 
+# ----------------------------------------------------
 # OUTPUT
+# ----------------------------------------------------
 
 {'5098': 2957, '5017': 7366, '2815': 253}
 ```
@@ -589,8 +676,11 @@ print(contribs)
 Extracts a numpy array of point coordinates from a point annotation layer in a locally-stored neuroglancer JSON state file. Takes the absolute filepath to a neuroglancer JSON state file on your local machine as a string with the `json_filepath` argument and the name of a point annotation layer in the JSON state you want to pull points from as a string with the `layer_name` argument and returns an (n,3)-shape numpy array of ints representing the point coordinates of each anntoation. Useful for making point cloud OBJS or meshing.
 
 Example (using a hypothetical JSON state file called `state01.json` containing a point annotation layer called `annotation1` and which is stored in the `home/user/ng_states/` folder):
+
 ```
+# ----------------------------------------------------
 # INPUT
+# ----------------------------------------------------
 
 import tracertools as tt
 
@@ -601,7 +691,9 @@ anno_array = tt.get_anno_array_from_json_state_file(
 
 print(anno_array)
 
+# ----------------------------------------------------
 # OUTPUT
+# ----------------------------------------------------
 
 # an (n,3)-shape numpy array containing all the points inthe annotation layer
 [
@@ -621,6 +713,10 @@ Example:
 Since this code requires an osteoid-format skeleton, we can get that using the get_seg_skeletons() function.
 
 ```
+# ----------------------------------------------------
+# INPUT (1/2)
+# ----------------------------------------------------
+
 import tracertools as tt
 
 # this part gets the skeleton for a given segment
@@ -633,6 +729,10 @@ skel = tt.get_seg_skeletons(
 Now that we have a skeleton, we can feed it into get_bones():
 
 ```
+# ----------------------------------------------------
+# INPUT (2/2)
+# ----------------------------------------------------
+
 bones = tt.get_bones(
     datastack="brain_and_nerve_cord", 
     skeleton=skel
@@ -640,7 +740,9 @@ bones = tt.get_bones(
 
 print(bones)
 
+# ----------------------------------------------------
 # OUTPUT
+# ----------------------------------------------------
 
 [
     [
@@ -669,7 +771,9 @@ Gets the total length of all the edges (sometimes called "bones") in each segmen
 Example:
 
 ```
+# ----------------------------------------------------
 # INPUT
+# ----------------------------------------------------
 
 import tracertools as tt
 
@@ -683,7 +787,9 @@ cable_lengths = tt.get_cable_lengths(
 
 print(cable_lengths)
 
+# ----------------------------------------------------
 # OUTPUT
+# ----------------------------------------------------
 
 [1712022.370770976, 2109110.992525338]
 ```
@@ -694,7 +800,9 @@ Gets a list of all the datastacks currently available trhough the CAVE service. 
 Example:
 
 ```
+# ----------------------------------------------------
 # INPUT
+# ----------------------------------------------------
 
 import tracertools as tt
 
@@ -702,7 +810,9 @@ stacks = tt.get_cave_stacks()
 
 print(stacks)
 
+# ----------------------------------------------------
 # OUTPUT
+# ----------------------------------------------------
 
 [
     "stack_name_1", 
@@ -718,7 +828,9 @@ Gets the official metadata information for a specific CAVE datastack, directly f
 Example:
 
 ```
+# ----------------------------------------------------
 # INPUT
+# ----------------------------------------------------
 
 import tracertools as tt
 
@@ -726,7 +838,9 @@ stack_info = tt.get_cave_stack_info(datastack="brain_and_nerve_cord")
 
 print(stack_info)
 
+# ----------------------------------------------------
 # OUTPUT (as of 9 June 2026)
+# ----------------------------------------------------
 
 {'aligned_volume': {'description': 'The BANC (said "the bank") is the Brain '
                                    'And Nerve Cord, a GridTape transmission '
@@ -763,7 +877,9 @@ Gets a list of all the currently-available backend CAVE tables associated with a
 Example:
 
 ```
+# ----------------------------------------------------
 # INPUT
+# ----------------------------------------------------
 
 import tracertools as tt
 
@@ -771,7 +887,9 @@ tables = tt.get_cave_stack_tables(datastack="brain_and_nerve_cord")
 
 print(tables)
 
+# ----------------------------------------------------
 # OUTPUT (as of 9 June 2026, truncated)
+# ----------------------------------------------------
 
 ['peripheral_nerves',
  'neck_connective_y121000',
@@ -788,7 +906,9 @@ Gets all the data for a specific CAVE table as a pandas DataFrame object. Takes 
 Example:
 
 ```
+# ----------------------------------------------------
 # INPUT
+# ----------------------------------------------------
 
 import tracertools as tt
 
@@ -798,8 +918,11 @@ table_df = tt.get_cave_table(
 )
 
 table_df.head()
-```
+
+# ----------------------------------------------------
 OUTPUT (as of 9 June 2026):
+# ----------------------------------------------------
+```
 
 ![get_cave_table_example](readme_images/get_cave_table_example.png)
 
@@ -809,7 +932,9 @@ Gets the metadata about a specific CAVE table as a dictionary. Takes a datastack
 Example:
 
 ```
+# ----------------------------------------------------
 # INPUT
+# ----------------------------------------------------
 
 import tracertools as tt
 
@@ -820,7 +945,9 @@ table_info = tt.get_cave_table_info(
 
 print(table_info)
 
+# ----------------------------------------------------
 # OUTPUT (as of 9 June 2026)
+# ----------------------------------------------------
 
 {'aligned_volume': 'brain_and_nerve_cord',
  'created': '2023-10-30T00:00:01.188701',
@@ -930,24 +1057,21 @@ Some datastacks may also have their own unique config entries to suit the needs 
 
 Example:
 
-
-----------------------------------------------------
-INPUT
-----------------------------------------------------
-
 ```
+# ----------------------------------------------------
+# INPUT
+# ----------------------------------------------------
+
 import tracertools as tt
 
 config = tt.get_config("brain_and_nerve_cord")
 
 print(config)
-```
 
-----------------------------------------------------
-OUTPUT (as of 9 June 2026)
-----------------------------------------------------
+# ----------------------------------------------------
+# OUTPUT (as of 9 June 2026)
+# ----------------------------------------------------
 
-```
 {'cell_info_table_name': 'cell_info',
  'default_angle_3d': [0, 1, 0, 0],
  'default_view_point': [125563, 118181, 2850],
