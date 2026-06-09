@@ -785,5 +785,27 @@ print(tables)
 ### get_cave_table
 Gets all the data for a specific CAVE table as a pandas DataFrame object. Takes a datastack name as a string with the `datastack` argument and a table name as a string with the `table_name` argument and returns a DataFrame object containing the requested information. These tables can be very large (e.g. the table listing all the synapses for the "flywire_fafb_production" datastack has roughly 50 million entries), and may become truncated in some circumstances. For more detailed CAVE table queries, the caveclient python module can be used.
 
+Example:
+
+```
+# INPUT
+
+import tracertools as tt
+
+table_df = tt.get_cave_table(
+    datastack="brain_and_nerve_cord",
+    table_name="cell_info"
+)
+
+table_df.head()
+
+# OUTPUT (as of 7 June 2026)
+```
+![get_cave_table_example](readme_images/get_cave_table_example.png)
+
+
+
+
+
 # License
 The tracertools package is licensed under the GNU General Public License v3.0. See the [LICENSE](https://github.com/jaybgager/tracertools/blob/main/LICENSE) file for more details.
