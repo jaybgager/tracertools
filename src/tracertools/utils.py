@@ -1710,6 +1710,39 @@ def get_current_seg_ids(
 
     return fresh_segs
 
+def get_json_state_from_url(
+    datastack, 
+    share_url,
+):
+    """
+    Derives JSON state from shortened sharing url.
+
+    Args:
+        datastack (str):
+            the name of the CAVE datastack the link is for
+            e.g. brain_and_nerve_cord
+        share_url (str):
+            the shortened NG url you want the JSON for
+
+    Returns:
+        json_state (dict):
+            the JSON state of the shortened link as a dictionary
+    """
+
+    # sets client using datastack name
+    client = CAVEclient(datastack)
+
+    # splits share url into components between slashes
+    split_url = share_url.split("/")
+
+    # gets state ID, which is always last component
+    state_id = int(split_url[-1])
+
+    # retreives JSON state from state server using state ID
+    json_state = client.state.get_state_json(state_id)
+
+    return json_state
+
 def get_mesh_triangles(
     volume_path, 
     mesh_seg_id=1, 
@@ -2242,41 +2275,6 @@ def get_seg_skeletons(
     ]
 
     return osteoid_skeletons
-
-
-def get_json_state_from_url(
-    datastack, 
-    share_url,
-):
-    """
-    Derives JSON state from shortened sharing url.
-
-    Args:
-        datastack (str):
-            the name of the CAVE datastack the link is for
-            e.g. brain_and_nerve_cord
-        share_url (str):
-            the shortened NG url you want the JSON for
-
-    Returns:
-        json_state (dict):
-            the JSON state of the shortened link as a dictionary
-    """
-
-    # sets client using datastack name
-    client = CAVEclient(datastack)
-
-    # splits share url into components between slashes
-    split_url = share_url.split("/")
-
-    # gets state ID, which is always last component
-    state_id = int(split_url[-1])
-
-    # retreives JSON state from state server using state ID
-    json_state = client.state.get_state_json(state_id)
-
-    return json_state
-
 
 def get_svs_from_seg(
     datastack, 
