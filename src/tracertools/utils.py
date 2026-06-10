@@ -2301,7 +2301,7 @@ def get_svs_from_seg(
     client = CAVEclient(datastack)
 
     # gets supervoxel IDs using seg ID
-    sv_ids = list(client.chunkedgraph.get_leaves(seg_id))
+    sv_ids = list(map(int,client.chunkedgraph.get_leaves(seg_id)))
 
     return sv_ids
 
