@@ -2185,7 +2185,7 @@ def get_seg_skeletons(
 
     Returns:
         intersect_list (list of objects):
-            a list of osteoid skeleton objects in the same ordaer as the submitted segment IDs
+            a list of osteoid skeleton objects in the same order as the submitted segment IDs
     """
 
     # sets client using datastack_name 
