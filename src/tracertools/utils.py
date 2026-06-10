@@ -1158,7 +1158,7 @@ def get_anno_array_from_json_state_file(
             the name of the annotation layer to pull coordinates from
             e.g. "annotation1"
         json_filepath (str):
-            the absolute filepath to the NG state json file to pull annotations from
+            the absolute filepath to the NG JSON state file to pull annotations from
             e.g. '/home/username/ng_jsons/state.json'
 
     Returns:
@@ -2244,12 +2244,12 @@ def get_seg_skeletons(
     return osteoid_skeletons
 
 
-def get_state_json_from_url(
+def get_json_state_from_url(
     datastack, 
     share_url,
 ):
     """
-    Derives state JSON from shortened sharing url.
+    Derives JSON state from shortened sharing url.
 
     Args:
         datastack (str):
@@ -2259,8 +2259,8 @@ def get_state_json_from_url(
             the shortened NG url you want the JSON for
 
     Returns:
-        state_json (dict):
-            the state JSON of the shortened link as a dictionary
+        json_state (dict):
+            the JSON state of the shortened link as a dictionary
     """
 
     # sets client using datastack name
@@ -2272,10 +2272,10 @@ def get_state_json_from_url(
     # gets state ID, which is always last component
     state_id = int(split_url[-1])
 
-    # retreives JSON from state server using state ID
-    state_json = client.state.get_state_json(state_id)
+    # retreives JSON state from state server using state ID
+    json_state = client.state.get_state_json(state_id)
 
-    return state_json
+    return json_state
 
 
 def get_svs_from_seg(
@@ -2731,7 +2731,7 @@ def make_anno_layer(
     Returns:
         anno_layer_dict (dict):
             dictionary for an annotation layer of the appropriate type
-            structured to work with neuroglancer state json format
+            structured to work with neuroglancer JSON state format
     """
 
     if len(linked_segs) > 0 and linked_seg_layer_name == None:
@@ -3296,7 +3296,7 @@ def make_local_volume_from_obj(datastack_name, obj_path, output_path):
             the name of the datastack the OBJ mesh is from, e.g. 'brain_and_nerve_cord'
             for a list of currently-supported datastacks use get_supported_configs()
         obj_path (str):
-            the absolute filepath to the NG state JSON file to pull annotations from
+            the absolute filepath to the NG JSON state file to pull annotations from
             e.g. '/home/username/ng_jsons/state.json'
         output_path (str):
             the absolute path to the folder where you want to save the mesh output
@@ -3432,7 +3432,7 @@ def make_mesh_from_points(
     # makes empty list to fill with annotation layer names
     layer_names = []
 
-    # selectively gets layer names from state json file
+    # selectively gets layer names from JSON state file
     for layer in json_dict["layers"]:
         # avoids archived and hidden layers
         if "archived" not in layer:
@@ -4018,7 +4018,7 @@ def make_ng_link(
 
 def make_objs_from_state_file(datastack, json_path, output_path):
     """
-    Generates convex hull obj mesh files from all the point annotation layers in a NG state json file.
+    Generates convex hull obj mesh files from all the point annotation layers in a NG JSON state file.
 
     Args:
         datastack (str):
@@ -4026,7 +4026,7 @@ def make_objs_from_state_file(datastack, json_path, output_path):
             e.g. "brain_and_nerve_cord"
             for a list of currently-supported datastacks use get_supported_configs()
         json_path (str):
-            the absolute path to the NG state JSON file to pull annotations from
+            the absolute path to the NG JSON state file to pull annotations from
             e.g. "/home/username/ng_jsons/state.json"
         output_path (str):
             the absolute path to the folder where you want to save the mesh output
@@ -4055,7 +4055,7 @@ def make_objs_from_state_file(datastack, json_path, output_path):
     # makes empty list to fill with annotation layer names
     layer_names = []
 
-    # gets layer names from state json file
+    # gets layer names from JSON state file
     for layer in json_dict["layers"]:
         if "archived" not in layer:
             if layer["type"] == "annotation":
@@ -4100,20 +4100,20 @@ def make_point_cloud_from_state_file(
     output_filepath,
 ):
     """
-    Generates a point cloud OBJ file from a neuroglancer point annotation layer in a state JSON file.
+    Generates a point cloud OBJ file from a neuroglancer point annotation layer in a JSON state file.
 
     Args:
         datastack (str):
-            the name of the datastack the state JSON is from
+            the name of the datastack the JSON state is from
             e.g. 'brain_and_nerve_cord'
             for a list of currently-supported datastacks use get_supported_configs()
         json_filepath (str):
-            the absolute path to the NG state JSON file to pull annotations from
+            the absolute path to the NG JSON state file to pull annotations from
             e.g. '/home/username/ng_jsons/state.json'
         output_filepath (str):
             the absolute path to the folder where you want to save the OBJ output file
             e.g. '/home/username/ng_meshes'
-            file will be named whatever the layer name was in the state JSON
+            file will be named whatever the layer name was in the JSON state
     """
 
     # gets config info dict for chosen datastack
@@ -4157,7 +4157,7 @@ def make_volume_mesh_from_state_file(
     export_obj=False,
 ):
     """
-    Generates a neuroglancer volume that contains a mesh using a point annotation layer from a state JSON file. 
+    Generates a neuroglancer volume that contains a mesh using a point annotation layer from a JSON state file. 
     
     Output will be a folder called "image" in the directory where this is run.
     Mesh is legacy-format single-resolution unsharded precomputed.
@@ -4169,7 +4169,7 @@ def make_volume_mesh_from_state_file(
             e.g. "brain_and_nerve_cord"
             for a list of currently-supported datastacks, use get_supported_configs()
         json_filepath (str):
-            the absolute filepath to the NG state JSON file to pull annotations from
+            the absolute filepath to the NG JSON state file to pull annotations from
             e.g. "/home/username/ng_jsons/state.json"
         layer_name (str):
             the name of the annotation layer to pull coordinates from
