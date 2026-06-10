@@ -1987,9 +1987,11 @@ def get_seg_details(
     """
 
     # gets current ids for each seg
-    fresh_segs = [
-        list(map(str,get_current_seg_ids(datastack=datastack, seg_ids=seg_ids)))
-    ]
+    # fresh_segs = [
+    #     list(map(str,get_current_seg_ids(datastack=datastack, seg_ids=seg_ids)))
+    # ]
+
+    fresh_segs = get_current_seg_ids(datastack=datastack, seg_ids=seg_ids)
 
     # makes list of segment volumes using fresh segs
     vols = [float(get_seg_3d_volume(datastack=datastack,seg_id=fresh_seg)) for fresh_seg in fresh_segs]
@@ -2134,7 +2136,7 @@ def get_seg_edits(
     final_df["point_coords"] = point_coords
     final_df["before_segs"] = before_ids
     final_df["after_segs"] = after_ids
-    final_df["seg_pairs"] = seg_pairs
+    final_df["seg_pair"] = seg_pairs
     final_df["user"] = users
 
     return final_df
