@@ -39,7 +39,9 @@ A server where files can be stored and accessed remotely. Often used for publicl
 Connectome annotation versioning engine, the software used to manage and interact with backend information about datastacks . This is done with the [caveclient](https://github.com/CAVEconnectome/CAVEclient) Python package, thorough documentation for which can be found [here](https://caveclient.readthedocs.io/en/latest/).
 
 **chunkedgraph/pychunkedgraph/pcg**\
-The chunkedgraph is an organizational structure that holds the information about which supervoxels belong to which segments. It's created and managed by the [pychunkedgraph (pcg) python package](https://github.com/CAVEconnectome/PyChunkedGraph). Individual supervoxels are always considered to belong to the lowest layer, making them the "level 1 nodes", or "L1 nodes" for short. All the supervoxels belonging to a segment within a given cube of space, referred to as a "chunk", will be grouped together into a level 2 (L2) node. Multiple L2 nodes are grouped into an L3 node and so on until you reach a layer that contains all the supervoxels in the whole segment. For a more detailed explanation, read [this description](https://caveclient.readthedocs.io/en/latest/guide/chunkedgraph.html). Working with different layers can have advantages. For example, the L1 layer (usually just referred to as "the supervoxels") can provide detailed information at the cost of computational power, while the L2 nodes can provide information faster for less processing power, like cached 3D volume measurements - at the cost of being less reliable in certain contexts.
+The chunkedgraph is an organizational structure that holds the information about which supervoxels belong to which segments. It's created and managed by the [pychunkedgraph (pcg) python package](https://github.com/CAVEconnectome/PyChunkedGraph). Individual supervoxels are always considered to belong to the lowest layer, making them the "level 1 nodes", or "L1 nodes" for short. All the supervoxels belonging to a segment within a given cube of space, referred to as a "chunk", will be grouped together into a level 2 (L2) node. 
+
+Multiple L2 nodes are grouped into an L3 node and so on until you reach a layer that contains all the supervoxels in the whole segment. For a more detailed explanation, read [this description](https://caveclient.readthedocs.io/en/latest/guide/chunkedgraph.html). Working with different layers can have advantages. For example, the L1 layer (usually just referred to as "the supervoxels") can provide detailed information at the cost of computational power, while the L2 nodes can provide information faster for less processing power, like cached 3D volume measurements - at the cost of being less reliable in certain contexts.
 
 **cloudvolume**\
 A Python package that allows reading and writing of neuroglancer volumes directly in RAM without having to write to a hard drive, documentation for which can be found [here](https://github.com/seung-lab/cloud-volume). Used in a number of processes including mesh-related operations, creating and hosting volumes both locally or on a bucket, and spatial segment lookup.
@@ -64,6 +66,13 @@ The flat planes that make up the surface of a 3D mesh. Can be any shape, but gen
 
 **graphene**\
 A data format backed by pychunkedgraph, used by cloudvolume and the Seung Lab's custom version of neuroglancer, documentation for which can be found [here](https://github.com/seung-lab/cloud-volume/wiki/Graphene). If you see the term "graphene" in the address for a segmentation layer, it generally indicates that it's linked to the chunkedgraph in some way and will therefore show up as a "painted" overlay in the 2D window of neuroglancer, allowing a user to show or hide segments by double-clicking within them in 2D. Contrast with the term "precomputed", which generally indicates a static mesh that isn't connected to the chunkedgraph and therefore won't show up as a "painted" overlay in the 2D window of neuroglancer.
+
+**JSON/JSON state/state JSON**\
+[JavaScript Object Notation](https://en.wikipedia.org/wiki/JSON), abbreviated JSON, is a data format commonly used to store information in a structure similar to a python dictionary, where there are "key" strings paired with values. The values can themselves be dictionary-like structures, creating multiple layers of nesting to allow for granular information storage. JSON format is often used for storign "state" information, or the information related to a specific configuration of settings that allows for saving and loading of specific setups for various programs, particularly on the internet. 
+
+Neuroglancer uses JSON states to store all the information about a given snapshot of the user interface (UI) at a point in time. This might include the windows that are open, the layers that are present and their visibility, which segments are selected, the position of any annotations, the 3d view position and angle, and many other pieces of information. You can view the JSON state of a neuroglancer at any time by clicking on the `{}` icon in the top-right of the UI window, clicking on the dropdown arrows to expand the various sections. 
+
+This state can be downloaded as a JSON state file on your local machine, from which all the information pertaining to that configuration of neuroglancer can be pulled if you know the methods and terms to use. When referring to an instance of this data type, the terms "JSON state" and "state JSON" are often used interchangeably. This package will always use "JSON state" since "JSON" is an adjective that's modifying the noun "state", except where the reverse is required by outside package fucntions.
 
 **mesh**\
 A 3-dimensional shape, often representing a neuron, but sometimes used to depict other structures like organelles, nuclei, neuropils, or simply regions of space. Stored in literal terms as a collection of vertices, edges, and faces. A mesh is considered "watertight" if all its triangular faces are connected to exactly 3 other triangular faces (i.e. there are no "holes"). Many formats for storing mesh information exist, but this package primarily uses either those found in neuroglancer volumes or sometimes OBJ files. 
@@ -1110,7 +1119,7 @@ print(config)
 The dictionary output above has been formatted for ease of reading using the pretty-print python module, which can be installed with `pip install pprint` and used by adding `from pprint import pprint` to your imports and replacing the `print()` command with `pprint()`. The actual default output would all be on a single line.
 
 ### get_current_seg_ids
-Gets the best guess for the current segment IDs for a list of potentially-outdated ("stale") segment IDs. Takes a datastack name as a string with the `datastack` argument, and a list of segment IDs as integers with the `seg_ids` argument and returns the best guess for the current IDs of each segment as integers by default. 
+Gets the best guess for the current segment IDs for a list of potentially-outdated ("stale") segment IDs. Takes a datastack name as a string with the `datastack` argument and a list of segment IDs as integers with the `seg_ids` argument and returns the best guess for the current IDs of each segment as integers by default. 
 
 If the `include_ratio` argument is set to `True`, each list item will instead be a list of 2 items: the current ID and the fraction of the original segment's supervoxels that are shared by the current segment as a float between 0 and 1. If the `full_list` argument is set to `True`, each list item will instead be a list of all the potential current-id candidates in order of their likelihood. If both `include_ratio` and `full_list` are set to `True`, each list item will be a list of all candidates as 2-items lists of ID and supervoxel fraction. 
 
@@ -1201,7 +1210,108 @@ print(fresh)
 ]
  ```
 
+ The list output above has been formatted for ease of reading using a combination of the pretty-print python module, which can be installed with `pip install pprint` and used by adding `from pprint import pprint` to your imports and replacing the `print()` command with `pprint()` and manual adjustment. The actual default output would all be on a single line.
+
  BANDWIDTH WARNING: When looped repeatedly in a short time, as might happen when using this to update a spreadsheet of old IDs one line at a time, this function can get throttled by CAVE due to repeatedly setting the client. Workarounds linclude batching, parallelization, or simply setting a sleep delay to lower the request rate below 60/min.
+
+### get_json_state_from_url
+Derives a neuroglancer JSON state from a shortened sharing url. Takes a datastack name as a string with the `datastack` argument and a shortened neuroglancer state url as a string with the `share_ul` argument and returns the neuroglancer JSON state as a python dictionary.
+
+Example:
+
+```
+# ----------------------------------------------------
+# INPUT
+# ----------------------------------------------------
+
+import tracertools as tt
+
+state = tt.get_json_state_from_url(
+    datastack="brain_and_nerve_cord",
+    share_url="https://spelunker.cave-explorer.org/#!middleauth+https://global.daf-apis.com/nglstate/api/v1/6734515480297472",
+)
+
+print(state)
+
+# ----------------------------------------------------
+# OUTPUT
+# ----------------------------------------------------
+
+{'crossSectionOrientation': [0, 1, 0, 0],
+ 'crossSectionScale': 4.124877700286996,
+ 'dimensions': {'x': [4e-09, 'm'], 'y': [4e-09, 'm'], 'z': [4.5e-08, 'm']},
+ 'layers': [{'name': 'BANC EM',
+             'source': 'precomputed://gs://seunglab_lee_fly_cns_001_alignment/aligned/v0',
+             'tab': 'source',
+             'type': 'image'},
+            {'colorSeed': 171511409,
+             'name': 'segmentation proofreading',
+             'segmentColors': {'720575941450261831': '#00ff00',
+                               '720575941518561971': '#0000ff',
+                               '720575941545083784': '#ff0000',
+                               '720575941609904714': '#54bcd1'},
+             'segments': ['720575941413124779'],
+             'selectedAlpha': 0.4,
+             'source': {'state': {'findPath': {},
+                                  'merge': {'merges': []},
+                                  'multicut': {'sinks': [], 'sources': []}},
+                        'url': 'graphene://middleauth+https://cave.fanc-fly.com/segmentation/table/wclee_fly_cns_001'},
+             'tab': 'segments',
+             'toolBindings': {'C': 'grapheneMulticutSegments',
+                              'F': 'grapheneFindPath',
+                              'M': 'grapheneMergeSegments'},
+             'type': 'segmentation'},
+            {'colorSeed': 260226408,
+             'meshSilhouetteRendering': 2,
+             'name': 'region outlines',
+             'objectAlpha': 0.35,
+             'pick': False,
+             'segmentColors': {'1': '#f0f2f4', '2': '#e7e9d8'},
+             'segmentQuery': '<id',
+             'segments': ['1', '2'],
+             'source': {'enableDefaultSubsources': False,
+                        'subsources': {'bounds': True,
+                                       'mesh': True,
+                                       'properties': True},
+                        'url': 'precomputed://gs://lee-lab_brain-and-nerve-cord-fly-connectome/region_outlines'},
+             'tab': 'rendering',
+             'type': 'segmentation'},
+            {'annotationColor': '#e01b24',
+             'annotations': [{'id': '5982b74cd362c84281a904ca59768e0d874b7e92',
+                              'point': [194490.25,
+                                        32266.216796875,
+                                        1977.9444580078125],
+                              'type': 'point'},
+                             {'id': '520971d0a979ff93352ebce7be7fbf3bd44ea1f7',
+                              'point': [48411.7421875,
+                                        34597.68359375,
+                                        2096.408935546875],
+                              'type': 'point'}],
+             'name': 'annotation',
+             'source': {'transform': {'outputDimensions': {'x': [4e-09, 'm'],
+                                                           'y': [4e-09, 'm'],
+                                                           'z': [4.5e-08,
+                                                                 'm']}},
+                        'url': 'local://annotations'},
+             'tab': 'annotations',
+             'tool': 'annotatePoint',
+             'type': 'annotation'}],
+ 'layout': 'xy-3d',
+ 'position': [123863.0625, 113466.2734375, 3157.3271484375],
+ 'projectionOrientation': [-0.0051445323042571545,
+                           0.9996799230575562,
+                           -0.0048975832760334015,
+                           -0.024281617254018784],
+ 'projectionScale': 360848.9354568101,
+ 'selectedLayer': {'layer': 'annotation', 'visible': True},
+ 'selection': {'layers': {'annotation': {'annotationId': '520971d0a979ff93352ebce7be7fbf3bd44ea1f7',
+                                         'annotationSource': 0,
+                                         'annotationSubsource': 'default'}}},
+ 'showSlices': False,
+ 'systemMemoryLimit': 1000000000}
+```
+
+The dictionary output above has been formatted for ease of reading using the pretty-print python module, which can be installed with `pip install pprint` and used by adding `from pprint import pprint` to your imports and replacing the `print()` command with `pprint()`. The actual default output would all be on a single line.
 
 ### get_mesh_triangles
 Gets a numpy array of the vertices for each face of a neuroglancer precomputed mesh in a volume. Takes the path to the neuroglancer volume as a string with the `volume_path` argument and returns an (n,3,3)-shape numpy array of floats representing the point coordinates of each mesh vertex. 
@@ -1342,6 +1452,330 @@ print(seg_ids)
 
 [76426092181762338, 76707773517849702, 75512879390421881]
 ```
+
+### get_seg_3d_volume
+Gets the volume of a given segment in cubic micrometers. Takes a datastack name as a string with the `datastack` argument and a segment ID as an integer with the `seg_id` argument and returns the volume of that segment (calculated by summing the volume of the segment's L2 nodes) in cubic micrometers as a float.
+
+Example:
+
+```
+# ----------------------------------------------------
+# INPUT
+# ----------------------------------------------------
+
+import tracertools as tt
+
+volume = tt.get_seg_3d_volume(
+    datastack="brain_and_nerve_cord",
+    seg_id=720575941703820762,
+)
+
+print(volume)
+
+# ----------------------------------------------------
+# OUTPUT
+# ----------------------------------------------------
+
+770.08292352
+```
+
+### get_seg_changelog
+Gets the official CAVE tabular changelog for a given segment as a pandas DataFrame object. Takes a datastack name as a string with the `datastack` argument and a segment ID as an integer with the `seg_id` argument and returns a DataFrame lising all the edits that led to that segment. The changelog is one of two repositories containing information about edits, the other being the operation details table.
+
+Example:
+
+```
+# ----------------------------------------------------
+# INPUT
+# ----------------------------------------------------
+
+import tracertools as tt
+
+cl_df = tt.get_seg_changelog(
+    datastack="brain_and_nerve_cord",
+    seg_id=720575941703820762,
+)
+
+cl_df.head()
+
+# ----------------------------------------------------
+# OUTPUT
+# ----------------------------------------------------
+```
+
+![get_seg_changelog_example](readme_images/get_seg_changelog_example.png)
+
+### get_seg_details
+Gets the current segment ID, 3D volume in cubic micrometers, cable length in whatever units the datastack uses, and synapse count for each item in a list of segment IDs. Takes a datastack name as a string with the `datastack` argument and a list of segment IDs as integers with the `seg_ids` argument and returns a list of items. 
+
+Each item of the output list is a list containing:
+1. The original ID as an integer
+2. The current ID as an integer
+3. The volume in cubic micrometers as a float
+4. The cable length in whatever units the datastack uses (usually nanometers) as a float
+5. The number of outgoing synapses as an integer
+6. The number of incoming synapses as an integer
+7. The number of total synapses as an integer
+
+If any step of the process encounters an error it will return a string value of `"ERROR"` for that step so as not to crash the entire run. Sometimes (e.g. when the problem is one of your connection to the server or some kind of host-side issue) rerunning will fix this, other times the problem wil always produce and error result. This can happen when a submitted segment is too large to pull all the data for at once (e.g the CT1 neurons in Drosophila) or you don't have permission to read from a specific datastack's CAVE tables.
+
+Example:
+
+```
+# ----------------------------------------------------
+# INPUT
+# ----------------------------------------------------
+
+import tracertools as tt
+
+details_list = tt.get_seg_details(
+    datastack="brain_and_nerve_cord",
+    seg_ids=[
+        720575941473274509,
+        720575941524660200,
+        720575941565377335,
+    ],
+)
+
+print(details_list)
+
+# ----------------------------------------------------
+# OUTPUT
+# ----------------------------------------------------
+
+[
+    [
+        720575941473274509,
+        720575941441350235,
+        523.49226624,
+        2453811.5,
+        5893,
+        945,
+        6838
+    ],
+    [
+        720575941524660200,
+        720575941519923628,
+        158.71888512,
+        587790.9375,
+        1614,
+        257,
+        1871
+    ],
+    [
+        720575941565377335,
+        720575941703820762,
+        770.08292352,
+        2826879.75,
+        7469,
+        1662,
+        9131
+    ]
+]
+```
+
+The list output above has been formatted for ease of reading using the pretty-print python module, which can be installed with `pip install pprint` and used by adding `from pprint import pprint` to your imports and replacing the `print()` command with `pprint()`. The actual default output would all be on a single line.
+
+### get_seg_edits
+Gets the tracer-format edit history for a given segment as a pandas DataFrame object. Takes a datastack name as a string with the `datastack` argument and a segment ID as an integer with the `seg_id` argument and returns a pandas DataFrame object where each row represents a single edit that was made in the history of the requested segment. Columns include:
+
+1. "operation_id" - a unique number CAVE uses to identify each edit, useful for more detailed lookups
+2. "is_merge" - a boolean (True/False) value denoting whether or not the edit was a merge (True = merge, False = split)
+3. "point_coords" - a list of two 3-item lists of integers representing the point coordinates for each side of the edit. For merges these are the actual points the user chose, but in the case of splits, these are the average of all the points automatically generated by the cut tool. Thus, split coordinates may be a little bit less accurate than those for merges.
+4. "before_segs" - a list of one (for splits) or two (for merges) segment IDs before the edit was made
+5. "after_segs" - a list of one (for merges) or two (for splits) segment IDs after the edit was made
+6. "seg_pair" - a list of two segment IDs that are either the pre-edit segments (for merges) or post-edit segments (for splits). Useful to have as a single category for certain analysis tasks like calculating supervoxel addition/subtraction sums (when paired with the "is_merge" column)
+7. "user" - the unique number identifying which user made the edit. Useful for assigning credit when calculating user contributions in supervoxels to a given segment or blame when grumbling about terrible neuron-ruining edits
+
+By default uses the standard `"operation_id"` column name of the CAVE operation detail table for the requested datastack when pulling backend data, but a different column name can be passed asa string with the `op_column` argument if the datastack you're working with uses another term.
+
+Example:
+
+```
+# ----------------------------------------------------
+# INPUT
+# ----------------------------------------------------
+
+import tracertools as tt
+
+cl_df = tt.get_seg_edits(
+    datastack="brain_and_nerve_cord",
+    seg_id=720575941703820762,
+)
+
+cl_df.head()
+
+# ----------------------------------------------------
+# OUTPUT
+# ----------------------------------------------------
+```
+
+![get_seg_edits_example](readme_images/get_seg_edits_example.png)
+
+### get_seg_from_sv
+Gets the current segment ID that a known supervoxel belongs to. Takes a datastack name as a string with the `datastack` argument and a supervoxel ID as an integer with the `sv_id` argument and returns the current segment ID that supervoxel belongs to as an integer.
+
+Example:
+
+```
+# ----------------------------------------------------
+# INPUT
+# ----------------------------------------------------
+
+import tracertools as tt
+
+seg = tt.get_seg_from_sv(
+    datastack="brain_and_nerve_cord",
+    sv_id=76919154560765265,
+)
+
+print(seg)
+
+# ----------------------------------------------------
+# OUTPUT (as of 9 June 2026)
+# ----------------------------------------------------
+
+720575941703820762
+```
+
+### get_seg_skeletons
+Gets a list of osteoid-format skeleton objects for a list of segment IDs. Takes a datastack name as a string with the `datastack` argument and a list of segment ID as integers with the `seg_ids` argument and returns a list of osteoid Skeleton objects. Will print the estimated time to skeletonize the submitted segments as calculated by the skeletonization service to give you a rough idea of how long it will take to run. Skeletons are cached once they're generated, so requesting the same skeleton more than once won't require recalculation and should be nearly instantaneous.
+
+Example:
+
+```
+# ----------------------------------------------------
+# INPUT
+# ----------------------------------------------------
+
+import tracertools as tt
+
+skeletons = tt.get_seg_skeletons(
+    datastack="brain_and_nerve_cord",
+    seg_ids=[
+        720575941473274509,
+        720575941524660200,
+        720575941565377335,
+    ],
+)
+
+print(skeletons)
+
+# ----------------------------------------------------
+# OUTPUT
+# ----------------------------------------------------
+
+[
+    Skeleton(
+        segid=None, 
+        vertices=(shape=274, float32), 
+        edges=(shape=273, uint32), 
+        radius=(274, float64), 
+        vertex_types=(274, uint8), 
+        space='physical', 
+        transform=[
+            [4.0, 0.0, 0.0, 0.0], 
+            [0.0, 4.0, 0.0, 0.0], 
+            [0.0, 0.0, 45.0, 0.0]
+        ]
+    ),
+    Skeleton(
+        segid=None, 
+        vertices=(shape=99, float32), 
+        edges=(shape=98, uint32), 
+        radius=(99, float64), 
+        vertex_types=(99, uint8), 
+        space='physical', 
+        transform=[
+            [4.0, 0.0, 0.0, 0.0], 
+            [0.0, 4.0, 0.0, 0.0], 
+            [0.0, 0.0, 45.0, 0.0]
+        ]
+    ),
+    Skeleton(
+        segid=None, 
+        vertices=(shape=505, float32), 
+        edges=(shape=504, uint32), 
+        radius=(505, float64), 
+        vertex_types=(505, uint8), 
+        space='physical', 
+        transform=[
+            [4.0, 0.0, 0.0, 0.0], 
+            [0.0, 4.0, 0.0, 0.0], 
+            [0.0, 0.0, 45.0, 0.0]
+        ]
+    )
+]
+```
+
+The list output above has been formatted for ease of reading using a combination of the pretty-print python module, which can be installed with `pip install pprint` and used by adding `from pprint import pprint` to your imports and replacing the `print()` command with `pprint()` and manual adjustment. The actual default output would all be on a single line.
+
+### get_svs_from_seg
+Gets a list of all the supervoxels associate with a segment. Takes a datastack name as a string with the `datastack` argument and a segment ID as an integer with the `seg_id` argument and returns a list of supervoxel IDs as integers.
+
+Example:
+
+```
+# ----------------------------------------------------
+# INPUT
+# ----------------------------------------------------
+
+import tracertools as tt
+
+svs = tt.get_svs_from_seg(
+    datastack="brain_and_nerve_cord",
+    seg_id=720575941413124779,
+)
+
+print(svs)
+
+# ----------------------------------------------------
+# OUTPUT
+# ----------------------------------------------------
+
+[
+    76492475061776745, 
+    76492475061779442, 
+    76492475061779424,
+    ...
+    76281162871835627, 
+    76281162871832853, 
+    76281162871835567
+]
+```
+
+The above output is truncated. The actual list of all the supervoxels in this segment is 846,443 items long. This function may sometimes fail on extremely large segments (e.g. the CT1 cells in Drosophila). This is due to rate-limiting on requests to the backend servers that host the supervoxel information.
+
+### get_supported_configs
+Gets a list of the names of all the datastacks for which tracer-format configs exist.
+
+Example:
+
+```
+# ----------------------------------------------------
+# INPUT
+# ----------------------------------------------------
+
+import tracertools as tt
+
+configs = tt.get_supported_configs
+
+print(configs)
+
+# ----------------------------------------------------
+# OUTPUT (as of 10 June 2026)
+# ----------------------------------------------------
+
+[
+    "brain_and_nerve_cord",
+    "flywire_fafb_production",
+    "male_adult_nerve_cord",
+    "stroeh_mouse_retina",
+]
+```
+
+
+
 
 # License
 The tracertools package is licensed under the GNU General Public License v3.0. See the [LICENSE](https://github.com/jaybgager/tracertools/blob/main/LICENSE) file for more details.
