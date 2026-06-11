@@ -1826,7 +1826,7 @@ Adds the data from a Python list as a column to a tab in a google sheet. Each li
 
 Example (using [this Google sheet](https://docs.google.com/spreadsheets/d/1AqIyrqSaEJFGD5Ff1fergwJ8-q0x2l0xCgO025C401c/edit?usp=sharing)):
 
-Starting with a blank sheet...\
+Starting with a blank sheet...
 
 ![gsheet_add_column_example_initial](readme_images/gsheet_add_column_example_initial.png)
 
@@ -1851,7 +1851,7 @@ tt.gsheet_add_column(
 )
 ```
 
-You now have a filled-in sheet!\
+You now have a filled-in sheet.
 
 ![gsheet_add_column_example_final](readme_images/gsheet_add_column_example_final.png)
 
@@ -1863,7 +1863,7 @@ Adds the data from a Python list as a row to a tab in a google sheet. Each list 
 
 Example (using [this Google sheet](https://docs.google.com/spreadsheets/d/1KM0xY9-yLe5fwiQit8yrwcg7vbvPDlZMEUnxf1BeFns/edit?usp=sharing)):
 
-Starting with a blank sheet...\
+Starting with a blank sheet...
 
 ![gsheet_add_row_example_initial](readme_images/gsheet_add_row_example_initial.png)
 
@@ -1888,7 +1888,7 @@ tt.gsheet_add_row(
 )
 ```
 
-You now have a filled-in sheet!\
+You now have a filled-in sheet.
 
 ![gsheet_add_row_example_final](readme_images/gsheet_add_row_example_final.png)
 
@@ -1904,7 +1904,7 @@ Returns `"ERROR"` string if a particular lookup process encounters a problem to 
 
 Example (using [this Google sheet](https://docs.google.com/spreadsheets/d/1Mq93HT7iEv-E1-4NCN9_bcMIGzbTVC9A0S5ZqYr4VAg/edit?usp=sharing)):
 
-Starting with a headered column of segment IDs...\
+Starting with a headered column of segment IDs...
 
 ![gsheet_add_seg_details_example_initial](readme_images/gsheet_add_seg_details_example_initial.png)
 
@@ -1924,7 +1924,7 @@ tt.gsheet_add_seg_details(
 )
 ```
 
-You now have a filled-in sheet!\
+You now have a filled-in sheet.
 
 ![gsheet_add_seg_details_example_final](readme_images/gsheet_add_seg_details_example_final.png)
 
@@ -1943,7 +1943,7 @@ If you want to ignore the first row (e.g. you don't need a column's header), you
 
 Examples (using [this Google sheet](https://docs.google.com/spreadsheets/d/1Qvm6AVyd2zI7BRTHrvJOM_-QvI3vR3qW9pW3_WucGsc/edit?usp=sharing)):
 
-Starting with a sheet of segment info...\
+Starting with a sheet of segment info...
 
 ![gsheet_get_col_as_list_example](readme_images/gsheet_get_col_as_list_example.png)
 
