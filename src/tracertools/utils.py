@@ -3185,7 +3185,7 @@ def make_edits_link(datastack, seg_id, separate_layers=False):
         """
 
         # gets coords from df as list
-        coords = df["coords"].values.tolist()
+        coords = df["point_coords"].values.tolist()
 
         # converts coord x and y dims, leave z alone
         # odd but necessary for using coords pulled from operation dict
@@ -3195,7 +3195,7 @@ def make_edits_link(datastack, seg_id, separate_layers=False):
         ]
 
         # gets segment pair from df
-        linked_segs = df["root_pair"].values.tolist()
+        linked_segs = df["seg_pair"].values.tolist()
 
         # makes empty list to fill with anno descriptions
         descriptions = []
