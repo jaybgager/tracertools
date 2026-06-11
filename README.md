@@ -9,7 +9,7 @@ Quick installation with pip isn't supported yet (but is planned for the future),
 3. In the terminal, navigate one folder down, so that you're in the top-level (root) folder of the tracertools package by running the command `cd tracertools`.
 4. In the terminal, run the command `pip install -e .`. This will tell Python's default installer, pip, to add the folder you're currently in to its list of importable packages. The `-e` modifier causes this installation to be "editable", meaning that if you make changes to the code stored in the tracertools folder, they'll take effect when you import tracertools into a Python script. This is important for keeping the package up-to-date, so you don't have to reinstall it every time there are changes. This also lets you expriment with modifying the tools to meet your own needs. The `.` at the end just tells pip to install everything at the current directory location.
 
-Now whenever you need to use a tracertools function, you can simply import it like any other package using the "import tracertools" code in any Python script. Then, when you want to use a function, you add `tracertools.` in front of it. For example, if you wanted to use the `get_current_seg_ids()` function, you would use the following code:
+Now whenever you need to use a tracertools function, you can simply import it like any other package using the "import tracertools" code in any Python script. Then, when you want to use a function, you add `tracertools.` in front of it. For example, if you wanted to use the `get_current_seg_ids` function, you would use the following code:
 
 ```
 import tracertools
@@ -101,7 +101,7 @@ The actual, physical dimensions in nanometers represented by one "unit" in the x
 Common derived terms include "viewer resolution" (the default voxel resolution used when viewing a datastack in neuroglancer), "mip0 resolution" (the voxel resolution of the raw electron microscope images for a dataset), and "nanometer resolution" (where the x-, y-, and z-resolutions are all 1 nanometer, often used for backend spatial information storage and mathematical calculations).
 
 **root ID**\
-An umbrella term that can refer to the numeric identifier attached to a single supervoxel, chunkedgraph node, or segment. Appropriate to use when the entity in question can't be known ahead of time, as in the `get_roots_from_points()` function, which can return either a segment or supervoxel ID dependingon the user's input. Often used in other sources interchangeably with the term "segment ID", but won't be here.
+An umbrella term that can refer to the numeric identifier attached to a single supervoxel, chunkedgraph node, or segment. Appropriate to use when the entity in question can't be known ahead of time, as in the `get_roots_from_points` function, which can return either a segment or supervoxel ID dependingon the user's input. Often used in other sources interchangeably with the term "segment ID", but won't be here.
 
 **segmement/segmentation**\
 The current group of supervoxels that make up one or more neurons and their overall representation in 3D. Associated with a unique 18-digit numeric identifier (segment ID / seg ID) for a given version of a single segment. The term "segment ID" is often used interchangeably with the term "root ID" in other sources, but won't be here.
@@ -755,7 +755,7 @@ Gets an array of viewer-resolution endpoint pairs for each edge in a nanometer-r
 
 Example:
 
-Since this code requires an osteoid-format skeleton, we can get that using the get_seg_skeletons() function.
+Since this code requires an osteoid-format skeleton, we can get that using the `get_seg_skeletons` function.
 
 ```
 # ----------------------------------------------------
@@ -771,7 +771,7 @@ skel = tt.get_seg_skeletons(
 )[0]
 ```
 
-Now that we have a skeleton, we can feed it into get_bones():
+Now that we have a skeleton, we can feed it into the `get_bones` function:
 
 ```
 # ----------------------------------------------------
@@ -1020,7 +1020,7 @@ print(table_info)
 > The dictionary output above has been formatted for ease of reading using the pretty-print Python module, which can be installed with `pip install pprint` and used by adding `from pprint import pprint` to your imports and replacing the `print()` command with `pprint()`. The actual default output would all be on a single line.
 
 ### get_config
-Gets the tracer-format config dictionary for a specific datastack if one exists. To get a list of the datastacks that currently have config support, use the `get_supported_configs()` function. Takes a datastack name as a string with the `datastack` argument and returns a dictionary that can be used for a number of other functions. Each dictionary will have the following keys:
+Gets the tracer-format config dictionary for a specific datastack if one exists. To get a list of the datastacks that currently have config support, use the `get_supported_configs` function. Takes a datastack name as a string with the `datastack` argument and returns a dictionary that can be used for a number of other functions. Each dictionary will have the following keys:
 
 **"resolution"**\
 The dimensions in nanometers used by the datastack's default viewer for a single voxel.
@@ -1038,7 +1038,7 @@ The address where the chunkedgraph-linked segmentation is hosted. This address c
 The address where the precomputed cache of segment skeletons for this datastack is stored, if one exists.
 
 **synapse_table_name**\
-The name of the official synapse table for this datastack, if one exists. Can be used with `get_cave_table()` and `get_cave_table_info()` functions.
+The name of the official synapse table for this datastack, if one exists. Can be used with `get_cave_table` and `get_cave_table_info` functions.
 
 **"syn_pre_coord_col" / "syn_post_coord_col"**\
 The names of the columns in the synapse table that contain the point coordinates associated with the pre- and post-synaptic sides of a given synapse annotation. Useful when automating the process of adding synapses to a programmatically-generated link.
@@ -1098,7 +1098,7 @@ A list of 4 float or int values for setting the tracer-chosen default 3D viewer 
 The address for the link-shortening state service to compress the default full neuroglancer url into shortlinks pointing to saved states that are more usable with common messaging services which impose character limits, if one exists for this datastack.
 
 **"here_be_monsters"**\
-The address for the tracer-created legacy-format neuroglancer volume containing precomputed single-resolution unsharded static meshes of all the known rough spots in a given datastack. Useful for triaging lists of segments during proofreading with the `calc_seg_mesh_intersect()` function. Used by the `triage_segs()` function for this purpose. These maps are living documents that may be updated at any time during the life of a datastack as new rough spots are found or existing meshes are improved.
+The address for the tracer-created legacy-format neuroglancer volume containing precomputed single-resolution unsharded static meshes of all the known rough spots in a given datastack. Useful for triaging lists of segments during proofreading with the `calc_seg_mesh_intersect` function. Used by the `triage_segs` function for this purpose. These maps are living documents that may be updated at any time during the life of a datastack as new rough spots are found or existing meshes are improved.
 
 **Unique Config Entries**\
 Some datastacks may also have their own unique config entries to suit the needs of the project. Common examples are host urls for the segmentations or meshes of other datastacks that have been aligned for comparison purposes, custom mesh hosting urls for specific structures like nerve bundles, or precomputed annotation layers for synapses, nuclei, organelles, or other structures.
@@ -1791,7 +1791,7 @@ print(svs)
 > The above output is truncated. The actual list of all the supervoxels in this segment is 846,443 items long. This function may sometimes fail on extremely large segments (e.g. the CT1 cells in Drosophila). This is due to rate-limiting on requests to the backend servers that host the supervoxel information.
 
 ### get_supported_configs
-Gets a list of the names of all the datastacks for which tracer-format configs exist.
+Gets a list of the names of all the datastacks for which tracer-format configs exist. Not all configs have the same level of support. To view a datastack's config information, use the `get_config` function.
 
 Example:
 
