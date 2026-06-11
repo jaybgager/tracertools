@@ -2412,7 +2412,7 @@ def gsheet_add_seg_details(
     proofreading=True,
 ):
     """
-    Gets neuron details for a list of segment IDs in a google sheet and add them to the sheet.
+    Gets neuron details for a list of segment IDs in a google sheet and adds them to the sheet.
     
     Requires a tab in the sheet with a single column of segment IDs with a header.
     This function requires a Google authentication token to be set up prior to use.
