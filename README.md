@@ -2040,7 +2040,7 @@ By default, assumes first row of data are headers that should be used for DataFr
 
 Example (using [this Google sheet](https://docs.google.com/spreadsheets/d/1Z6n5bRPx4wqfIDR4ZwUJl3-z2esScgxfLOeXzri2lOw/edit?usp=sharing)):
 
-Starting with a sheet of segment info...\
+Starting with a sheet of segment info...
 
 ![gsheet_get_tab_as_df_example](readme_images/gsheet_get_tab_as_df_example.png)
 
