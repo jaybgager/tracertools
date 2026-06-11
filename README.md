@@ -101,7 +101,7 @@ The actual, physical dimensions in nanometers represented by one "unit" in the x
 Common derived terms include "viewer resolution" (the default voxel resolution used when viewing a datastack in neuroglancer), "mip0 resolution" (the voxel resolution of the raw electron microscope images for a dataset), and "nanometer resolution" (where the x-, y-, and z-resolutions are all 1 nanometer, often used for backend spatial information storage and mathematical calculations).
 
 **root ID**\
-An umbrella term that can refer to the numeric identifier attached to a single supervoxel, chunkedgraph node, or segment. Appropriate to use when the entity in question can't be known ahead of time, as in the get_roots_from_points() function, which can return either a segment or supervoxel ID dependingon the user's input. Often used in other sources interchangeably with the term "segment ID", but won't be here.
+An umbrella term that can refer to the numeric identifier attached to a single supervoxel, chunkedgraph node, or segment. Appropriate to use when the entity in question can't be known ahead of time, as in the `get_roots_from_points()` function, which can return either a segment or supervoxel ID dependingon the user's input. Often used in other sources interchangeably with the term "segment ID", but won't be here.
 
 **segmement/segmentation**\
 The current group of supervoxels that make up one or more neurons and their overall representation in 3D. Associated with a unique 18-digit numeric identifier (segment ID / seg ID) for a given version of a single segment. The term "segment ID" is often used interchangeably with the term "root ID" in other sources, but won't be here.
@@ -403,9 +403,9 @@ print(intersect)
 ```
 
 ### calc_seg_mesh_intersect
-Calculates all points where the skeleton of a segment intersects a mesh, if any exist. Takes a datastack name as a string with the `datastack` argument, a list of segment IDs as ints with the `seg_ids` argument, and the address of a neuroglancer mesh as a string with the `mesh_address` argument (e.g. "https://c10s.pni.princeton.edu/tracers/jay/mesher_demo/example_01|neuroglancer-precomputed:") and by default returns a list of bool (True/False) values indicating which segments' skeletons intersect the chosen mesh.
+Calculates all points where the skeleton of a segment intersects a mesh, if any exist. Takes a datastack name as a string with the `datastack` argument, a list of segment IDs as ints with the `seg_ids` argument, and the address of a neuroglancer mesh as a string with the `mesh_address` argument and by default returns a list of bool (True/False) values indicating which segments' skeletons intersect the chosen mesh.
 
-Optionally setting the `return_intersects` argument to True will instead return a list of values that are either lists of all the point coordinates at which each segment intersects the mesh or a `None` value if no intersection points exist.
+Optionally setting the `return_intersects` argument to True will instead return a list of items that are either lists of all the point coordinates at which each segment intersects the mesh as (3)-shape numpy arrays of floats or a `None` value if no intersection points exist.
 
 Example:
 
@@ -532,6 +532,7 @@ print(intersections)
 Checks if a list of segment IDs are current or outdated. Takes a datastack name as a string with the `datastack` argument and a list of segment IDs as ints with the `seg_ids` argument and returns a list of bools (True/False values) indicating if each segment ID in the submitted list is current (True) or outdated (False).
 
 Example:
+
 ```
 # ----------------------------------------------------
 # INPUT
@@ -1825,7 +1826,8 @@ Adds the data from a Python list as a column to a tab in a google sheet. Each li
 
 Example (using [this Google sheet](https://docs.google.com/spreadsheets/d/1AqIyrqSaEJFGD5Ff1fergwJ8-q0x2l0xCgO025C401c/edit?usp=sharing)):
 
-Starting with a blank sheet...
+Starting with a blank sheet...\
+
 ![gsheet_add_column_example_initial](readme_images/gsheet_add_column_example_initial.png)
 
 Running the code...
@@ -1849,15 +1851,248 @@ tt.gsheet_add_column(
 )
 ```
 
-You now have a filled-in sheet!
+You now have a filled-in sheet!\
+
 ![gsheet_add_column_example_final](readme_images/gsheet_add_column_example_final.png)
 
+### gsheet_add_row
+> [!IMPORTANT]
+> Google-sheet-related functions require a bit of additional setup. Please read the [Google Sheet Functions](https://github.com/jaybgager/tracertools/tree/main#google-sheet-functions) section before use.
+
+Adds the data from a Python list as a row to a tab in a google sheet. Each list item will fill a column in the first empty row of the chosen google sheet tab. Takes a Google sheet key as a string with the `sheet_key` argument, the name of a tab within that spreadsheet as a string with the `tab_name` argument, and a Python list with the `row_data` argument.
+
+Example (using [this Google sheet](https://docs.google.com/spreadsheets/d/1KM0xY9-yLe5fwiQit8yrwcg7vbvPDlZMEUnxf1BeFns/edit?usp=sharing)):
+
+Starting with a blank sheet...\
+
+![gsheet_add_row_example_initial](readme_images/gsheet_add_row_example_initial.png)
+
+Running the code...
+
+```
+# ----------------------------------------------------
+# INPUT
+# ----------------------------------------------------
+
+import tracertools as tt
+
+tt.gsheet_add_row(
+    sheet_key="1KM0xY9-yLe5fwiQit8yrwcg7vbvPDlZMEUnxf1BeFns",
+    tab_name="final_state",
+    row_data=[
+        "segment",
+        "3d_volume",
+        "cable_length",
+        "synapses",
+    ],
+)
+```
+
+You now have a filled-in sheet!\
+
+![gsheet_add_row_example_final](readme_images/gsheet_add_row_example_final.png)
+
+### gsheet_add_seg_details
+> [!IMPORTANT]
+> Google-sheet-related functions require a bit of additional setup. Please read the [Google Sheet Functions](https://github.com/jaybgager/tracertools/tree/main#google-sheet-functions) section before use.
+
+Gets neuron details for a list of segment IDs in a Google sheet column and adds them to the sheet. Requires a tab in the sheet with a single column of segment IDs with a header. Takes a datastack name as a string with the `datastack` argument, a Google sheet key as a string with the `sheet_key` argument, and a tab name as a string with the `tab_name` argument.
+
+By default, adds columns for 3d volume, cable length, synapse counts, and proofreading status. Each of these can be turned off independently by setting the `volume`, `cable_length`, `synapse_counts`, or `proofreading` arguments to `False`.
+
+Returns `"ERROR"` string if a particular lookup process encounters a problem to avoid crashing the whole run. In some cases, like connection or server-side issues, waiting a bit and rerunning can fix this. In others, like cases where a segment is too large for the requested lookup (e.g. the CT1 neurons in Drosophila) or the initial ID is bad, rerunning won't work.
+
+Example (using [this Google sheet](https://docs.google.com/spreadsheets/d/1Mq93HT7iEv-E1-4NCN9_bcMIGzbTVC9A0S5ZqYr4VAg/edit?usp=sharing)):
+
+Starting with a headered column of segment IDs...\
+
+![gsheet_add_seg_details_example_initial](readme_images/gsheet_add_seg_details_example_initial.png)
+
+Running the code...
+
+```
+# ----------------------------------------------------
+# INPUT
+# ----------------------------------------------------
+
+import tracertools as tt
+
+tt.gsheet_add_seg_details(
+    datastack="brain_and_nerve_cord",
+    sheet_key="1Mq93HT7iEv-E1-4NCN9_bcMIGzbTVC9A0S5ZqYr4VAg",
+    tab_name="final_state",
+)
+```
+
+You now have a filled-in sheet!\
+
+![gsheet_add_seg_details_example_final](readme_images/gsheet_add_seg_details_example_final.png)
+
+>[!NOTE]
+>This function writes one row at a time to allow for continuous monitoring for issues when running very large lists. The amount of time required for each segment's lookup processes varies with segment size, synapse number, and connection speed to the host servers. In particular getting the cable length requires skeletonizing the segments, which can take a minute or two per segment depending on size and whther that skeleton has already been cached recently. Time estimates for each segment will print out as they're fed into the skeletonization service. On average, a good starting point is to budget 20-30 seconds for each segment to run.
+
+### gsheet_get_col_as_list
+> [!IMPORTANT]
+> Google-sheet-related functions require a bit of additional setup. Please read the [Google Sheet Functions](https://github.com/jaybgager/tracertools/tree/main#google-sheet-functions) section before use.
+
+Gets the data of a Google sheet column as a python list. Takes a sheet key as a string with the `sheet_key` argument and a tab name as a string with the `tab_name` argument and returns a list of whatever values were in the requested column.
+
+By default this returns the first column (column A), but any column can be chosen by setting the `col_num` argument to the column's number. Google sheets start column numbering at 1 (e.g. A = 1, B = 2, ...).
+
+If you want to ignore the first row (e.g. you don't need a column's header), you can set the `ignore_header` argument to `True`.
+
+Examples (using [this Google sheet](https://docs.google.com/spreadsheets/d/1Qvm6AVyd2zI7BRTHrvJOM_-QvI3vR3qW9pW3_WucGsc/edit?usp=sharing)):
+
+Starting with a sheet of segment info...\
+
+![gsheet_get_col_as_list_example](readme_images/gsheet_get_col_as_list_example.png)
+
+```
+# ----------------------------------------------------
+# INPUT
+# ----------------------------------------------------
+
+import tracertools as tt
+
+col_data = tt.gsheet_get_col_as_list(
+    sheet_key="1Qvm6AVyd2zI7BRTHrvJOM_-QvI3vR3qW9pW3_WucGsc",
+    tab_name="seg_info",
+)
+
+print(col_data)
+
+# ----------------------------------------------------
+# OUTPUT
+# ----------------------------------------------------
+
+[
+    'seg_id', 
+    '720575941473274509', 
+    '720575941524660200', 
+    '720575941565377335'
+]
+```
+
+Example (picking a different column):
+
+```
+# ----------------------------------------------------
+# INPUT
+# ----------------------------------------------------
+
+import tracertools as tt
+
+col_data = tt.gsheet_get_col_as_list(
+    sheet_key="1Qvm6AVyd2zI7BRTHrvJOM_-QvI3vR3qW9pW3_WucGsc",
+    tab_name="seg_info",
+    col_num=4,
+)
+
+print(col_data)
+
+# ----------------------------------------------------
+# OUTPUT
+# ----------------------------------------------------
+
+[
+    'cable_length', 
+    '2453811.5', 
+    '587790.9375', 
+    '2826879.75'
+]
+```
+
+Example (ignoring first row):
+
+```
+# ----------------------------------------------------
+# INPUT
+# ----------------------------------------------------
+
+import tracertools as tt
+
+col_data = tt.gsheet_get_col_as_list(
+    sheet_key="1Qvm6AVyd2zI7BRTHrvJOM_-QvI3vR3qW9pW3_WucGsc",
+    tab_name="seg_info",
+    ignore_header=True,
+)
+
+print(col_data)
+
+# ----------------------------------------------------
+# OUTPUT
+# ----------------------------------------------------
+
+[
+    '720575941473274509', 
+    '720575941524660200', 
+    '720575941565377335'
+]
+```
+
+### gsheet_get_tab_as_df
+> [!IMPORTANT]
+> Google-sheet-related functions require a bit of additional setup. Please read the [Google Sheet Functions](https://github.com/jaybgager/tracertools/tree/main#google-sheet-functions) section before use.
+
+Gets all the data from a google sheet tab as a dataframe. Takes a sheet key as a string with the `sheet_key` argument and a tab name as a string with the `tab_name` argument and returns a pandas DataFrame object containing all the data in the tab.
+
+By default, assumes first row of data are headers that should be used for DataFrame column names. If this isn't the case, you can set the `has_headers` argument to `False`. Doing so will treat the first row of values the same as all the others and automatically generate DataFrame column names using the pattern `col_1, col_2, ..., col_n`.
+
+Example (using [this Google sheet](https://docs.google.com/spreadsheets/d/1Z6n5bRPx4wqfIDR4ZwUJl3-z2esScgxfLOeXzri2lOw/edit?usp=sharing)):
+
+Starting with a sheet of segment info...\
+
+![gsheet_get_tab_as_df_example](readme_images/gsheet_get_tab_as_df_example.png)
+
+```
+# ----------------------------------------------------
+# INPUT
+# ----------------------------------------------------
+
+import tracertools as tt
+
+tab_df = tt.gsheet_get_tab_as_df(
+    sheet_key="1Z6n5bRPx4wqfIDR4ZwUJl3-z2esScgxfLOeXzri2lOw",
+    tab_name="seg_info",
+)
+
+tab_df.head()
+
+# ----------------------------------------------------
+# OUTPUT
+# ----------------------------------------------------
+```
+
+![gsheet_get_tab_as_df_example_default](readme_images/gsheet_get_tab_as_df_example_default.png)
+
+Example (ignoring the first row):
+
+```
+# ----------------------------------------------------
+# INPUT
+# ----------------------------------------------------
+
+import tracertools as tt
+
+tab_df = tt.gsheet_get_tab_as_df(
+    sheet_key="1Z6n5bRPx4wqfIDR4ZwUJl3-z2esScgxfLOeXzri2lOw",
+    tab_name="seg_info",
+    has_headers=False,
+)
+
+tab_df.head()
+
+# ----------------------------------------------------
+# OUTPUT
+# ----------------------------------------------------
+```
+
+![gsheet_get_tab_as_df_example_ignore_headers](readme_images/gsheet_get_tab_as_df_example_ignore_headers.png)
+
 ## Google Sheet Functions
-All the Google-sheet-related functions in this package (those beginning with the `gsheet_` prefix) depend on the gspread Python package and currently require a Google authentication token to be set up prior to use. The process for doing so is explained [here](https://docs.gspread.org/en/latest/oauth2.html#oauth-client-id). Support for Google service accounts will likely be added in the future.
+All the Google-sheet-related functions in this package (those beginning with the `gsheet_` prefix) depend on the [gspread](https://docs.gspread.org/en/latest/) Python package and currently require a Google authentication token to be set up prior to use. The process for doing so is explained [here](https://docs.gspread.org/en/latest/oauth2.html#oauth-client-id). Support for Google service accounts will likely be added in the future.
 
-
-
-The sheet key for a Google sheet can be found in the url between `https://docs.google.com/spreadsheets/d/` and `/edit?gid=0#gid=0`. For example, the sheet ID for the example sheet is `1AqIyrqSaEJFGD5Ff1fergwJ8-q0x2l0xCgO025C401c`.
+You'll need permission to read and/or write the specific Google sheets you intend to work with, as well as their sheet keys. The sheet key for a Google sheet can be found in the url between `https://docs.google.com/spreadsheets/d/` and `/edit?`. For example, the sheet key used in the `gsheet_add_column` example above is `1AqIyrqSaEJFGD5Ff1fergwJ8-q0x2l0xCgO025C401c`.
 
 > [!WARNING]
 > When uploading floats or integers to Google sheets, large numbers may sometimes be converted to scientific notation - particularly if they end in several 0s. To avoid this for things like segment IDs, it's recommended to convert all numbers to strings prior to uploading.
