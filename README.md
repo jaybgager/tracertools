@@ -7,9 +7,9 @@ Quick installation with pip isn't supported yet (but is planned for the future),
 1. Open a terminal and navigate to the directory where you want the tracertools package to be stored.
 2. Run the code `git clone https://github.com/jaybgager/tracertools.git` to make a local copy of the package at the location you naviagated to in step one. This will be create a folder named tracertools in that directory that's linked to the GitHub repository.
 3. In the terminal, navigate one folder down, so that you're in the top-level (root) folder of the tracertools package by running the command `cd tracertools`.
-4. In the terminal, run the command `pip install -e .`. This will tell Python's default installer, pip, to add the folder you're currently in to its list of importable packages. The `-e` modifier causes this installation to be "editable", meaning that if you make changes to the code stored in the tracertools folder, they'll take effect when you import tracertools into a python script. This is important for keeping the package up-to-date, so you don't have to reinstall it every time there are changes. This also lets you expriment with modifying the tools to meet your own needs. The `.` at the end just tells pip to install everything at the current directory location.
+4. In the terminal, run the command `pip install -e .`. This will tell Python's default installer, pip, to add the folder you're currently in to its list of importable packages. The `-e` modifier causes this installation to be "editable", meaning that if you make changes to the code stored in the tracertools folder, they'll take effect when you import tracertools into a Python script. This is important for keeping the package up-to-date, so you don't have to reinstall it every time there are changes. This also lets you expriment with modifying the tools to meet your own needs. The `.` at the end just tells pip to install everything at the current directory location.
 
-Now whenever you need to use a tracertools function, you can simply import it like any other package using the "import tracertools" code in any python script. Then, when you want to use a function, you add `tracertools.` in front of it. For example, if you wanted to use the `get_current_seg_ids()` function, you would use the following code:
+Now whenever you need to use a tracertools function, you can simply import it like any other package using the "import tracertools" code in any Python script. Then, when you want to use a function, you add `tracertools.` in front of it. For example, if you wanted to use the `get_current_seg_ids()` function, you would use the following code:
 
 ```
 import tracertools
@@ -19,7 +19,7 @@ fresh_ids = tracertools.get_current_seg_ids(
 )
 ```
 
-You can also use and alias when importing the package; "tt" is a common choice. In that case, the above code would be modified slightly to look like this:
+You can also use an alias when importing the package; "tt" is a common choice. In that case, the above code would be modified slightly to look like this:
 
 ```
 import tracertools as tt
@@ -39,7 +39,7 @@ A server where files can be stored and accessed remotely. Often used for publicl
 Connectome annotation versioning engine, the software used to manage and interact with backend information about datastacks . This is done with the [caveclient](https://github.com/CAVEconnectome/CAVEclient) Python package, thorough documentation for which can be found [here](https://caveclient.readthedocs.io/en/latest/).
 
 **chunkedgraph/pychunkedgraph/pcg**\
-The chunkedgraph is an organizational structure that holds the information about which supervoxels belong to which segments. It's created and managed by the [pychunkedgraph (pcg) python package](https://github.com/CAVEconnectome/PyChunkedGraph). Individual supervoxels are always considered to belong to the lowest layer, making them the "level 1 nodes", or "L1 nodes" for short. All the supervoxels belonging to a segment within a given cube of space, referred to as a "chunk", will be grouped together into a level 2 (L2) node. 
+The chunkedgraph is an organizational structure that holds the information about which supervoxels belong to which segments. It's created and managed by the [pychunkedgraph (pcg) Python package](https://github.com/CAVEconnectome/PyChunkedGraph). Individual supervoxels are always considered to belong to the lowest layer, making them the "level 1 nodes", or "L1 nodes" for short. All the supervoxels belonging to a segment within a given cube of space, referred to as a "chunk", will be grouped together into a level 2 (L2) node. 
 
 Multiple L2 nodes are grouped into an L3 node and so on until you reach a layer that contains all the supervoxels in the whole segment. For a more detailed explanation, read [this description](https://caveclient.readthedocs.io/en/latest/guide/chunkedgraph.html). Working with different layers can have advantages. For example, the L1 layer (usually just referred to as "the supervoxels") can provide detailed information at the cost of computational power, while the L2 nodes can provide information faster for less processing power, like cached 3D volume measurements - at the cost of being less reliable in certain contexts.
 
@@ -47,13 +47,15 @@ Multiple L2 nodes are grouped into an L3 node and so on until you reach a layer 
 A Python package that allows reading and writing of neuroglancer volumes directly in RAM without having to write to a hard drive, documentation for which can be found [here](https://github.com/seung-lab/cloud-volume). Used in a number of processes including mesh-related operations, creating and hosting volumes both locally or on a bucket, and spatial segment lookup.
 
 **DataFrame/df**\
-A type of python object generated using the [Pandas](https://www.w3schools.com/python/pandas/default.asp) python package. Similar to a table or spreadsheet, but with various optimizations for searching and performing calculations on the data it contains. Commonly used as the storage format for CAVE tables of anntoations, edits, or segment information. Often abbreviated "df".
+A type of Python object generated using the [Pandas](https://www.w3schools.com/python/pandas/default.asp) Python package. Similar to a table or spreadsheet, but with various optimizations for searching and performing calculations on the data it contains. Commonly used as the storage format for CAVE tables of anntoations, edits, or segment information. Often abbreviated "df".
 
 **dataset**\
 The original image data (usually in the form of raw electron microscope images) for a specific brain (or other piece of tissue). Often identified by a descriptive acronym (e.g. Brain and Nerve Cord (BANC), Female Adult Fly Brain (FAFB)) or by the name of the organism that the tissue came from (e.g. "Minnie", "Basil"). This term is sometimes used interchangeably with "datastack" in other media, but won't be here.
 
 **datastack**\
-All the data associated with a particular project associated with a given dataset. Multiple datastacks can be associated with a single dataset (e.g. "flywire_fafb_production" and "flywire_fafb_public" are both datastacks associated with the FAFB dataset). This can include aligned EM images, 3D segmentation data, and tables of information for things like synapses, cell type labels, or nucleus locations. It may also include neuron skeletons, neuropil mesh layers, and other stack-specific information. This term is sometimes used interchangeably with "dataset" in other media, but won't be here.
+All the data associated with a particular project associated with a given dataset. Multiple datastacks can be associated with a single dataset (e.g. "flywire_fafb_production" and "flywire_fafb_public" are both datastacks associated with the FAFB dataset). 
+
+This can include aligned EM images, 3D segmentation data, and tables of information for things like synapses, cell type labels, or nucleus locations. It may also include neuron skeletons, neuropil mesh layers, and other stack-specific information. This term is sometimes used interchangeably with "dataset" in other media, but won't be here.
 
 **edge (graph)**\
 A general term for the connection between two nodes in a graph. This could be a synapse between neurons, a connection between supervoxels in the same segment, or a link between two vertices of a mesh. Often stored as two numbers that in some way reference the ID or position of their endpoints in a list. 
@@ -68,7 +70,7 @@ The flat planes that make up the surface of a 3D mesh. Can be any shape, but gen
 A data format backed by pychunkedgraph, used by cloudvolume and the Seung Lab's custom version of neuroglancer, documentation for which can be found [here](https://github.com/seung-lab/cloud-volume/wiki/Graphene). If you see the term "graphene" in the address for a segmentation layer, it generally indicates that it's linked to the chunkedgraph in some way and will therefore show up as a "painted" overlay in the 2D window of neuroglancer, allowing a user to show or hide segments by double-clicking within them in 2D. Contrast with the term "precomputed", which generally indicates a static mesh that isn't connected to the chunkedgraph and therefore won't show up as a "painted" overlay in the 2D window of neuroglancer.
 
 **JSON/JSON state/state JSON**\
-[JavaScript Object Notation](https://en.wikipedia.org/wiki/JSON), abbreviated JSON, is a data format commonly used to store information in a structure similar to a python dictionary, where there are "key" strings paired with values. The values can themselves be dictionary-like structures, creating multiple layers of nesting to allow for granular information storage. JSON format is often used for storign "state" information, or the information related to a specific configuration of settings that allows for saving and loading of specific setups for various programs, particularly on the internet. 
+[JavaScript Object Notation](https://en.wikipedia.org/wiki/JSON), abbreviated JSON, is a data format commonly used to store information in a structure similar to a Python dictionary, where there are "key" strings paired with values. The values can themselves be dictionary-like structures, creating multiple layers of nesting to allow for granular information storage. JSON format is often used for storign "state" information, or the information related to a specific configuration of settings that allows for saving and loading of specific setups for various programs, particularly on the internet. 
 
 Neuroglancer uses JSON states to store all the information about a given snapshot of the user interface (UI) at a point in time. This might include the windows that are open, the layers that are present and their visibility, which segments are selected, the position of any annotations, the 3d view position and angle, and many other pieces of information. You can view the JSON state of a neuroglancer at any time by clicking on the `{}` icon in the top-right of the UI window, clicking on the dropdown arrows to expand the various sections. 
 
@@ -84,13 +86,19 @@ A user interface (UI) for interacting with the 3D segmentation and rendering of 
 A ray (line with a direction) aimed perpendicular (sometimes reffered to as "orthogonal") to a flat plane. Often used to indicate what direction a mesh face is oriented for the purposes of rendering lighting.
 
 **numpy/np/numpy array**\
-A python package commonly used for various mathematical tasks, often abbreviated as "np". Numpy arrays are similar to lists, but are considered their own object type in python. They're often used by python functions because they're faster and more versatile to work with than standard lists, particularly when doing matrix operations.
+A Python package commonly used for various mathematical tasks, often abbreviated as "np". Numpy arrays are similar to lists, but are considered their own object type in Python. They're often used by Python functions because they're faster and more versatile to work with than standard lists, particularly when doing matrix operations.
 
 **precomputed**\
-A common type of formatting for neuroglancer data layers that relies on doing complex mathematical operations ahead of time (pre-computing) to allow faster use by the end user. If you see the term "precomputed" in the address for a segmentation layer, it generally indicates that it's a static mesh that isn't connected to the chunkedgraph and therefore won't show up as a "painted" overlay in the 2D window of neuroglancer. Contrast with the term "graphene", which indicates that a mesh is linked to the chunkedgraph in some way and will therefore show up as a "painted" overlay in the 2D window of neuroglancer, allowing a user to show or hide segments by double-clicking within them in 2D. 
+A common type of formatting for neuroglancer data layers that relies on doing complex mathematical operations ahead of time (pre-computing) to allow faster use by the end user. 
+
+If you see the term `precomputed` in the address for a segmentation layer, it generally indicates that it's a static mesh that isn't connected to the chunkedgraph and therefore won't show up as a "painted" overlay in the 2D window of neuroglancer. 
+
+Contrast with the term `graphene`, which indicates that a mesh is linked to the chunkedgraph in some way and will therefore show up as a "painted" overlay in the 2D window of neuroglancer, allowing a user to show or hide segments by double-clicking within them in 2D. 
 
 **resolution**\
-The actual, physical dimensions in nanometers represented by one "unit" in the x, y, and z directions of a 3D coordinate system, stored as a list/array of 3 numbers (e.g. `[4, 4, 45]` for the voxel dimensions in the "brain and nerve_cord" datastack). Common derived terms include "viewer resolution" (the default voxel resolution used when viewing a datastack in neuroglancer), "mip0 resolution" (the voxel resolution of the raw electron microscope images for a dataset), and "nanometer resolution" (where the x-, y-, and z-resolutions are all 1 nanometer, often used for backend spatial information storage and mathematical calculations).
+The actual, physical dimensions in nanometers represented by one "unit" in the x, y, and z directions of a 3D coordinate system, stored as a list/array of 3 numbers (e.g. `[4, 4, 45]` for the voxel dimensions in the "brain and nerve_cord" datastack). 
+
+Common derived terms include "viewer resolution" (the default voxel resolution used when viewing a datastack in neuroglancer), "mip0 resolution" (the voxel resolution of the raw electron microscope images for a dataset), and "nanometer resolution" (where the x-, y-, and z-resolutions are all 1 nanometer, often used for backend spatial information storage and mathematical calculations).
 
 **root ID**\
 An umbrella term that can refer to the numeric identifier attached to a single supervoxel, chunkedgraph node, or segment. Appropriate to use when the entity in question can't be known ahead of time, as in the get_roots_from_points() function, which can return either a segment or supervoxel ID dependingon the user's input. Often used in other sources interchangeably with the term "segment ID", but won't be here.
@@ -111,8 +119,7 @@ A collection of neuroglancer-related assets that can include 2D image layers, 3D
 One unit of 3D space, shaped like a rectangular prism, the actual spatial dimensions of which vary from datastack to datastack. Compare to a 2-dimensional pixel. Multiple voxels are grouped together to form a supervoxel.
 
 # Functions
-WORK IN PROGRESS
-Below are basic descriptions of each function in the tracertools package, with instructions on their use. Examples will be added at a alter date.
+Below are basic descriptions of each function in the `tracertools` package, with instructions on their use and examples.
 
 ### bucket_convert_colons
 Converts file names that include colons to a Windows-safe alternative and back. Takes a string with the `file_path` argument. By default, converts any colons `:` in the string to triple-underscores `___`. If the `to_windows` argument is set to `False`, converts triple underscores back to colons. Used to allow creation and download/upload of neuroglancer legacy-format volumes (which by necessity must include colons in several file names) on Windows machines (which strictly prohibit the use of colons in file names).
@@ -163,10 +170,13 @@ print(
 ```
 
 ### bucket_delete_file
-Deletes a file on a cloudfiles-managed bucket. Takes an absolute file path on a cloudfiles-managed bucket as a string with the `file_path` argument and deletes the file. Requires write access to the chosen bucket.
+Deletes a file on a cloudfiles-managed bucket. Takes an absolute file path on a cloudfiles-managed bucket as a string with the `file_path` argument and deletes the file.
 
 ### bucket_delete_folder
-Deletes a folder and all its contents on a cloudfiles-managed bucket. Takes an absolute folder path on a cloudfiles-managed bucket as a string with the `folder_path` argument and deletes the folder, including everything contained within. Prompts the user with a confirmation window where they must type `DELETE` and hit enter to prevent accidental deletion. Requires write access to the chosen bucket.
+Deletes a folder and all its contents on a cloudfiles-managed bucket. Takes an absolute folder path on a cloudfiles-managed bucket as a string with the `folder_path` argument and deletes the folder, including everything contained within. Prompts the user with a confirmation window where they must type `DELETE` and hit enter to prevent accidental deletion. 
+
+> [!NOTE]
+> Requires write permission for the chosen bucket.
 
 ### bucket_download_file
 Downloads a file from a cloudfiles-managed bucket. Takes an absolute file path on a cloudfiles-managed bucket as a string with the `bucket_path` argument and downloads the file. Tries to find a folder called `Downloads` in the home directory by default, but a specific absolute path to a different location can be optionally passed as a string with the `download_path` argument.
@@ -175,16 +185,31 @@ Downloads a file from a cloudfiles-managed bucket. Takes an absolute file path o
 Downloads a folder from a cloudfiles-managed bucket. Takes an absolute folder path on a cloudfiles-managed bucket as a string with the `bucket_path` argument and downloads the folder and all its contents. Tries to find a folder called `Downloads` in the home directory by default, but a specific absolute path to a different location can be optionally passed as a string with the `download_path` argument.
 
 ### bucket_move_file
-Moves a file from one folder to another on a cloudfiles-managed bucket. Takes an absolute file path on a cloudfiles-managed bucket as a string with the `file_path` argument and moves it to a new folder location on the bucket passed as a string of the absolute path to that folder with the `new_folder_path` argument. Requires write access to the chosen bucket.
+Moves a file from one folder to another on a cloudfiles-managed bucket. Takes an absolute file path on a cloudfiles-managed bucket as a string with the `file_path` argument and moves it to a new folder location on the bucket passed as a string of the absolute path to that folder with the `new_folder_path` argument. 
+
+> [!NOTE]
+> Requires write permission for the chosen bucket.
 
 ### bucket_rename_file
-Renames a file in-place on a cloudfiles-managed bucket. Takes an absolute file path on a cloudfiles-managed bucket as a string with the `file_path` argument and renames using a string passed with the `new_name` argument. The new name should just be the name of the file (not an absolute path that includes any folders it was contained within) with the file extension if one was present in the original name. Requires write access to the chosen bucket.
+Renames a file in-place on a cloudfiles-managed bucket. Takes an absolute file path on a cloudfiles-managed bucket as a string with the `file_path` argument and renames using a string passed with the `new_name` argument. The new name should just be the name of the file (not an absolute path that includes any folders it was contained within) with the file extension if one was present in the original name. 
+
+> [!NOTE]
+> Requires write permission for the chosen bucket.
 
 ### bucket_upload_file
-Uploads a file to a cloudfiles-managed bucket. Takes an absolute file path on your local machine to a file you want to upload as a string with the `local_path` argument and an absolute folder path to a bucket folder where you want the file to be saved as a string with the `bucket_path` argument, and copies your local file to the bucket location specified. If folders that don't yet exist are included in the `bucket_path` argument, they'll be created. Requires write access to the chosen bucket.
+Uploads a file to a cloudfiles-managed bucket. Takes an absolute file path on your local machine to a file you want to upload as a string with the `local_path` argument and an absolute folder path to a bucket folder where you want the file to be saved as a string with the `bucket_path` argument, and copies your local file to the bucket location specified. If folders that don't yet exist are included in the `bucket_path` argument, they'll be created. 
+
+> [!NOTE]
+> Requires write permission for the chosen bucket.
 
 ### bucket_upload_folder
-Uploads a folder to a cloudfiles-managed bucket. Takes an absolute folder path on your local machine to a folder you want to upload as a string with the `local_path` argument and an absolute folder path to a bucket folder where you want the file to be saved as a string with the `bucket_path` argument, and coppies the contents of your local folder to the folder specified on the bucket. Note that the last folder in the bucket path will be the new top-level folder (i.e. if your local folder is called "image" and you want to put it at a bucket location of "bucket/test_images" you should set the `bucket_path` argument equal to `bucket/test/images/image`). This format is intended to allow you to rename the folder when uploading if desired. If folders that don't yet exist are included in the `bucket_path` argument, they'll be created. Requires write access to the chosen bucket.
+Uploads a folder to a cloudfiles-managed bucket. Takes an absolute folder path on your local machine to a folder you want to upload as a string with the `local_path` argument and an absolute folder path to a bucket folder where you want the file to be saved as a string with the `bucket_path` argument, and copies the contents of your local folder to the folder specified on the bucket. If folders that don't yet exist are included in the `bucket_path` argument, they'll be created.
+
+> [!NOTE]
+> The last folder in the bucket path will be the new top-level folder (i.e. if your local folder is called "image" and you want to put it at a bucket location of "bucket/test_images" you should set the `bucket_path` argument equal to `bucket/test/images/image`). This format is intended to allow you to rename the folder when uploading if desired. 
+
+> [!NOTE]
+> Requires write permission for the chosen bucket.
 
 ### calc_3d_distance
 Calculates the distance between two points in 3D. Takes two points as lists of 3 integers representing their x,y, and z coordinates with the `point_a` and `point_b` arguments and a the resolution of the coordinate system as a list of 3 integers with the `res` argument, and returns the distance between the two points as a float. Units will be the same as whatever was used for the `res` argument.
@@ -270,7 +295,10 @@ print(
 ```
 
 ### calc_bbox_corners_from_center
-Calculates the point coordinates for the corners of a rectangular prism shaped bounding box based on a centerpoint and a set of dimensions. Takes a list of 3 ints with the `center_point` argument and a set of dimensions in the x-, y-, and z-dimensions as a list of ints with the `dims` argument and returns a list of two lists of 3 ints representing the corners of a bounding box of the requested dimensions centered on the requested point. If odd dimension values are submitted they'll be rounded down to the next even integer to avoid using floats for the corner coordinates.
+Calculates the point coordinates for the corners of a rectangular prism shaped bounding box based on a centerpoint and a set of dimensions. Takes a list of 3 ints with the `center_point` argument and a set of dimensions in the x-, y-, and z-dimensions as a list of ints with the `dims` argument and returns a list of two lists of 3 ints representing the corners of a bounding box of the requested dimensions centered on the requested point. 
+
+> [!NOTE]
+> If odd dimension values are submitted they'll be rounded down to the next even integer to avoid using floats for the corner coordinates.
 
 Example:
 
@@ -297,7 +325,9 @@ print(
 
 
 ### calc_line_triangle_intersect
-Calculates the point where a line segment and a triangular plane intersect, if any. Takes a line segment as an array of two arrays of 3 floats or ints representing the endpoints with the `line` argument (e.g. `[[x1,y1,z1],[x2,y2,z2]]`) and a triangular plane as an array of 3 arrays of 3 floats or ints representing the point coordinates of the vertices with the `triangle` argument (e.g. `[[x1,y1,z1],[x2,y2,z2],[x3,y3,z3]]`) and returns either an array of 3 floats representing the point coordinates where the line intersects the triangular plane (e.g. `[x,y,z]`) or a `None` value if none exist. By default, rounds the results to the nearest integer, but more detailed results can be obtained by setting the `precision` argument to the number of decimal places desired. Warning: using high precision (e.g. 16+ decimal places) with low numbers (e.g. [1,1,1]) can cause false negatives. This is due to extremely small rounding errors when calculating floating point math.
+Calculates the point where a line segment and a triangular plane intersect, if any. Takes a line segment as an array of two arrays of 3 floats or ints representing the endpoints with the `line` argument (e.g. `[[x1,y1,z1],[x2,y2,z2]]`) and a triangular plane as an array of 3 arrays of 3 floats or ints representing the point coordinates of the vertices with the `triangle` argument (e.g. `[[x1,y1,z1],[x2,y2,z2],[x3,y3,z3]]`) and returns either an array of 3 floats representing the point coordinates where the line intersects the triangular plane (e.g. `[x,y,z]`) or a `None` value if none exist. 
+
+By default, rounds the results to the nearest integer, but more detailed results can be obtained by setting the `precision` argument to the number of decimal places desired. Warning: using high precision (e.g. 16+ decimal places) with low numbers (e.g. [1,1,1]) can cause false negatives. This is due to extremely small rounding errors when calculating floating point math.
 
 Example:
 
@@ -309,23 +339,23 @@ Example:
 import tracertools as tt
 import numpy as np
 
-print(
-    tt.calc_line_triangle_intersect(
-        line = np.array(
-            [
-                [0,0,0],
-                [1,2,3]
-            ]
-        ),
-        triangle = np.array(
-            [
-                [2,0,0],
-                [0,3,0],
-                [0,0,4]
-            ]
-        ),
-    )
+intersect = tt.calc_line_triangle_intersect(
+    line = np.array(
+        [
+            [0,0,0],
+            [1,2,3]
+        ]
+    ),
+    triangle = np.array(
+        [
+            [2,0,0],
+            [0,3,0],
+            [0,0,4]
+        ]
+    ),
 )
+
+print(intersect)
 
 # ----------------------------------------------------
 # OUTPUT
@@ -345,24 +375,24 @@ Example (higher precision):
 import tracertools as tt
 import numpy as np
 
-print(
-    tt.calc_line_triangle_intersect(
-        line = np.array(
-            [
-                [0,0,0],
-                [1,2,3]
-            ]
-        ),
-        triangle = np.array(
-            [
-                [2,0,0],
-                [0,3,0],
-                [0,0,4]
-            ]
-        ),
-        precision=3,
-    )
+intersect = tt.calc_line_triangle_intersect(
+    line = np.array(
+        [
+            [0,0,0],
+            [1,2,3]
+        ]
+    ),
+    triangle = np.array(
+        [
+            [2,0,0],
+            [0,3,0],
+            [0,0,4]
+        ]
+    ),
+    precision=3,
 )
+
+print(intersect)
 
 # ----------------------------------------------------
 # OUTPUT
@@ -373,7 +403,9 @@ print(
 ```
 
 ### calc_seg_mesh_intersect
-Calculates all points where the skeleton of a segment intersects a mesh, if any exist. Takes a datastack name as a string with the `datastack` argument, a list of segment IDs as ints with the `seg_ids` argument, and the address of a neuroglancer mesh as a string with the `mesh_address` argument (e.g. "https://c10s.pni.princeton.edu/tracers/jay/mesher_demo/example_01|neuroglancer-precomputed:") and by default returns a list of bool (True/False) values indicating which segments' skeletons intersect the chosen mesh. Optionally setting the `return_intersects` argument to True will instead return a list of values that are either lists of all the point coordinates at which each segment intersects the mesh or a `None` value if no intersection points exist.
+Calculates all points where the skeleton of a segment intersects a mesh, if any exist. Takes a datastack name as a string with the `datastack` argument, a list of segment IDs as ints with the `seg_ids` argument, and the address of a neuroglancer mesh as a string with the `mesh_address` argument (e.g. "https://c10s.pni.princeton.edu/tracers/jay/mesher_demo/example_01|neuroglancer-precomputed:") and by default returns a list of bool (True/False) values indicating which segments' skeletons intersect the chosen mesh.
+
+Optionally setting the `return_intersects` argument to True will instead return a list of values that are either lists of all the point coordinates at which each segment intersects the mesh or a `None` value if no intersection points exist.
 
 Example:
 
@@ -881,7 +913,8 @@ print(stack_info)
  'viewer_site': 'https://spelunker.cave-explorer.org/'}
 ```
 
-The dictionary output above has been formatted for ease of reading using the pretty-print python module, which can be installed with `pip install pprint` and used by adding `from pprint import pprint` to your imports and replacing the `print()` command with `pprint()`. The actual default output would all be on a single line.
+> [!NOTE]
+> The dictionary output above has been formatted for ease of reading using the pretty-print Python module, which can be installed with `pip install pprint` and used by adding `from pprint import pprint` to your imports and replacing the `print()` command with `pprint()`. The actual default output would all be on a single line.
 
 ### get_cave_stack_tables
 Gets a list of all the currently-available backend CAVE tables associated with a datastack. Takes a datastack name as a string with the `datastack` argument and returns a list of strings representing the names of the various available tables.
@@ -913,7 +946,7 @@ print(tables)
 ```
 
 ### get_cave_table
-Gets all the data for a specific CAVE table as a pandas DataFrame object. Takes a datastack name as a string with the `datastack` argument and a table name as a string with the `table_name` argument and returns a DataFrame object containing the requested information. These tables can be very large (e.g. the table listing all the synapses for the "flywire_fafb_production" datastack has roughly 50 million entries), and may become truncated in some circumstances. For more detailed CAVE table queries, the caveclient python module can be used.
+Gets all the data for a specific CAVE table as a pandas DataFrame object. Takes a datastack name as a string with the `datastack` argument and a table name as a string with the `table_name` argument and returns a DataFrame object containing the requested information. These tables can be very large (e.g. the table listing all the synapses for the "flywire_fafb_production" datastack has roughly 50 million entries), and may become truncated in some circumstances. For more detailed CAVE table queries, the caveclient Python module can be used.
 
 Example:
 
@@ -981,7 +1014,9 @@ print(table_info)
  'voxel_resolution': [4.0, 4.0, 45.0],
  'write_permission': 'PRIVATE'}
 ```
-The dictionary output above has been formatted for ease of reading using the pretty-print python module, which can be installed with `pip install pprint` and used by adding `from pprint import pprint` to your imports and replacing the `print()` command with `pprint()`. The actual default output would all be on a single line.
+
+> [!NOTE]
+> The dictionary output above has been formatted for ease of reading using the pretty-print Python module, which can be installed with `pip install pprint` and used by adding `from pprint import pprint` to your imports and replacing the `print()` command with `pprint()`. The actual default output would all be on a single line.
 
 ### get_config
 Gets the tracer-format config dictionary for a specific datastack if one exists. To get a list of the datastacks that currently have config support, use the `get_supported_configs()` function. Takes a datastack name as a string with the `datastack` argument and returns a dictionary that can be used for a number of other functions. Each dictionary will have the following keys:
@@ -1116,7 +1151,8 @@ print(config)
  'volume_size': [262144, 294912, 7010]}
  ```
 
-The dictionary output above has been formatted for ease of reading using the pretty-print python module, which can be installed with `pip install pprint` and used by adding `from pprint import pprint` to your imports and replacing the `print()` command with `pprint()`. The actual default output would all be on a single line.
+> [!NOTE]
+> The dictionary output above has been formatted for ease of reading using the pretty-print Python module, which can be installed with `pip install pprint` and used by adding `from pprint import pprint` to your imports and replacing the `print()` command with `pprint()`. The actual default output would all be on a single line.
 
 ### get_current_seg_ids
 Gets the best guess for the current segment IDs for a list of potentially-outdated ("stale") segment IDs. Takes a datastack name as a string with the `datastack` argument and a list of segment IDs as integers with the `seg_ids` argument and returns the best guess for the current IDs of each segment as integers by default. 
@@ -1127,7 +1163,8 @@ If the `skip_fresh` argument is set to `False`, the function will skip the step 
 
 If the `detailed_errors` argument is set to `True`, any errors encountered (from things like internet connection hiccups, overly large requests, or server-side issues) will return strings with detailed error information instead of the default `"ERROR"` value.
 
-Extremely large neurons (e.g. the CT1 cells in Drosophila) may exceed the request limit for the supervoxel query and cause an HTTP 413 Client Error.Currently there's no way around this issue.
+> [!WARNING]
+> Extremely large neurons (e.g. the CT1 cells in Drosophila) may exceed the request limit for the supervoxel query and cause an HTTP 413 Client Error. Currently there's no way around this issue.
 
 Example:
 
@@ -1210,12 +1247,14 @@ print(fresh)
 ]
  ```
 
- The list output above has been formatted for ease of reading using a combination of the pretty-print python module, which can be installed with `pip install pprint` and used by adding `from pprint import pprint` to your imports and replacing the `print()` command with `pprint()` and manual adjustment. The actual default output would all be on a single line.
+> [!NOTE]
+> The list output above has been formatted for ease of reading using a combination of the pretty-print Python module, which can be installed with `pip install pprint` and used by adding `from pprint import pprint` to your imports and replacing the `print()` command with `pprint()` and manual adjustment. The actual default output would all be on a single line.
 
- BANDWIDTH WARNING: When looped repeatedly in a short time, as might happen when using this to update a spreadsheet of old IDs one line at a time, this function can get throttled by CAVE due to repeatedly setting the client. Workarounds linclude batching, parallelization, or simply setting a sleep delay to lower the request rate below 60/min.
+> [!WARNING]
+> When looped repeatedly in a short time, as might happen when using this to update a spreadsheet of old IDs one line at a time, this function can get throttled by CAVE due to repeatedly setting the client. Workarounds linclude batching, parallelization, or simply setting a sleep delay to lower the request rate below 60/min.
 
 ### get_json_state_from_url
-Derives a neuroglancer JSON state from a shortened sharing url. Takes a datastack name as a string with the `datastack` argument and a shortened neuroglancer state url as a string with the `share_ul` argument and returns the neuroglancer JSON state as a python dictionary.
+Derives a neuroglancer JSON state from a shortened sharing url. Takes a datastack name as a string with the `datastack` argument and a shortened neuroglancer state url as a string with the `share_ul` argument and returns the neuroglancer JSON state as a Python dictionary.
 
 Example:
 
@@ -1311,7 +1350,8 @@ print(state)
  'systemMemoryLimit': 1000000000}
 ```
 
-The dictionary output above has been formatted for ease of reading using the pretty-print python module, which can be installed with `pip install pprint` and used by adding `from pprint import pprint` to your imports and replacing the `print()` command with `pprint()`. The actual default output would all be on a single line.
+> [!NOTE]
+> The dictionary output above has been formatted for ease of reading using the pretty-print Python module, which can be installed with `pip install pprint` and used by adding `from pprint import pprint` to your imports and replacing the `print()` command with `pprint()`. The actual default output would all be on a single line.
 
 ### get_mesh_triangles
 Gets a numpy array of the vertices for each face of a neuroglancer precomputed mesh in a volume. Takes the path to the neuroglancer volume as a string with the `volume_path` argument and returns an (n,3,3)-shape numpy array of floats representing the point coordinates of each mesh vertex. 
@@ -1574,7 +1614,8 @@ print(details_list)
 ]
 ```
 
-The list output above has been formatted for ease of reading using the pretty-print python module, which can be installed with `pip install pprint` and used by adding `from pprint import pprint` to your imports and replacing the `print()` command with `pprint()`. The actual default output would all be on a single line.
+> [!NOTE]
+> The list output above has been formatted for ease of reading using the pretty-print Python module, which can be installed with `pip install pprint` and used by adding `from pprint import pprint` to your imports and replacing the `print()` command with `pprint()`. The actual default output would all be on a single line.
 
 ### get_seg_edits
 Gets the tracer-format edit history for a given segment as a pandas DataFrame object. Takes a datastack name as a string with the `datastack` argument and a segment ID as an integer with the `seg_id` argument and returns a pandas DataFrame object where each row represents a single edit that was made in the history of the requested segment. Columns include:
@@ -1708,7 +1749,8 @@ print(skeletons)
 ]
 ```
 
-The list output above has been formatted for ease of reading using a combination of the pretty-print python module, which can be installed with `pip install pprint` and used by adding `from pprint import pprint` to your imports and replacing the `print()` command with `pprint()` and manual adjustment. The actual default output would all be on a single line.
+> [!NOTE]
+> The list output above has been formatted for ease of reading using a combination of the pretty-print Python module, which can be installed with `pip install pprint` and used by adding `from pprint import pprint` to your imports and replacing the `print()` command with `pprint()` and manual adjustment. The actual default output would all be on a single line.
 
 ### get_svs_from_seg
 Gets a list of all the supervoxels associate with a segment. Takes a datastack name as a string with the `datastack` argument and a segment ID as an integer with the `seg_id` argument and returns a list of supervoxel IDs as integers.
@@ -1744,7 +1786,8 @@ print(svs)
 ]
 ```
 
-The above output is truncated. The actual list of all the supervoxels in this segment is 846,443 items long. This function may sometimes fail on extremely large segments (e.g. the CT1 cells in Drosophila). This is due to rate-limiting on requests to the backend servers that host the supervoxel information.
+> [!NOTE]
+> The above output is truncated. The actual list of all the supervoxels in this segment is 846,443 items long. This function may sometimes fail on extremely large segments (e.g. the CT1 cells in Drosophila). This is due to rate-limiting on requests to the backend servers that host the supervoxel information.
 
 ### get_supported_configs
 Gets a list of the names of all the datastacks for which tracer-format configs exist.
@@ -1774,8 +1817,50 @@ print(configs)
 ]
 ```
 
+### gsheet_add_column
+> [!IMPORTANT]
+> Google-sheet-related functions require a bit of additional setup. Please read the [Google Sheet Functions](https://github.com/jaybgager/tracertools/tree/main#google-sheet-functions) section before use.
+
+Adds the data from a Python list as a column to a tab in a google sheet. Each list item will fill a row in the first empty column of the chosen google sheet tab. Takes a Google sheet key as a string with the `sheet_key` argument, the name of a tab within that spreadsheet as a string with the `tab_name` argument, and a Python list with the `col_data` argument.
+
+Example (using [this Google sheet](https://docs.google.com/spreadsheets/d/1AqIyrqSaEJFGD5Ff1fergwJ8-q0x2l0xCgO025C401c/edit?usp=sharing)):
+
+Starting with a blank sheet...
+![gsheet_add_column_example_initial](readme_images/gsheet_add_column_example_initial.png)
+
+Running the code...
+
+```
+# ----------------------------------------------------
+# INPUT
+# ----------------------------------------------------
+
+import tracertools as tt
+
+tt.gsheet_add_column(
+    sheet_key="1AqIyrqSaEJFGD5Ff1fergwJ8-q0x2l0xCgO025C401c",
+    tab_name="final_state",
+    col_data=[
+        "segment",
+        "720575941473274509",
+        "720575941524660200",
+        "720575941565377335",
+    ],
+)
+```
+
+You now have a filled-in sheet!
+![gsheet_add_column_example_final](readme_images/gsheet_add_column_example_final.png)
+
+## Google Sheet Functions
+All the Google-sheet-related functions in this package (those beginning with the `gsheet_` prefix) depend on the gspread Python package and currently require a Google authentication token to be set up prior to use. The process for doing so is explained [here](https://docs.gspread.org/en/latest/oauth2.html#oauth-client-id). Support for Google service accounts will likely be added in the future.
 
 
+
+The sheet key for a Google sheet can be found in the url between `https://docs.google.com/spreadsheets/d/` and `/edit?gid=0#gid=0`. For example, the sheet ID for the example sheet is `1AqIyrqSaEJFGD5Ff1fergwJ8-q0x2l0xCgO025C401c`.
+
+> [!WARNING]
+> When uploading floats or integers to Google sheets, large numbers may sometimes be converted to scientific notation - particularly if they end in several 0s. To avoid this for things like segment IDs, it's recommended to convert all numbers to strings prior to uploading.
 
 # License
 The tracertools package is licensed under the GNU General Public License v3.0. See the [LICENSE](https://github.com/jaybgager/tracertools/blob/main/LICENSE) file for more details.
