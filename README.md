@@ -113,7 +113,7 @@ The smallest rearrangeable unit of a 3D segment, made up of multiple voxels. Not
 A single point in 3D space connected to other points. Used to represent the boundaries of a 3D mesh. Stored as a list or array of 3 numbers (e.g. `[1,2,3]`) corresponding to the point's x, y, and z coordinates, either in nanometers, or in voxels - the measurements for which may change depending on the voxel resolution of the datastack you're working with. Plural vertices.
 
 **volume**\
-A collection of neuroglancer-related assets that can include 2D image layers, 3D segmentation and meshing, segment skeletons, and annotations. Stored in a single folder/directory often named "image". Several formats exist depending on the type of mesh being used, more documentation about which can be found [here](https://github.com/google/neuroglancer/blob/master/src/datasource/precomputed/meshes.md). 
+A collection of neuroglancer-related assets that can include 2D image layers, 3D segmentation and meshing, segment skeletons, and annotations. Stored in a single folder/directory, often named `image`. Several formats exist depending on the type of mesh being used, more documentation about which can be found [here](https://github.com/google/neuroglancer/blob/master/src/datasource/precomputed/meshes.md). Some formats require colons `:` in several file names in order to function properly. This makes them incompatible with Windows OS, which reserves colons for Drive names and therefore forbids their use in file names.
 
 **voxel**\
 One unit of 3D space, shaped like a rectangular prism, the actual spatial dimensions of which vary from datastack to datastack. Compare to a 2-dimensional pixel. Multiple voxels are grouped together to form a supervoxel.
@@ -181,8 +181,14 @@ Deletes a folder and all its contents on a cloudfiles-managed bucket. Takes an a
 ### bucket_download_file
 Downloads a file from a cloudfiles-managed bucket. Takes an absolute file path on a cloudfiles-managed bucket as a string with the `bucket_path` argument and downloads the file. Tries to find a folder called `Downloads` in the home directory by default, but a specific absolute path to a different location can be optionally passed as a string with the `download_path` argument.
 
+>[!WARNING]
+>If this function is used on a Windows machine, any files that contain colons `:` in their filenames will have them converted to triple-underscores `___`. This is because Windows OS forbids the practice of including colons in filenames, as they're reserved for Drive names. This is a common issue with legacy-format neuroglancer volumes containing single-resolution unsharded meshes, which require several files to have colons in their names in order to function properly.
+
 ### bucket_download_folder
 Downloads a folder from a cloudfiles-managed bucket. Takes an absolute folder path on a cloudfiles-managed bucket as a string with the `bucket_path` argument and downloads the folder and all its contents. Tries to find a folder called `Downloads` in the home directory by default, but a specific absolute path to a different location can be optionally passed as a string with the `download_path` argument.
+
+>[!WARNING]
+>If this function is used on a Windows machine, any files that contain colons `:` in their filenames will have them converted to triple-underscores `___`. This is because Windows OS forbids the practice of including colons in filenames, as they're reserved for Drive names. This is a common issue with legacy-format neuroglancer volumes containing single-resolution unsharded meshes, which require several files to have colons in their names in order to function properly.
 
 ### bucket_move_file
 Moves a file from one folder to another on a cloudfiles-managed bucket. Takes an absolute file path on a cloudfiles-managed bucket as a string with the `file_path` argument and moves it to a new folder location on the bucket passed as a string of the absolute path to that folder with the `new_folder_path` argument. 
@@ -202,6 +208,9 @@ Uploads a file to a cloudfiles-managed bucket. Takes an absolute file path on yo
 > [!NOTE]
 > Requires write permission for the chosen bucket.
 
+>[!WARNING]
+>If this function is used on a Windows machine, any files that contain triple-underscores `___` in their filenames will have them converted to colons `:`. This is because Windows OS forbids the practice of including colons in filenames, as they're reserved for Drive names. This is a common issue with legacy-format neuroglancer volumes containing single-resolution unsharded meshes, which require several files to have colons in their names in order to function properly.
+
 ### bucket_upload_folder
 Uploads a folder to a cloudfiles-managed bucket. Takes an absolute folder path on your local machine to a folder you want to upload as a string with the `local_path` argument and an absolute folder path to a bucket folder where you want the file to be saved as a string with the `bucket_path` argument, and copies the contents of your local folder to the folder specified on the bucket. If folders that don't yet exist are included in the `bucket_path` argument, they'll be created.
 
@@ -210,6 +219,9 @@ Uploads a folder to a cloudfiles-managed bucket. Takes an absolute folder path o
 
 > [!NOTE]
 > Requires write permission for the chosen bucket.
+
+>[!WARNING]
+>If this function is used on a Windows machine, any files that contain triple-underscores `___` in their filenames will have them converted to colons `:`. This is because Windows OS forbids the practice of including colons in filenames, as they're reserved for Drive names. This is a common issue with legacy-format neuroglancer volumes containing single-resolution unsharded meshes, which require several files to have colons in their names in order to function properly.
 
 ### calc_3d_distance
 Calculates the distance between two points in 3D. Takes two points as lists of 3 integers representing their x,y, and z coordinates with the `point_a` and `point_b` arguments and a the resolution of the coordinate system as a list of 3 integers with the `res` argument, and returns the distance between the two points as a float. Units will be the same as whatever was used for the `res` argument.
@@ -2088,6 +2100,59 @@ tab_df.head()
 ```
 
 ![gsheet_get_tab_as_df_example_ignore_headers](readme_images/gsheet_get_tab_as_df_example_ignore_headers.png)
+
+### host_ng_volume_locally
+Locally hosts a precomputed neuroglancer volume for testing purposes. Takes the absolute file path to the location where the top-level folder of the volume is stored on your local machine as a string with the `volume_path` argument.
+
+Example (using a hypothetical local volume called `image01` stored in the `/home/user/ng_volumes/` folder):
+
+First you run the code to start the local host...
+
+```
+# ----------------------------------------------------
+# INPUT
+# ----------------------------------------------------
+
+import tracertools as tt
+
+tt.host_ng_volume_locally(
+    volume_path="home/user/ng_volumes/image01"
+)
+
+# ----------------------------------------------------
+# OUTPUT
+# ----------------------------------------------------
+
+Neuroglancer server listening to http://localhost:1337
+```
+
+This script will continue hosting the volume as long as it's running. When you want to stop hosting, stop the script.
+
+Then you can open a neuroglancer instance in your browser of choice and create a new layer by clicking the `+` button to the right of the last current layer in the layer bar.
+
+![host_ng_volume_locally_example_01](readme_images/host_ng_volume_locally_example_01.png)
+
+You should then be propted to enter a `Data Source URL` at the top of the `Source` tab of the `new layer` menu on the right side of the neuroglancer window, as shown below.
+
+![host_ng_volume_locally_example_02](readme_images/host_ng_volume_locally_example_02.png)
+
+Into the field, paste `http://localhost:1337/|neuroglancer-precomputed:` and hit Enter. You should see a pale yellow bar appear that says `Create as segmentation layer`. Click this.
+
+![host_ng_volume_locally_example_03](readme_images/host_ng_volume_locally_example_03.png)
+
+Once you click the pale yellow bar, it should create a segmentation layer named `1337`. Depending on the volume's default settings, this may bring up a yellow bounding box that can be turned off by unchecking the `[bounds] default annotations` option in the `Source` tab of the `seg` menu on the right.
+
+![host_ng_volume_locally_example_04](readme_images/host_ng_volume_locally_example_04.png)
+
+If you've used one of the functions in this package to create a mesh and/or volume that you're hosting, it likely has a single segment labeled `1` that's turned off by default. To turn this on, go to the `Seg.` tab of the `seg` menu on the right, type `1` into the input field, and hit Enter. Your mesh should show up (probably as a cornflower blue color, which is the default).
+
+![host_ng_volume_locally_example_05](readme_images/host_ng_volume_locally_example_05.png)
+
+>[!WARNING]
+>This function is effectively impossible to use on Windows machines when working with legacy-format neuroglancer volumes containing single-resolution unsharded meshes, as these require several files to have colons `:` in their filenames, a practice forbidden by the Windows OS. If you've downloaded such a volume on Windows using the functions in this package, a stopgap measure has been applied which converts colons to triple-underscores `___` in file names. While this allows volumes to be passed to and from Windows machines, it doesn't allow for local hosting, as the host software requires the colons.
+
+>[!NOTE]
+>If the `volume_path` passed doesn't begin with a slash `/` (e.g. `home/user/...` instead of `/home/user/...`), this function will assume you want to add the passed path to the path to the current directory you're sitting in when you call this function instead of starting at your machine's root directory. You can run this either way if you format the path properly, but should be aware of the behavior if you're getting errors related to the `volume_path`.
 
 ## Google Sheet Functions
 All the Google-sheet-related functions in this package (those beginning with the `gsheet_` prefix) depend on the [gspread](https://docs.gspread.org/en/latest/) Python package and currently require a Google authentication token to be set up prior to use. The process for doing so is explained [here](https://docs.gspread.org/en/latest/oauth2.html#oauth-client-id). Support for Google service accounts will likely be added in the future.
