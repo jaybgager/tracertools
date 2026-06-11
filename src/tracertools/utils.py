@@ -3108,7 +3108,7 @@ def make_color_list(number_of_colors, alternate_brightness=0.0):
 
 def make_edits_link(datastack, seg_id, separate_layers=False):
     """
-    Make a neuroglancer link with all the edits to a given segment as line annotations.
+    Makes a neuroglancer link with all the edits to a given segment as line annotations.
 
     Args:
         datastack (str):
