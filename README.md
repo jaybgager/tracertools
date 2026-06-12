@@ -2226,6 +2226,7 @@ To solve this issue, we can use a process called [Delaunay Triangulation](https:
 <p align="center">
 <img src="readme_images/delaunay_circumcircles_example.png" alt="delaunay_circumcircles_example" style="width:66%; height:auto;">
 </p>
+
 Above image derived from [public domain work on Wikipedia](https://commons.wikimedia.org/wiki/File:Delaunay_circumcircles_centers.svg) by user [Nü](https://es.wikipedia.org/wiki/Usuario:N%C3%BC)
 
 The alpha shape technique then takes this result and removes all the triangles too large to fit into a circle of a specified size. The radius of this circle is called the "alpha" value. A smaller alpha value will produce a more detailed final result, but risks breaking apart points in a way that creates holes in the final result. See the example below for a visualization (this is what the exterior hull of the final shape would look like, not all triangles are drawn):
