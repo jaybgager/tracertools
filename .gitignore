@@ -1,1 +1,5 @@
+# local testing notebook in top level folder
 sandbox.ipynb
+
+# all local pycache files
+**/__pycache__/
