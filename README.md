@@ -2208,7 +2208,10 @@ https://spelunker.cave-explorer.org/#!middleauth+https://global.daf-apis.com/ngl
 >[!WARNING]
 >This function is experimental and may break easily. It currently only works with the Princeton nokura bucket.
 
-Generates a bucket-hosted legacy-format neuroglancer volume containing a precomputed single-resolution unsharded mesh from a neuroglancer state shortlink containing point annotation layers and returns a shortlink to a neuroglancer state with the mesh selected in a segmentation layer. Takes a datastack name as a string with the `datastack` argument, a neuroglancer shortlink as a string with the `share_url` argument, and the absolute path to where you want to host the volume on a bucket as a string with the `bucket_path` argument and returns a shortlink url as a string.
+Generates a bucket-hosted legacy-format neuroglancer volume containing a precomputed single-resolution unsharded mesh from a neuroglancer state shortlink containing point annotation layers and returns a shortlink to a neuroglancer state with the mesh selected in a segmentation layer. Takes a datastack name as a string with the `datastack` argument, a neuroglancer shortlink as a string with the `share_url` argument, and the absolute path to where you want to host the volume on a bucket as a string with the `bucket_path` argument and returns a shortlink url as a string 
+
+>[!NOTE]
+>The last folder name in the bucket path will be the top-level folder of the volume. E.g. if your bucket path is "my://bucket/path/vol_01" the vol_01 folder will be the neuroglancer volume. This will create new folders where none exist if you add them into the path.
 
 Before explaining the optional parameters for this function, it's a good idea to understand how it works. If all we wanted was a [convex hull](https://en.wikipedia.org/wiki/Convex_hull), this would be simple to generate. Convex hulls are created by connecting the outermost points in a cloud and ignoring everything inside. This is fine for many purposes, but often you'll need to be able to make more detailed shapes that include concave regions. Doing this automatically, however, becomes complicated very quickly. Take the diagram below for example:
 
