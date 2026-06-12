@@ -2198,7 +2198,9 @@ Generates a bucket-hosted legacy-format neuroglancer volume containing a precomp
 
 Before explaining the optional parameters for this function, it's a good idea to understand how it works. If all we wanted was a [convex hull](https://en.wikipedia.org/wiki/Convex_hull), this would be simple to generate. Convex hulls are created by connecting the outermost points in a cloud and ignoring everything inside. This is fine for many purposes, but often you'll need to be able to make more detailed shapes that include concave regions. Doing this automatically, however, becomes complicated very quickly. Take the diagram below for example:
 
+<p align="center">
 <img src="readme_images/concave_hull_example.png" alt="concave_hull_example" style="width:50%; height:auto;">
+</p>
 
 If we start with the black point cloud, we can easily generate the green convex hull at the top. However, if we want to include concavities, the computer doesn't know exactly which of the many possible "legitimate" configurations of point connections to use. All three of the shapes on the bottom row are legitimate possible ways of connecting the point cloud into a concave shape. The problem is even more difficult when you add a third spatial dimension.
 
