@@ -119,7 +119,21 @@ A collection of neuroglancer-related assets that can include 2D image layers, 3D
 One unit of 3D space, shaped like a rectangular prism, the actual spatial dimensions of which vary from datastack to datastack. Compare to a 2-dimensional pixel. Multiple voxels are grouped together to form a supervoxel.
 
 # Functions
-Below are basic descriptions of each function in the `tracertools` package, with instructions on their use and examples.
+In this section you'll find descriptions of each function in the `tracertools` package, with instructions on their use and examples, as well as notes and warnings about known issues, dependencies, or limitations they may have.
+
+## Function Cluster Notes
+The tracertools package includes several groups of functions that all work in a similar way or rely on a similar set of tools. Rather than rewrite the general information for these in each description, it's summarized here for brevity.
+
+### Google Sheet Functions
+All the Google-sheet-related functions in this package (those beginning with the `gsheet_` prefix) depend on the [gspread](https://docs.gspread.org/en/latest/) Python package and currently require a Google authentication token to be set up prior to use. The process for doing so is explained [here](https://docs.gspread.org/en/latest/oauth2.html#oauth-client-id). Support for Google service accounts will likely be added in the future.
+
+You'll need permission to read and/or write the specific Google sheets you intend to work with, as well as their sheet keys. The sheet key for a Google sheet can be found in the url between `https://docs.google.com/spreadsheets/d/` and `/edit?`. For example, the sheet key used in the `gsheet_add_column` example above is `1AqIyrqSaEJFGD5Ff1fergwJ8-q0x2l0xCgO025C401c`.
+
+> [!WARNING]
+> When uploading floats or integers to Google sheets, large numbers may sometimes be converted to scientific notation - particularly if they end in several 0s. To avoid this for things like segment IDs, it's recommended to convert all numbers to strings prior to uploading.
+
+## Function Descriptions, Instructions, and Examples
+
 
 ### bucket_convert_colons
 Converts file names that include colons to a Windows-safe alternative and back. Takes a string with the `file_path` argument. By default, converts any colons `:` in the string to triple-underscores `___`. If the `to_windows` argument is set to `False`, converts triple underscores back to colons. Used to allow creation and download/upload of neuroglancer legacy-format volumes (which by necessity must include colons in several file names) on Windows machines (which strictly prohibit the use of colons in file names).
@@ -2411,14 +2425,6 @@ By overwriting the old meshes, you change what data is stored at that address wi
 ![iterative_mesh_refinement_example_05](readme_images/iterative_mesh_refinement_example_05.png)
 
 Keep repeating this process until you can't tighten up the `test` mesh any further, then move on to the next annotation layer and do the process again. Keep going until you've tightened up all the annotation layers as much as you can and you should have a nice, snug, watertight mesh for whatever your needs may be!
-
-## Google Sheet Functions
-All the Google-sheet-related functions in this package (those beginning with the `gsheet_` prefix) depend on the [gspread](https://docs.gspread.org/en/latest/) Python package and currently require a Google authentication token to be set up prior to use. The process for doing so is explained [here](https://docs.gspread.org/en/latest/oauth2.html#oauth-client-id). Support for Google service accounts will likely be added in the future.
-
-You'll need permission to read and/or write the specific Google sheets you intend to work with, as well as their sheet keys. The sheet key for a Google sheet can be found in the url between `https://docs.google.com/spreadsheets/d/` and `/edit?`. For example, the sheet key used in the `gsheet_add_column` example above is `1AqIyrqSaEJFGD5Ff1fergwJ8-q0x2l0xCgO025C401c`.
-
-> [!WARNING]
-> When uploading floats or integers to Google sheets, large numbers may sometimes be converted to scientific notation - particularly if they end in several 0s. To avoid this for things like segment IDs, it's recommended to convert all numbers to strings prior to uploading.
 
 # License
 The tracertools package is licensed under the GNU General Public License v3.0. See the [LICENSE](https://github.com/jaybgager/tracertools/blob/main/LICENSE) file for more details.
