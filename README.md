@@ -2198,13 +2198,14 @@ Generates a bucket-hosted legacy-format neuroglancer volume containing a precomp
 
 Before explaining the optional parameters for this function, it's a good idea to understand how it works. If all we wanted was a [convex hull](https://en.wikipedia.org/wiki/Convex_hull), this would be simple to generate. Convex hulls are created by connecting the outermost points in a cloud and ignoring everything inside. This is fine for many purposes, but often you'll need to be able to make more detailed shapes that include concave regions. Doing this automatically, however, becomes complicated very quickly. Take the diagram below for example:
 
-![concave_hull_example](readme_images/concave_hull_example.png)
+<img src="readme_images/concave_hull_example.png" alt="concave_hull_example" style="width:50%; height:auto;">
 
 If we start with the black point cloud, we can easily generate the green convex hull at the top. However, if we want to include concavities, the computer doesn't know exactly which of the many possible "legitimate" configurations of point connections to use. All three of the shapes on the bottom row are legitimate possible ways of connecting the point cloud into a concave shape. The problem is even more difficult when you add a third spatial dimension.
 
 To solve this issue, we can use a process called [Delaunay Triangulation](https://en.wikipedia.org/wiki/Delaunay_triangulation), or more specifically, a modified version of it that produces a structure called an [alpha shape](https://en.wikipedia.org/wiki/Alpha_shape). Without going into the math too much, Delaunay Triangulation connects points into triangles in a way so that each triangle's [circumcircle](https://en.wikipedia.org/wiki/Circumcircle) (the circle on which all three points that make up the triangle lie) doesn't have any points within it. The process works very similarly in 3D except that instead of making triangles by fitting 3 points to a circle, it makes tetrahedrons by fitting 4 points to a sphere. See the diagram below for a 2D visualization of the result:
 
 ![delaunay_circumcircles_example](readme_images/delaunay_circumcircles_example.png)
+Above image derived from [public domain work on Wikipedia](https://commons.wikimedia.org/wiki/File:Delaunay_circumcircles_centers.svg) by user [Nü](https://es.wikipedia.org/wiki/Usuario:N%C3%BC)
 
 The alpha shape technique then takes this result and removes all the triangles too large to fit into a circle of a specified size. The radius of this circle is called the "alpha" value. A smaller alpha value will produce a more detailed final result, but risks breaking apart points in a way that creates holes in the final result. See the example below (this is what the exterior hull of the final shape would look like, not all triangles are drawn):
 
