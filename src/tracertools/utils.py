@@ -4279,13 +4279,13 @@ def make_volume_packaging(
         num_channels=1,
         layer_type="segmentation",
         data_type="uint64",  # channel images might be 'uint8' #
-        # encoding options are raw, png, jpeg, compressed_segmentation, fpzip, kempressed, zfpc, compresso, crackle #
+        # encoding options are raw, png, jpeg, compressed_segmentation, fpzip, kempressed, zfpc, compresso, crackle
         encoding="raw", 
         resolution=resolution,
         voxel_offset=[0, 0, 0],  # x,y,z offset in voxels from the origin #
         mesh="mesh",
-        # pick a convenient size for your underlying chunk representation #
-        # powers of two are recommended, doesn't need to cover image exactly #
+        # pick a convenient size for your underlying chunk representation
+        # powers of two are recommended, doesn't need to cover image exactly
         chunk_size=chunk_size,
         volume_size=volume_size,
     )
