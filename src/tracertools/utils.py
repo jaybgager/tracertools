@@ -4410,18 +4410,18 @@ def triage_segs(
     return results
 
 
-def visualize_skeletons(seg_ids, datastack="brain_and_nerve_cord"):
+def visualize_skeletons(datastack, seg_ids):
     """
-    Generate a microviewer window using the submitted segment IDs.
+    Generates a microviewer window using the submitted segment IDs.
 
-    Currently only works with BANC.
+    Currently only works with "brain_and_nerve_cord" datastack.
 
     Args:
-        seg_ids (list of ints):
-            a list of segment IDs to visualize
-        datastack (str, optional, default="brain_and_nerve_cord"):
+        datastack (str):
             the name of the datastack the segment IDs come from
             currently only "brain_and_nerve_cord" is supported
+        seg_ids (list of ints):
+            a list of segment IDs to visualize
     """
 
     # sets client
