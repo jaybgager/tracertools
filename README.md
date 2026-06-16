@@ -2684,7 +2684,7 @@ Checks if a list of segments pass through the known rough spots for a given data
 
 Optionally get the point coordinates of each intersection as output instead by setting the `return_intersects` argument to `True`. Returns a list of items that will either be lists of 3-integer lists representing any intersection points for a given segment or a None value if none exist.
 
->[!WARNING]
+>[!NOTE]
 >Specifically, this function first skeletonizes the segments and then checks if those skeletons intersect the rough spot meshes. For this reason it's possible (though unlikely) to get false positives and/or false negatives if a segment's skeleton doesn't accurately represent its shape, as can happen ocasionally for very blobby structures like mergers, glia, or cell bodies. This shouldn't be an issue for typical neuronal processes, which is what the function is designed for.
 
 Examples below are fictional and only included to demonstrate formatting. These will be replaced by actual working code once the first rough spot map is completed.
