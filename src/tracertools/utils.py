@@ -1148,7 +1148,7 @@ def count_user_sv_contribution(
 
 def get_anno_array_from_json_state_file(
     layer_name, 
-    json_filepath,
+    json_path,
 ):
     """
     Extracts a numpy array of point coords from a point annotation layer in a NG JSON state file. 
@@ -1157,7 +1157,7 @@ def get_anno_array_from_json_state_file(
         layer_name (str):
             the name of the annotation layer to pull coordinates from
             e.g. "annotation1"
-        json_filepath (str):
+        json_path (str):
             the absolute filepath to the NG JSON state file to pull annotations from
             e.g. '/home/username/ng_jsons/state.json'
 
@@ -1167,7 +1167,7 @@ def get_anno_array_from_json_state_file(
     """
 
     # opens json file and converts to python dict 
-    with open(json_filepath, "r") as json_file:
+    with open(json_path, "r") as json_file:
         json_dict = json.load(json_file)
 
     # searches the full dict for the annotation layer specified and pulls it out as a separate list
@@ -4065,7 +4065,7 @@ def make_objs_from_state_file(datastack, json_path, output_path):
     for layer_name in layer_names:
         # extracts annotation coords as list of lists from JSON state using layer name
         points = get_anno_array_from_json_state_file(
-            layer_name, json_filepath=json_path
+            layer_name, json_path=json_path
         )
 
         # converts coords to numpy array  of nm-resolution point coord numpy arrays
@@ -4093,9 +4093,9 @@ def make_objs_from_state_file(datastack, json_path, output_path):
 
 def make_point_cloud_from_state_file(
     datastack, 
-    json_filepath, 
+    json_path, 
     layer_name, 
-    output_filepath,
+    output_path,
 ):
     """
     Generates a point cloud OBJ file from a neuroglancer point annotation layer in a JSON state file.
@@ -4105,10 +4105,10 @@ def make_point_cloud_from_state_file(
             the name of the datastack the JSON state is from
             e.g. 'brain_and_nerve_cord'
             for a list of currently-supported datastacks use get_supported_configs()
-        json_filepath (str):
+        json_path (str):
             the absolute path to the NG JSON state file to pull annotations from
             e.g. '/home/username/ng_jsons/state.json'
-        output_filepath (str):
+        output_path (str):
             the absolute path to the folder where you want to save the OBJ output file
             e.g. '/home/username/ng_meshes'
             file will be named whatever the layer name was in the JSON state
@@ -4127,7 +4127,7 @@ def make_point_cloud_from_state_file(
 
     # creates numpy array of points
     points = get_anno_array_from_json_state_file(
-        layer_name, json_filepath=json_filepath
+        layer_name, json_path=json_path
     )
 
     # converts points to nm resolution
@@ -4144,12 +4144,12 @@ def make_point_cloud_from_state_file(
     pc = trimesh.PointCloud(nm_points)
 
     # exports point cloud as obj
-    pc.export(output_filepath, file_type="obj")
+    pc.export(output_path, file_type="obj")
 
 
 def make_volume_mesh_from_state_file(
     datastack, 
-    json_filepath, 
+    json_path, 
     layer_name, 
     output_filepath, 
     export_obj=False,
@@ -4166,7 +4166,7 @@ def make_volume_mesh_from_state_file(
             the name of the datastack the JSON state is from
             e.g. "brain_and_nerve_cord"
             for a list of currently-supported datastacks, use get_supported_configs()
-        json_filepath (str):
+        json_path (str):
             the absolute filepath to the NG JSON state file to pull annotations from
             e.g. "/home/username/ng_jsons/state.json"
         layer_name (str):
@@ -4193,7 +4193,7 @@ def make_volume_mesh_from_state_file(
 
     # extracts annotation coords as list of lists from JSON state using layer name
     points = get_anno_array_from_json_state_file(
-        layer_name, json_filepath=json_filepath
+        layer_name, json_path=json_path
     )
 
     # converts coords to numpy array  of nm_resolution point coord numpy arrays
