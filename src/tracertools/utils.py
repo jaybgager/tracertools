@@ -4108,6 +4108,9 @@ def make_point_cloud_from_state_file(
         json_path (str):
             the absolute path to the NG JSON state file to pull annotations from
             e.g. '/home/username/ng_jsons/state.json'
+        layer_name (str):
+            the name of the point annotation layer to pull from
+            e.g. "annotation1"
         output_path (str):
             the absolute path to the folder where you want to save the OBJ output file
             e.g. '/home/username/ng_meshes'
