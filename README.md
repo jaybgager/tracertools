@@ -2,12 +2,12 @@
 The tracertools package is a collection of Python functions designed to streamline common tasks for connectomics researchers, particularly those related to the proofreading process. 
 
 # Installation
-Quick installation with pip isn't supported yet (but is planned for the future), so you'll have to intall the tracertools package manually from this GitHub repository by doing the following:
+Quick installation from the Python Package Index (PyPI) with pip isn't supported yet (but is planned for the future), so you'll have to intall the tracertools package manually from this GitHub repository by doing the following:
 
 1. Open a terminal and navigate to the directory where you want the tracertools package to be stored.
-2. Run the code `git clone https://github.com/jaybgager/tracertools.git` to make a local copy of the package at the location you naviagated to in step one. This will be create a folder named tracertools in that directory that's linked to the GitHub repository.
-3. In the terminal, navigate one folder down, so that you're in the top-level (root) folder of the tracertools package by running the command `cd tracertools`.
-4. In the terminal, run the command `pip install -e .`. This will tell Python's default installer, pip, to add the folder you're currently in to its list of importable packages. The `-e` modifier causes this installation to be "editable", meaning that if you make changes to the code stored in the tracertools folder, they'll take effect when you import tracertools into a Python script. This is important for keeping the package up-to-date, so you don't have to reinstall it every time there are changes. This also lets you expriment with modifying the tools to meet your own needs. The `.` at the end just tells pip to install everything at the current directory location.
+2. Run the code `git clone https://github.com/jaybgager/tracertools.git` to make a local copy of the package at the location you navigated to in step one. This will create a folder named `tracertools` that's linked to the GitHub repository in the location you were in when you ran the `clone` command.
+3. In the terminal, navigate one folder down, so that you're in the top-level folder of the `tracertools` package by running the command `cd tracertools`.
+4. In the terminal, run the command `pip install -e .` (it may take a minute to run). This will tell Python's default installer, pip, to add the folder you're currently in to its list of importable packages. The `-e` modifier causes this installation to be "editable", meaning that if you make changes to the code stored in the `tracertools` folder, they'll take effect when you import the tracertools package into a Python script. This is important for keeping the package up-to-date, so you don't have to reinstall it every time there are changes. This also lets you expriment with modifying the tools to meet your own needs. The `.` at the end just tells pip to install everything at the current directory location.
 
 Now whenever you need to use a tracertools function, you can simply import it like any other package using the "import tracertools" code in any Python script. Then, when you want to use a function, you add `tracertools.` in front of it. For example, if you wanted to use the `get_current_seg_ids` function, you would use the following code:
 
@@ -28,6 +28,9 @@ fresh_ids = tt.get_current_seg_ids(
     seg_ids=[720575941586154052,720575941429544111]
 )
 ```
+
+>[!NOTE]
+>Remember to periodically update your package by navigating tot he `tracertools` folder in the terminal and running the command `git pull` to get the latest changes from the github repository. If you've got an active kernel that was started before running the pull command (e.g. you've been using tracertools in a jupyter notebook), remember to restart the kernel after updating the package in order for the changes to take effect!
 
 # Glossary of Common Terms
 Some terms used in the function descriptions are either uncommon or are used here to mean something very specific in the context of this package. These are defined below:
