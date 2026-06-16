@@ -32,6 +32,9 @@ fresh_ids = tt.get_current_seg_ids(
 # Glossary of Common Terms
 Some terms used in the function descriptions are either uncommon or are used here to mean something very specific in the context of this package. These are defined below:
 
+**backbone (neuron)**\
+A general collective term for the larger processes of a given neuron. Exact definitional criteria vary from source to source, but often requires microtubules to be visible in imaging where this is possible. Contrast to "twig". Frequently used as a proofreading standard for cell completion (e.g. `"backbone_proofread"`), as attaching every twig to a neuron is typically cost-prohibitive due to the difficulty and uneccessary due to biological redundancy between connected neurons.
+
 **bucket**\
 A server where files can be stored and accessed remotely. Often used for publicly hosting neuroglancer volumes containing meshes, annotation layers, or electron microscope (EM) image layers. Can also be used to host data tables for things like cell type labels, proofreading status, or synapse data. The functions that begin with the prefix `bucket_` relate to reading from and writing to buckets using the [cloudfiles](https://github.com/seung-lab/cloud-files) Python package.
 
@@ -76,6 +79,9 @@ Neuroglancer uses JSON states to store all the information about a given snapsho
 
 This state can be downloaded as a JSON state file on your local machine, from which all the information pertaining to that configuration of neuroglancer can be pulled if you know the methods and terms to use. When referring to an instance of this data type, the terms "JSON state" and "state JSON" are often used interchangeably. This package will always use "JSON state" since "JSON" is an adjective that's modifying the noun "state", except where the reverse is required by outside package fucntions.
 
+**local**\
+A term used to refer to something stored on the actual computer that you're using (e.g. your hard drive). Derived terms include "local path"/"local directory", "local machine", and "local host(ing)". Contrast with "remote".
+
 **mesh**\
 A 3-dimensional shape, often representing a neuron, but sometimes used to depict other structures like organelles, nuclei, neuropils, or simply regions of space. Stored in literal terms as a collection of vertices, edges, and faces. A mesh is considered "watertight" if all its triangular faces are connected to exactly 3 other triangular faces (i.e. there are no "holes"). Many formats for storing mesh information exist, but this package primarily uses either those found in neuroglancer volumes or sometimes OBJ files. 
 
@@ -95,6 +101,12 @@ If you see the term `precomputed` in the address for a segmentation layer, it ge
 
 Contrast with the term `graphene`, which indicates that a mesh is linked to the chunkedgraph in some way and will therefore show up as a "painted" overlay in the 2D window of neuroglancer, allowing a user to show or hide segments by double-clicking within them in 2D. 
 
+**process (neuron)**\
+A general umbrella term for the long, thin structures that extend (or "proceed") from the cell body of a typical neuron or from other processes. Often used interchangeably with "tract", "neurite", "path", and "branch". "Backbones", "twigs", "axons", and "dendrites" would all be considered types of processes. Usage can sometimes overlap with "arbor", though that term more correctly refers to a collection of multiple processes branching out from a single initial process.
+
+**remote**\
+A term used to refer to something stored on a computer other than the one you're actually using. This could be another user's machine, a university-run server, or cloud server run by a private company (e.g. Google Cloud / Amazon Web Services). Derived terms include "remote host(ing)", "remote bucket", and "remote machine". Things that are hosted remotely will often require some kind of verification process in order to access (e.g. security tokens, SSH keys, password protection etc.)Contrast with local. 
+
 **resolution**\
 The actual, physical dimensions in nanometers represented by one "unit" in the x, y, and z directions of a 3D coordinate system, stored as a list/array of 3 numbers (e.g. `[4, 4, 45]` for the voxel dimensions in the "brain and nerve_cord" datastack). 
 
@@ -108,6 +120,9 @@ The current group of supervoxels that make up one or more neurons and their over
 
 **supervoxel**\
 The smallest rearrangeable unit of a 3D segment, made up of multiple voxels. Not a consistent size. Sometimes referred to as the "watershed" layer because of [the type of algorithm](https://en.wikipedia.org/wiki/Watershed_(image_processing)) that led to their creation. Supervoxels cannot be broken apart, a quality sometimes referred to as being "atomic" (i.e. the smallest unbreakable constituent part of something). When referenceing the "nodes"/"leaves"/"layers" of the chunkedgraph, supervoxels are L1 - the foundational level. At any given time, a supervoxel will "belong to" a specific segment (and will therefore be associated with that segment's ID), but this assignment will change if that segment is edited.
+
+**twigs (neuron)**\
+A general term for the smaller, more peripheral processes of a neuron. Exact definitional criteria vary from source to source, but often rely on a lack of visible microtubules in visualizations where these can be seen. Contrast with "backbone". Twigs are often ignored during the proofreading process, as attaching every twig to a neuron is typically cost-prohibitive due to the difficulty and uneccessary due to biological redundancy between connected neurons.
 
 **vertex**\
 A single point in 3D space connected to other points. Used to represent the boundaries of a 3D mesh. Stored as a list or array of 3 numbers (e.g. `[1,2,3]`) corresponding to the point's x, y, and z coordinates, either in nanometers, or in voxels - the measurements for which may change depending on the voxel resolution of the datastack you're working with. Plural vertices.
@@ -743,7 +758,7 @@ print(contribs)
 {'5098': 2957, '5017': 7366, '2815': 253}
 ```
 
-### get_anno_array_from_json_state_file
+### get_anno_array_from_state_file
 Extracts a numpy array of point coordinates from a point annotation layer in a locally-stored neuroglancer JSON state file. Takes the absolute filepath to a neuroglancer JSON state file on your local machine as a string with the `json_filepath` argument and the name of a point annotation layer in the JSON state you want to pull points from as a string with the `layer_name` argument and returns an (n,3)-shape numpy array of ints representing the point coordinates of each anntoation. Useful for making point cloud OBJS or meshing.
 
 Example (using a hypothetical JSON state file called `state01.json` containing a point annotation layer called `annotation1` and which is stored in the `home/user/ng_states/` folder):
@@ -755,7 +770,7 @@ Example (using a hypothetical JSON state file called `state01.json` containing a
 
 import tracertools as tt
 
-anno_array = tt.get_anno_array_from_json_state_file(
+anno_array = tt.get_anno_array_from_state_file(
     json_filepath="home/user/ng_states/state01.json",
     layer_name="annotation1"
 )
@@ -2204,6 +2219,30 @@ https://spelunker.cave-explorer.org/#!middleauth+https://global.daf-apis.com/ngl
 >[!NOTE]
 >While the coordinates of the merge edits represent the exact locations laid down by the proofreader, the split point coordinates represent an average of all the individual coordinates generated by the automated cut tool, and so may be slightly distorted in some cases.
 
+### make_local_volume_from_obj
+Locally generates a legacy-format neuroglancer volume that contains a single-resolution unsharded precomputed mesh using an OBJ file. Takes a datastack name as a string with the `datastack` argument, the absolute file path to the existing OBJ file as a string with the `obj_path` argument, and the absolute path to the folder where you want the volume to be stored as a string with the `output_path` argument. A folder called "image" containing the volume files will be created in this folder.
+
+>[!WARNING]
+>This function doesn't work on Windows OS due to the volume format requiring colons `:` in several file names, which is prohibited on Windows. Currently there's no way around this limitation.
+
+Example:
+
+```
+# ----------------------------------------------------
+# INPUT
+# ----------------------------------------------------
+
+import tracertools as tt
+
+tt.make_local_volume_from_obj(
+    datastack="brain_and_nerve_cord",
+    obj_path="/home/user/path/to/file.obj",
+    output_path="/home/user/path/to/volume/folder"
+)
+```
+
+This would create a `brain_and_nerve_cord` volume folder named `image` that contained all the volume files in the `/home/user/path/to/volume/folder` folder using the data from `file.obj`.
+
 ### make_mesh_from_points
 >[!WARNING]
 >This function is experimental and may break easily. It currently only works with the Princeton nokura bucket.
@@ -2221,7 +2260,7 @@ Before explaining the optional parameters for this function, it's a good idea to
 
 If we start with the black point cloud, we can easily generate the green convex hull at the top. However, if we want to include concavities, the computer doesn't know exactly which of the many possible "legitimate" configurations of point connections to use. All three of the shapes on the bottom row are legitimate possible ways of connecting the point cloud into a concave shape. The problem is even more difficult when you add a third spatial dimension.
 
-To solve this issue, we can use a process called [Delaunay Triangulation](https://en.wikipedia.org/wiki/Delaunay_triangulation), or more specifically, a modified version of it that produces a structure called an [alpha shape](https://en.wikipedia.org/wiki/Alpha_shape). Without going into the math too much, Delaunay Triangulation connects points into triangles in a way so that each triangle's [circumcircle](https://en.wikipedia.org/wiki/Circumcircle) (the circle on which all three points that make up the triangle lie) doesn't have any points within it. The process works very similarly in 3D except that instead of making triangles by fitting 3 points to a circle, it makes tetrahedrons by fitting 4 points to a sphere. See the diagram below for a 2D visualization of the result:
+To solve this issue, we can use a process called [Delaunay Triangulation](https://en.wikipedia.org/wiki/Delaunay_triangulation), or more specifically, a modified version of it that produces a structure called an [alpha shape](https://en.wikipedia.org/wiki/Alpha_shape). Without going into the math too much, Delaunay Triangulation connects points into triangles in a way so that each triangle's [circumcircle](https://en.wikipedia.org/wiki/Circumcircle) (the circle on which all three points that make up the triangle lie) doesn't have any points within it. The process works very similarly in 3D except that instead of making triangles by fitting 3 points to a circle, it makes tetrahedrons by fitting 4 points to a sphere. See the diagram below for a 2D visualization of the result (ignore the red dots, those are just the centerpoints of the circles):
 
 <p align="center">
 <img src="readme_images/delaunay_circumcircles_example.png" alt="delaunay_circumcircles_example" style="width:66%; height:auto;">
@@ -2229,11 +2268,13 @@ To solve this issue, we can use a process called [Delaunay Triangulation](https:
 
 Above image derived from [public domain work on Wikipedia](https://commons.wikimedia.org/wiki/File:Delaunay_circumcircles_centers.svg) by user [Nü](https://es.wikipedia.org/wiki/Usuario:N%C3%BC)
 
-The alpha shape technique then takes this result and removes all the triangles too large to fit into a circle of a specified size. The radius of this circle is called the "alpha" value. A smaller alpha value will produce a more detailed final result, but risks breaking apart points in a way that creates holes in the final result. See the example below for a visualization (this is what the exterior hull of the final shape would look like, not all triangles are drawn):
+The alpha shape technique then takes this result and removes all the triangles too large to fit into a circle of a specified size. The radius of this circle is called the "alpha" value. A smaller alpha value will produce a more detailed final result, but risks breaking apart points in a way that creates holes in the output. See the example below for a visualization*:
 
 <p align="center">
 <img src="readme_images/alpha_variation_example.png" alt="alpha_variation_example" style="width:66%; height:auto;">
 </p>
+
+*This is only showing what the exterior hull of the final shape would look like, the actual triangles aren't drawn. This is also a hand-drawn example, so there may be some slight spatial inaccuracies since it's not generated from actual data.
 
 Trying different alpha values for the same point cloud is therefore often necessary to produce a good final product. This function starts at an alpha of 0 by default, then uses some math to guess at a good interval to use, and tries incrementing the alpha value up by that interval with each pass until it hits a mesh that's "watertight" (one that doesn't have any holes in it). It does this for each of the point annotation layers in the initial neuroglancer link, then fuses all the resulting meshes together using a manifold3d boolean union method.
 
@@ -2429,6 +2470,320 @@ By overwriting the old meshes, you change what data is stored at that address wi
 ![iterative_mesh_refinement_example_05](readme_images/iterative_mesh_refinement_example_05.png)
 
 Keep repeating this process until you can't tighten up the `test` mesh any further, then move on to the next annotation layer and do the process again. Keep going until you've tightened up all the annotation layers as much as you can and you should have a nice, snug, watertight mesh for whatever your needs may be!
+
+### make_ng_link
+Generates a neuroglancer link from a datastack name, optionally adding a list of segment IDs and various layers. Only works on config-supported datastacks. Takes a datastack name as a string with the `datastack` argument and returns a string-format neuroglancer link to a state with the chosen datastack's image and segmentation layers.
+
+Optionally pass segment IDs as a list of integers with the `seg_ids` argument to have them selected.
+
+Optionally pass annotation layers as a list of dictionaries with the `anno_layers` argument. These can be created using the `make_anno_layer` function or constructed manually as long as the formatting is correct for the chosen datastack.
+
+Optionally add a layer for the default region mesh(es) for the datastack if one exists by setting the `region_meshes` argument to `True`.
+
+Optionally choose the coloration of selected segments by passing a list of string-format hexadecimal values with the `seg_colors` argument (e.g. `["#FF0000","#00FF00","#0000FF"]`). The length of this list must match the length of the list passed with `seg_ids`.
+
+Optionally set the viewer site manually by passing a string of the base viewer url with the `viewer_site` argument. By default this function uses the default viewer site recommended by the datastack.
+
+Optionally add a custom mesh layer by passing the url to a hosted volume with one or more meshes in it as a string with the `cutom_mesh_source` argument. Currently only designed to work with lecagy-format volumes containing precomputed single-resolution unsharded meshes. Use with other formats may work, but isn't guaranteed. Currently only one custom mesh can be passed,but multiple inputs are planned for the future. By default this mesh layer will be named "Custom Mesh" unless a custom name is passed as a string with the `custom_mesh_name` argument. Similarly, the default behavior makes the mesh segment ID 1 green `"#6DB86B"` unless a custom hexadecimal color value is passed as a string with the `custom_mesh_color` argument. This will only color the mesh segment with ID `1` currently. 
+
+Optionally pass custom point coordinates as a list of integers with the `view_coords` argument. By default the standard coordinates for the chosen datastack config will be used (usually near the center of the volume). These coordinates must be in the same voxel resolution as the viewer used (e.g. `[4,4,45]` for `brain_and_nerve_cord`)
+
+Optionally return a standard-format long neuroglancer url containing all the state information in i by setting the `long_url` argument to `True`. Default behavior uses the standard link shortening service for the chosen datastack, which dramatically reduces the character count of the links for use with common messaging services that impose character limits. 
+
+Optionally set the opacity of the 3D viewer to 0.99 to make the meshes translucent by setting the `translucent_seg` argument to `True`. This is useful for comparing two versions of the same segment by setting them to complimentary colors (e.g. red `"#FF0000"` for the old trace and cyan `"#00FFFF"` for the new one), causing the overlap (i.e. the regions the two traces share) to turn neutral grey. This highlights changes made - in the previous example removed regions would show up red and added regions as cyan.
+
+Example (basic behavior):
+
+```
+# ----------------------------------------------------
+# INPUT
+# ----------------------------------------------------
+
+import tracertools as tt
+
+ng_url = tt.make_ng_link(
+    datastack="brain_and_nerve_cord",
+    seg_ids=[
+        720575941441350235,
+        720575941519923628,
+        720575941703820762,
+    ],
+    region_meshes=True,
+)
+
+print(ng_url)
+
+# ----------------------------------------------------
+# OUTPUT (as of 16 June 2026)
+# ----------------------------------------------------
+
+https://spelunker.cave-explorer.org/#!middleauth+https://global.daf-apis.com/nglstate/api/v1/6639015473184768
+```
+
+Example (custom colors, translucency):
+
+```
+# ----------------------------------------------------
+# INPUT
+# ----------------------------------------------------
+
+import tracertools as tt
+
+ng_url = tt.make_ng_link(
+    datastack="brain_and_nerve_cord",
+    seg_ids=[
+        720575941473274509, # outdated version of 720575941441350235 #
+        720575941524660200, # outdated version of 720575941519923628 #
+        720575941565377335, # outdated version of 720575941703820762 #
+        720575941441350235,
+        720575941519923628,
+        720575941703820762,
+    ],
+    seg_colors=[
+        "#FF0000",
+        "#FF0000",
+        "#FF0000",
+        "#00FFFF",
+        "#00FFFF",
+        "#00FFFF",
+    ],
+    translucent_seg=True,
+)
+
+print(ng_url)
+
+# ----------------------------------------------------
+# OUTPUT (as of 16 June 2026)
+# ----------------------------------------------------
+
+https://spelunker.cave-explorer.org/#!middleauth+https://global.daf-apis.com/nglstate/api/v1/5192707382181888
+```
+
+Example (custom mesh with chosen color and name, manual viewpoint setting):
+
+```
+# ----------------------------------------------------
+# INPUT
+# ----------------------------------------------------
+
+import tracertools as tt
+
+ng_url = tt.make_ng_link(
+    datastack="brain_and_nerve_cord",
+    custom_mesh_source="https://c10s.pni.princeton.edu/tracers/samples/mesher/volume_02|neuroglancer-precomputed:",
+    custom_mesh_name="Orange you glad you can customize mesh names?",
+    custom_mesh_color="#FF7800",
+    view_coords=[123757, 180557, 4582],
+)
+
+print(ng_url)
+
+# ----------------------------------------------------
+# OUTPUT (as of 16 June 2026)
+# ----------------------------------------------------
+
+https://spelunker.cave-explorer.org/#!middleauth+https://global.daf-apis.com/nglstate/api/v1/4819158423306240
+```
+
+### make_objs_from_state_file
+Generates convex hull meshes as OBJ files from all the point annotation layers in a local neuroglancer JSON state file. Takes a datastack name as a string with the `datastack` argument, the absolute file path to the existing JSON state file as a string with the `json_path` argument, and the absolute path to the folder where you want the OBJ files to be stored as a string with the `output_path` argument. The OBJ file names will be the same as the layers they were created from.
+
+Example:
+
+```
+# ----------------------------------------------------
+# INPUT
+# ----------------------------------------------------
+
+import tracertools as tt
+
+tt.make_objs_from_state_file(
+    datastack="brain_and_nerve_cord",
+    json_path="/home/user/path/to/state.json",
+    output_path="/home/user/path/to/obj/folder",
+)
+```
+
+### make_point_cloud_from_state_file
+Generates a point cloud as an OBJ file from a point annotation layer in a local neuroglancer JSON state file. Takes a datastack name as a string with the `datastack` argument, the absolute file path to the existing JSON state file as a string with the `json_path` argument, the name of the point annotation layer in the state to pull the coordinates from as a string with the `layer_name` argument, and the absolute path to the folder where you want the OBJ files to be stored as a string with the `output_path` argument. 
+
+Example:
+
+```
+# ----------------------------------------------------
+# INPUT
+# ----------------------------------------------------
+
+import tracertools as tt
+
+tt.make_point_cloud_from_state_file(
+    datastack="brain_and_nerve_cord",
+    json_path="/home/user/path/to/state.json",
+    layer_name="annotation1",
+    output_path="/home/user/path/to/obj/folder",
+)
+```
+
+### make_volume_mesh_from_state_file
+Locally generates a precomputed single-res unsharded convex hull mesh in a legacy-format neuroglancer volume from a point annotation layer in a local neuroglancer JSON state file. Takes a datastack name as a string with the `datastack` argument, the absolute file path to the existing JSON state file as a string with the `json_path` argument, the name of the point annotation layer in the state to pull the coordinates from as a string with the `layer_name` argument, and the absolute path to the folder where you want the OBJ files to be stored as a string with the `output_path` argument. Output will be a neuroglancer volume folder called `image` containing a single meshed segment with an ID of `1` in the specified directory.
+
+Optionally also create an OBJ file of the mesh called `hull.obj` in the same location by setting the `export_obj` argument to `True`.
+
+>[!WARNING]
+>This function doesn't work on Windows OS due to the volume format requiring colons `:` in several file names, which is prohibited on Windows. Currently there's no way around this limitation.
+
+Example (includes optional exporting of OBJ files):
+
+```
+# ----------------------------------------------------
+# INPUT
+# ----------------------------------------------------
+
+import tracertools as tt
+
+tt.make_volume_mesh_from_state_file(
+    datastack="brain_and_nerve_cord",
+    json_path="/home/user/path/to/state.json",
+    layer_name="annotation1",
+    output_path="/home/user/path/to/volume/folder",
+    export_obj=True,
+)
+```
+
+### make_volume_packaging
+Creates a local file structure to hold a neuroglancer volume in the specified directory. Primarily intended to be used by other functions that automate this process, but can be used manually by passing the absolute path to the folder where you want the volume to be created as a string with the `output_path` argument. Names volume folder "image".
+
+Optionally set the volume's voxel resolution by passing the size in nanometers of the voxels' x, y, and z dimensions as a list of integers. Default is nanometer resolution (i.e. `[1,1,1]`).
+
+Optionally set the size of the volume's chunks in voxels by passing the x, y, and z dimensions of one chunk as a list of integers. Default is `[512,512,16]`.
+
+Optionally set the size of the entire volume by passing the x, y, and z dimensions in voxels as a lsit of integers. Default is `250000, 250000, 25000]`.
+
+>[!WARNING]
+>This function doesn't work on Windows OS due to the volume format requiring colons `:` in several file names, which is prohibited on Windows. Currently there's no way around this limitation.
+
+Example:
+
+```
+# ----------------------------------------------------
+# INPUT
+# ----------------------------------------------------
+
+import tracertools as tt
+
+tt.make_volume_packaging(
+    output_path="/home/user/path/to/volume/folder",
+)
+```
+
+### triage_segs
+>[!WARNING]
+>This function currently doesn't work. Rough spot maps are in the process fo being generated as of 16 June 2026.
+
+Checks if a list of segments pass through the known rough spots for a given datastack. Takes a datastack name as a string with the `datastack` argument and a list of segment IDs as a list of integers with the `seg_ids` argument, and returns a list of boolean (True/False) values indicating whether each segment passes through a known rough spot.
+
+Optionally get the point coordinates of each intersection as output instead by setting the `return_intersects` argument to `True`. Returns a list of items that will either be lists of 3-integer lists representing any intersection points for a given segment or a None value if none exist.
+
+>[!WARNING]
+>Specifically, this function first skeletonizes the segments and then checks if those skeletons intersect the rough spot meshes. For this reason it's possible (though unlikely) to get false positives and/or false negatives if a segment's skeleton doesn't accurately represent its shape, as can happen ocasionally for very blobby structures like mergers, glia, or cell bodies. This shouldn't be an issue for typical neuronal processes, which is what the function is designed for.
+
+Examples below are fictional and only included to demonstrate formatting. These will be replaced by actual working code once the first rough spot map is completed.
+
+Example (default behavior):
+
+```
+# ----------------------------------------------------
+# INPUT
+# ----------------------------------------------------
+
+import tracertools as tt
+
+intersects_rough = tt.triage_segs(
+    datastack="brain_and_nerve_cord",
+    seg_ids=[
+        123,
+        456,
+        789,
+    ],
+)
+
+# ----------------------------------------------------
+# OUTPUT
+# ----------------------------------------------------
+
+[True,False,True]
+```
+
+Example (return intersection points):
+
+```
+# ----------------------------------------------------
+# INPUT
+# ----------------------------------------------------
+
+import tracertools as tt
+
+intersects_rough = tt.triage_segs(
+    datastack="brain_and_nerve_cord",
+    seg_ids=[
+        123,
+        456,
+        789,
+    ],
+    return_intersects=True,
+)
+
+# ----------------------------------------------------
+# OUTPUT
+# ----------------------------------------------------
+
+[
+    [
+        [313, 2, 45]
+    ],
+    None,
+    [
+        [3, 45, 67],
+        [786, 90, 13],
+        [112, 63, 201]
+    ]
+]
+```
+
+### visualize_skeletons
+Generates an immediate visual representation of the skeletons for a list of neurons using the [microviewer](https://pypi.org/project/microviewer/) Python package. Includes heatmap of approximate cable thickness with key. Takes a datastack name as a string with the `datastack` argument and a list of segment IDs as a list of integers with the `seg_ids` argument and begins running a microviewer instance using [Visualization Toolkit (VTK)](https://vtk.org/).
+
+Left-click and drag to rotate. Scroll or right-click and drag to zoom. Shift-click and drag or middle-mouse-click and drag to pan. Cell bodies will generally appear as red or orange skeleton "bones" indicating very thick radii.
+
+Skeletons may take some time to create depending on their size, and whether they've been cached recently. A time estimate will print out when the function is run and the function will automatically sleep for this amount of time in order to avoid crashing. In rare cases, this may underestimate the skeleton creation time and fail to pull them. If this occurs, wait a short time and try again. This allows more time for the skeletonization service to complete the process.
+
+>[!NOTE]
+>The viewer may occasionally refuse to close when clicking on the `X` button or using force-quit hotkeys, requiring the script that initiated it to be interrupted/killed manually. It's unclear at present (16 June 2026) what causes this issue, and is low-priority for debugging as it appears to be harmless, if a bit inconvenient.
+
+Example:
+
+```
+# ----------------------------------------------------
+# INPUT
+# ----------------------------------------------------
+
+import tracertools as tt
+
+tt.visualize_skeletons(
+    datastack="brain_and_nerve_cord",
+    seg_ids=[
+        720575941441350235,
+        720575941519923628,
+        720575941703820762,
+    ],
+)
+
+# ----------------------------------------------------
+# OUTPUT
+# ----------------------------------------------------
+```
+
+![visualize_skeletons_example](readme_images/visualize_skeletons_example.png)
 
 # License
 The tracertools package is licensed under the GNU General Public License v3.0. See the [LICENSE](https://github.com/jaybgager/tracertools/blob/main/LICENSE) file for more details.
