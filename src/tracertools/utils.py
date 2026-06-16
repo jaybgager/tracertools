@@ -955,7 +955,7 @@ def count_synapses(
         config = get_config(datastack=datastack)
     except KeyError:
         raise KeyError(
-            "The datastack you requested is not supported. For a list of supported datastacks, use get_datastack_names()."
+            "The datastack you requested is not config-supported. For a list of supported datastacks, use get_supported_configs()."
         )
 
     # gets name of synapse table using stack_info
@@ -2221,7 +2221,7 @@ def get_seg_skeletons(
             a list of osteoid skeleton objects in the same order as the submitted segment IDs
     """
 
-    # sets client using datastack_name 
+    # sets client using datastack name 
     client = CAVEclient(datastack)
 
     # pulls tracer-format datastack config 
@@ -3283,14 +3283,14 @@ def make_edits_link(datastack, seg_id, separate_layers=False):
     return link
 
 
-def make_local_volume_from_obj(datastack_name, obj_path, output_path):
+def make_local_volume_from_obj(datastack, obj_path, output_path):
     """
     Generates a local neuroglancer volume that contains a single-resolution precomputed mesh using an OBJ file. 
     
     Doesn't currently work on Windows due to unavoidable use of colons in several filenames.
 
     Args:
-        datastack_name (str):
+        datastack (str):
             the name of the datastack the OBJ mesh is from, e.g. 'brain_and_nerve_cord'
             for a list of currently-supported datastacks use get_supported_configs()
         obj_path (str):
@@ -3304,10 +3304,10 @@ def make_local_volume_from_obj(datastack_name, obj_path, output_path):
 
     # gets config info dict for chosen datastack
     try:
-        config = get_config(datastack=datastack_name)
+        config = get_config(datastack=datastack)
     except KeyError:
         raise KeyError(
-            "The datastack name is invalid. To see a list of currently-supported datastack names, use the get_supported_configs() function."
+            "The datastack name doesn't match a currently-supported config. To see a list of currently-supported datastack names, use the get_supported_configs() function."
         )
 
     # pulls voxel xyz dimensions from config dict
@@ -3421,7 +3421,7 @@ def make_mesh_from_points(
         config = get_config(datastack=datastack)
     except KeyError:
         raise KeyError(
-            "The datastack name is invalid. To see a list of currently-supported datastack names, use the get_supported_configs() function."
+            "The datastack name isn't in the list of currently-supported configs. To see a list of currently-supported datastack names, use the get_supported_configs() function."
         )
 
     # pulls voxel xyz dimensions from config dict
@@ -3809,7 +3809,7 @@ def make_ng_link(
     """
     Generates a neuroglancer link from a datastack name, optionally adding a list of segment IDs and various layers. 
     
-    For a list of currently-supported datastacks, use the get_datastack_names() function.
+    For a list of datastacks with current config support, use the get_supported_configs() function.
 
     Args:
         datastack (str):
@@ -4036,7 +4036,7 @@ def make_objs_from_state_file(datastack, json_path, output_path):
         config = get_config(datastack=datastack)
     except KeyError:
         raise KeyError(
-            "The datastack name is invalid. To see a list of currently-supported datastack names, use the get_supported_configs() function."
+            "The datastack name isn't int he list of currently-supported configs. To see a list of currently-supported datastack names, use the get_supported_configs() function."
         )
 
     # adds trailing slash to output path if none present
@@ -4119,7 +4119,7 @@ def make_point_cloud_from_state_file(
         config = get_config(datastack=datastack)
     except KeyError:
         raise KeyError(
-            "The datastack name is invalid. To see a list of currently-supported datastack names, use the get_supported_configs() function."
+            "The datastack name isn't in the list of currently-supported configs. To see a list of currently-supported datastack names, use the get_supported_configs() function."
         )
 
     # gets resolution of volume
@@ -4185,7 +4185,7 @@ def make_volume_mesh_from_state_file(
         config = get_config(datastack=datastack)
     except KeyError:
         raise KeyError(
-            "The datastack name is invalid. To see a list of currently-supported datastack names, use the get_supported_configs() function."
+            "The datastack name isn't in the current list of supported configs. To see a list of currently-supported datastack names, use the get_supported_configs() function."
         )
 
     # pulls voxel xyz dimensions from config dict
