@@ -69,7 +69,7 @@ def bucket_delete_file(file_path):
 
     Args:
         file_path (str):
-            the absolute filepath to the file you want to delete on the bucket
+            the absolute path to the file you want to delete on the bucket
     """
 
     # splits file_path into file name and folder path
@@ -135,7 +135,7 @@ def bucket_download_file(
 
     Args:
         bucket_path (str):
-            the absolute filepath of the file in the bucket
+            the absolute path of the file in the bucket
         download_path (str, optional, default=None):
             the absolute path to the folder on your local machine 
             where you want the downloaded file to go 
@@ -194,7 +194,7 @@ def bucket_download_folder(
 
     Args:
         bucket_path (str):
-            the absolute filepath of the bucket folder you want to download (str)
+            the absolute path of the bucket folder you want to download (str)
         download_path (str, optional, default=None):
             the absolute path to the folder on your local machine 
             where you want the downloaded folder to go 
@@ -1158,7 +1158,7 @@ def get_anno_array_from_state_file(
             the name of the annotation layer to pull coordinates from
             e.g. "annotation1"
         json_path (str):
-            the absolute filepath to the NG JSON state file to pull annotations from
+            the absolute path to the NG JSON state file to pull annotations from
             e.g. '/home/username/ng_jsons/state.json'
 
     Returns:
@@ -1753,7 +1753,7 @@ def get_mesh_triangles(
 
     Args:
         volume_path
-            the absolute filepath to the directory of the volume that contains the mesh 
+            the absolute path to the directory of the volume that contains the mesh 
             e.g. '/home/username/ng_meshes/image' (str)
         mesh_seg_id (int, optional, default=1):
             the segment ID of the mesh within the neuroglancer volume
@@ -1767,7 +1767,7 @@ def get_mesh_triangles(
             e.g. [[[1,2,3],[4,5,6],[7,8,9]],[[11,12,13],[14,15,16],[17,18,19]],...]
     """
 
-    # removes trailing slashes from volume filepath if present
+    # removes trailing slashes from volume path if present
     if volume_path[-1] == "/":
         volume_path = volume_path[:-1]
 
@@ -1782,7 +1782,7 @@ def get_mesh_triangles(
         volume = cloudvolume.CloudVolume(cloudpath)
     except FileNotFoundError:
         print(
-            f"The directory '{cloudpath}' couldn't be found. Please check the accuracy of this filepath."
+            f"The directory '{cloudpath}' couldn't be found. Please check the accuracy of this path."
         )
     except Exception as e:
         print(f"An error occurred: {e}")
@@ -2671,7 +2671,7 @@ def host_ng_volume_locally(volume_path):
             e.g. '/home/username/ng_meshes/image'
     """
 
-    # removes trailing slashes from filepath if present
+    # removes trailing slashes from path if present
     if volume_path[-1] == "/":
         volume_path = volume_path[:-1]
 
@@ -2684,7 +2684,7 @@ def host_ng_volume_locally(volume_path):
     # handles bad directory input
     except FileNotFoundError:
         print(
-            f"The directory '{cloud_path}' couldn't be found. Please check the accuracy of this filepath."
+            f"The directory '{cloud_path}' couldn't be found. Please check the accuracy of this path."
         )
     # handles all other errors
     except Exception as e:
@@ -3294,7 +3294,7 @@ def make_local_volume_from_obj(datastack, obj_path, output_path):
             the name of the datastack the OBJ mesh is from, e.g. 'brain_and_nerve_cord'
             for a list of currently-supported datastacks use get_supported_configs()
         obj_path (str):
-            the absolute filepath to the NG JSON state file to pull annotations from
+            the absolute path to the NG JSON state file to pull annotations from
             e.g. '/home/username/ng_jsons/state.json'
         output_path (str):
             the absolute path to the folder where you want to save the mesh output
@@ -3320,13 +3320,13 @@ def make_local_volume_from_obj(datastack, obj_path, output_path):
     # an info file to it, then creates a subfolder inside image called '/mesh'
     # and adds another info file to that. This is the necessary file structure
     # for cloudvolume to create a legacy-format unsharded single-resolution mesh
-    make_volume_packaging(resolution=resolution, output_filepath=output_path)
+    make_volume_packaging(resolution=resolution, output_path=output_path)
 
-    # constructs cloudpath from filepath
-    cloudpath = "file://" + output_path + "/image"
+    # constructs cloud path from ouput path
+    cloud_path = "file://" + output_path + "/image"
 
     # creates cloudvolume object using information at cloudpath
-    volume = cloudvolume.CloudVolume(cloudpath)
+    volume = cloudvolume.CloudVolume(cloud_path)
 
     # makes a cloudvolume mesh using the trimesh object
     cv_format_mesh = cloudvolume.Mesh(vertices=obj_mesh.vertices, faces=obj_mesh.faces)
@@ -3368,7 +3368,7 @@ def make_mesh_from_points(
         share_url (str):
             the shortened spelunker url of a NG state
         bucket_path (str):
-            the absolute filepath where you want the volume to be hosted on a bucket
+            the absolute path where you want the volume to be hosted on a bucket
             last folder name will be the volume folder
             will create new folders where none exist
         alphas (list of floats or ints, optional, default=None):
@@ -4154,7 +4154,7 @@ def make_volume_mesh_from_state_file(
     datastack, 
     json_path, 
     layer_name, 
-    output_filepath, 
+    output_path, 
     export_obj=False,
 ):
     """
@@ -4170,13 +4170,13 @@ def make_volume_mesh_from_state_file(
             e.g. "brain_and_nerve_cord"
             for a list of currently-supported datastacks, use get_supported_configs()
         json_path (str):
-            the absolute filepath to the NG JSON state file to pull annotations from
+            the absolute path to the NG JSON state file to pull annotations from
             e.g. "/home/username/ng_jsons/state.json"
         layer_name (str):
             the name of the annotation layer to pull coordinates from
             e.g. "annotation1"
-        output_filepath (str):
-            the absolute filepath to the folder where you want to save the mesh output
+        output_path (str):
+            the absolute path to the folder where you want to save the mesh output
             e.g. "/home/username/ng_meshes"
         export_obj (bool, optional, default=False)
             optional toggle to export the mesh as an OBJ file in addition to making volume 
@@ -4218,17 +4218,17 @@ def make_volume_mesh_from_state_file(
     # handles optional obj export
     if export_obj == True:
         # creates obj export path from output_path
-        obj_filepath = output_filepath + "hull.obj"
-        hull.export(obj_filepath, file_type="obj")
+        obj_path = output_path + "hull.obj"
+        hull.export(obj_path, file_type="obj")
 
     # creates a folder inside the specified directory called '/image' and adds
     # an info file to it, then creates a subfolder inside image called '/mesh'
     # and adds another info file to that. This is the necessary file structure
     # for cloudvolume to create a legacy-format unsharded mesh
-    make_volume_packaging(resolution=resolution, output_filepath=output_filepath)
+    make_volume_packaging(resolution=resolution, output_path=output_path)
 
-    # constructs cloudpath from filepath
-    cloudpath = "file://" + output_filepath + "/image"
+    # constructs cloudpath from file path
+    cloudpath = "file://" + output_path + "/image"
 
     # creates cloudvolume object using information at cloudpath
     volume = cloudvolume.CloudVolume(cloudpath)
@@ -4246,7 +4246,7 @@ def make_volume_mesh_from_state_file(
 
 
 def make_volume_packaging(
-    output_filepath,
+    output_path,
     resolution=[1, 1, 1],
     chunk_size=[512, 512, 16],
     volume_size=[250000, 250000, 25000],
@@ -4255,8 +4255,8 @@ def make_volume_packaging(
     Creates a file structure to hold a neuroglancer volume of legacy-format meshes in the specified directory.
 
     Args:
-        output_filepath (str):
-            absolute filepath to the folder where you want to create the mesh, e.g. 'home/username/ng_meshes" (str)
+        output_path (str):
+            the absolute path to the folder where you want to create the mesh, e.g. 'home/username/ng_meshes" (str)
         resolution (list of ints, optional, default [1,1,1]):
             the voxel scale in nm of the datastack the mesh belongs to
             e.g. [4,4,45] for "brain_and_nerve_cord"
@@ -4292,13 +4292,13 @@ def make_volume_packaging(
     separator = "/"
 
     # removes trailing separator if present
-    if output_filepath[-1] == separator:
-        output_filepath = output_filepath[:-1]
+    if output_path[-1] == separator:
+        output_path = output_path[:-1]
 
     # sets output folder name
     volume_name = "image"
 
-    directory_name = output_filepath + separator + volume_name
+    directory_name = output_path + separator + volume_name
 
     # creates mesh subdirectory path name
     subdirectory_name = directory_name + separator + "mesh"
