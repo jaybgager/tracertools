@@ -4470,5 +4470,4 @@ def visualize_skeletons(datastack, seg_ids):
     ]
 
     # initiates microviewer and feeds in skeletons
-    viewer_list = pskel_list
-    microviewer.objects(viewer_list)
+    microviewer.objects(pskel_list)
