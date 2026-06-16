@@ -3287,7 +3287,8 @@ def make_local_volume_from_obj(datastack, obj_path, output_path):
     """
     Generates a local neuroglancer volume that contains a single-resolution precomputed mesh using an OBJ file. 
     
-    Doesn't currently work on Windows due to unavoidable use of colons in several filenames.
+    Doesn't work on Windows OS due to filename requirements that include colons ":"
+    Windows OS prohbits colons in filenames because they're reserved for drive names.
 
     Args:
         datastack (str):
@@ -4163,6 +4164,8 @@ def make_volume_mesh_from_state_file(
     Output will be a folder called "image" in the directory where this is run.
     Mesh is legacy-format single-resolution unsharded precomputed.
     Mesh will be convex hull, will lose concave details.
+    Doesn't work on Windows OS due to filename requirements that include colons ":"
+    Windows OS prohbits colons in filenames because they're reserved for drive names.
 
     Args:
         datastack (str):
@@ -4252,7 +4255,11 @@ def make_volume_packaging(
     volume_size=[250000, 250000, 25000],
 ):
     """
-    Creates a file structure to hold a neuroglancer volume of legacy-format meshes in the specified directory.
+    Creates a local file structure to hold a neuroglancer volume in the specified directory.
+
+    Specifically, creates legacy-format volume for precomputed, single-resolution, unsharded meshes.
+    Doesn't work on Windows OS due to filename requirements that include colons ":"
+    Windows OS prohbits colons in filenames because they're reserved for drive names.
 
     Args:
         output_path (str):
