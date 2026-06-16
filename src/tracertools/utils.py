@@ -1146,7 +1146,7 @@ def count_user_sv_contribution(
 #     client.chunkedgraph.remesh_level2_chunks(chunk_ids=L2_ids)
 
 
-def get_anno_array_from_json_state_file(
+def get_anno_array_from_state_file(
     layer_name, 
     json_path,
 ):
@@ -4064,7 +4064,7 @@ def make_objs_from_state_file(datastack, json_path, output_path):
     # iterates through layer names and generate an obj for each
     for layer_name in layer_names:
         # extracts annotation coords as list of lists from JSON state using layer name
-        points = get_anno_array_from_json_state_file(
+        points = get_anno_array_from_state_file(
             layer_name, json_path=json_path
         )
 
@@ -4126,7 +4126,7 @@ def make_point_cloud_from_state_file(
     resolution = config["resolution"]
 
     # creates numpy array of points
-    points = get_anno_array_from_json_state_file(
+    points = get_anno_array_from_state_file(
         layer_name, json_path=json_path
     )
 
@@ -4192,7 +4192,7 @@ def make_volume_mesh_from_state_file(
     resolution = config["resolution"]
 
     # extracts annotation coords as list of lists from JSON state using layer name
-    points = get_anno_array_from_json_state_file(
+    points = get_anno_array_from_state_file(
         layer_name, json_path=json_path
     )
 
