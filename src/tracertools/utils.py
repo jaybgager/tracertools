@@ -3840,7 +3840,7 @@ def make_ng_link(
         long_url (bool, optional, default=False):
             optional toggle to get the default long-form NG url as output instead of using a shortened link 
         translucent_seg (bool, optional, default=False):
-            if True, sets segmetnation 3D opacity to 0.99, making rendering translucent
+            if True, sets segmentation 3D opacity to 0.99, making rendering translucent
             this is useful for doing segment proofreading comparisons, where the old seg is set to red (#FF0000)
             and the proofread seg is set to cyan (#00FFFF); this causes the overlap to turn grey, showing added
             regions as cyan and removed regions as red (any pair of directly complemetary colors can be used)
