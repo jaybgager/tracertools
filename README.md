@@ -2783,7 +2783,9 @@ tt.visualize_skeletons(
 # ----------------------------------------------------
 ```
 
-![visualize_skeletons_example](readme_images/visualize_skeletons_example.png)
+<p align="center">
+<img src="readme_images/visualize_skeletons_example.png" alt="visualize_skeletons_example" style="width:66%; height:auto;">
+</p>
 
 # License
 The tracertools package is licensed under the GNU General Public License v3.0. See the [LICENSE](https://github.com/jaybgager/tracertools/blob/main/LICENSE) file for more details.
