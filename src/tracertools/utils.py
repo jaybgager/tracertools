@@ -148,7 +148,7 @@ def bucket_download_file(
             download_path = str(Path.home() / "Downloads")
         except:
             raise Exception(
-                "Default download folder couldn't be found, please specify the absolute file path to a folder using the 'download_folder' argument."
+                "Default download folder couldn't be found, please specify the absolute path to a folder using the 'download_path' argument."
             )
 
     # splits file name and folder path into list
@@ -207,7 +207,7 @@ def bucket_download_folder(
             download_path = str(Path.home() / "Downloads")
         except:
             raise Exception(
-                "Default download folder couldn't be found, please specify the absolute file path to a folder using the 'download_folder' argument."
+                "Default download folder couldn't be found, please specify the absolute path to a folder using the 'download_path' argument."
             )
 
     # removes trailing slash from dl folder path if present 
@@ -1758,7 +1758,7 @@ def get_mesh_triangles(
         mesh_seg_id (int, optional, default=1):
             the segment ID of the mesh within the neuroglancer volume
         local (bool, optional, default=False):
-            if set to True, treats volume path as local file path
+            if set to True, treats volume_path as local file path
             assumes remote-hosted url by default
 
     Returns:
@@ -3648,7 +3648,7 @@ def make_mesh_from_points(
                 obj_path = str(Path.home() / "Downloads")
             except:
                 raise Exception(
-                    "Default download folder couldn't be found, please specify the absolute file path to a folder using the 'obj_path' argument."
+                    "Default download folder couldn't be found, please specify the absolute path to a folder using the 'obj_path' argument."
                 )
 
         # adds trailing slash if not present
@@ -4230,7 +4230,7 @@ def make_volume_mesh_from_state_file(
     # for cloudvolume to create a legacy-format unsharded mesh
     make_volume_packaging(resolution=resolution, output_path=output_path)
 
-    # constructs cloudpath from file path
+    # constructs cloudpath from output_path
     cloudpath = "file://" + output_path + "/image"
 
     # creates cloudvolume object using information at cloudpath
