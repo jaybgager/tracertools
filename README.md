@@ -38,6 +38,9 @@ Some terms used in the function descriptions are either uncommon or are used her
 **backbone (neuron)**\
 A general collective term for the larger processes of a given neuron. Exact definitional criteria vary from source to source, but often requires microtubules to be visible in imaging where this is possible. Contrast to "twig". Frequently used as a proofreading standard for cell completion (e.g. `"backbone_proofread"`), as attaching every twig to a neuron is typically cost-prohibitive due to the difficulty and uneccessary due to biological redundancy between connected neurons.
 
+**break**\
+A segmentation error where the path of a neuronal process ends prematurely. Factors that increase the chances are thin diamter of the process and 2D imaging errors like dislocations, missing data, warping, or blurred focus. Often distinguishable in 3D by an abrupt end to a process with no tapering or branching, soemtimes accompanied by jagged mesh (potentially with concavities) at the break site. Requires manual merging with the missing process(es) by a proofreader. with Contrast with "merger".
+
 **bucket**\
 A server where files can be stored and accessed remotely. Often used for publicly hosting neuroglancer volumes containing meshes, annotation layers, or electron microscope (EM) image layers. Can also be used to host data tables for things like cell type labels, proofreading status, or synapse data. The functions that begin with the prefix `bucket_` relate to reading from and writing to buckets using the [cloudfiles](https://github.com/seung-lab/cloud-files) Python package.
 
@@ -72,6 +75,9 @@ The lines connecting a mesh's vertices, representing the places where the mesh s
 **face**\
 The flat planes that make up the surface of a 3D mesh. Can be any shape, but generally stored as triangles (sometimes called "tris") for rendering and mathematical analysis purposes. Can be stored either as lists/arrays of 3 points or 3 edges, depending on useage. May also be associated with a normal.
 
+**fresh (segment ID)**\
+A fresh segment ID is one that's currently in use in a live production datastack. It represents the most current information about a neuron or other structure. Any time an edit (split or merge) is made to a segment (in the case of splits) or segments (in the case of merges), the resulting segments (in the case of splits) or segment (in the case of merges) will be given a new unique ID (in the case of merges) or two new IDs (in the case of splits). A fresh ID is the one that all the supervoxels associated with it will register as currently belonging to. Interchangeable with "current", "latest", and "most recent". Contrast with "stale".
+
 **graphene**\
 A data format backed by pychunkedgraph, used by cloudvolume and the Seung Lab's custom version of neuroglancer, documentation for which can be found [here](https://github.com/seung-lab/cloud-volume/wiki/Graphene). If you see the term "graphene" in the address for a segmentation layer, it generally indicates that it's linked to the chunkedgraph in some way and will therefore show up as a "painted" overlay in the 2D window of neuroglancer, allowing a user to show or hide segments by double-clicking within them in 2D. Contrast with the term "precomputed", which generally indicates a static mesh that isn't connected to the chunkedgraph and therefore won't show up as a "painted" overlay in the 2D window of neuroglancer.
 
@@ -85,17 +91,29 @@ This state can be downloaded as a JSON state file on your local machine, from wh
 **local**\
 A term used to refer to something stored on the actual computer that you're using (e.g. your hard drive). Derived terms include "local path"/"local directory", "local machine", and "local host(ing)". Contrast with "remote".
 
+**merge**\
+An edit operation in neuroglancer that combines two segments into one new segment. This is done by manually placing a single line annotation with one end in each segment to be connected. Generally used during proofreading to attach missing branches or other structures to a neauron. Plural "merges". Contrast with "split". Not to be confused with "merger".
+
+**merger**\
+A single segment that is made of structures that actually belong to two or more different neurons or other tissue types, and which therefore requires splitting by a proofreader. Derived terms include "glial merger", "synapse site merger", and "z-plane merger". Plural "mergers". Contrast with "break". Not to be confused with "merge".
+
 **mesh**\
 A 3-dimensional shape, often representing a neuron, but sometimes used to depict other structures like organelles, nuclei, neuropils, or simply regions of space. Stored in literal terms as a collection of vertices, edges, and faces. A mesh is considered "watertight" if all its triangular faces are connected to exactly 3 other triangular faces (i.e. there are no "holes"). Many formats for storing mesh information exist, but this package primarily uses either those found in neuroglancer volumes or sometimes OBJ files. 
 
-**neuroglancer (NG)**\
+**neuroglancer/NG**\
 A user interface (UI) for interacting with the 3D segmentation and rendering of neurons and other biological structures, the documentation for which can be found [here](https://github.com/google/neuroglancer). There are multiple branches of NG for specific purposes, like [FlyWire](https://github.com/seung-lab/ng-extend/tree/flywire) or [Spelunker](https://github.com/seung-lab/neuroglancer/tree/spelunker). Most of the functions in this package are built for use with Spelunker, the Seung Lab's current customized version of NG.
 
 **normal (mesh)**\
-A ray (line with a direction) aimed perpendicular (sometimes reffered to as "orthogonal") to a flat plane. Often used to indicate what direction a mesh face is oriented for the purposes of rendering lighting.
+A ray (line with a direction) aimed perpendicular (sometimes reffered to as "orthogonal") to a flat plane. Often used to indicate what direction a mesh face is oriented for the purposes of rendering lighting (i.e. which side of the face is the "outside" of the mesh).
 
 **numpy/np/numpy array**\
 A Python package commonly used for various mathematical tasks, often abbreviated as "np". Numpy arrays are similar to lists, but are considered their own object type in Python. They're often used by Python functions because they're faster and more versatile to work with than standard lists, particularly when doing matrix operations.
+
+**path swap**\
+A specific type of merger where the path of one neuronal process suddenly switches to follow the path of another. Particularly common when 2D image dislocation errors occur in parallel bundles. Can be quite hard to spot visually, but often shows up as unexpected patterns of connectivity compared to typical cells of the same type during synaptic analyses.
+
+**parallel bundle**\
+A biological structure where the paths of multiple neuronal processes run parallel and adjacent to one another for long stretches. Often the diameter of the processes can be quite thin, increasing the risk of path swaps or breaks if there are any defects in the 2D imagery.
 
 **precomputed**\
 A common type of formatting for neuroglancer data layers that relies on doing complex mathematical operations ahead of time (pre-computing) to allow faster use by the end user. 
@@ -118,8 +136,18 @@ Common derived terms include "viewer resolution" (the default voxel resolution u
 **root ID**\
 An umbrella term that can refer to the numeric identifier attached to a single supervoxel, chunkedgraph node, or segment. Appropriate to use when the entity in question can't be known ahead of time, as in the `get_roots_from_points` function, which can return either a segment or supervoxel ID dependingon the user's input. Often used in other sources interchangeably with the term "segment ID", but won't be here.
 
-**segmement/segmentation**\
-The current group of supervoxels that make up one or more neurons and their overall representation in 3D. Associated with a unique 18-digit numeric identifier (segment ID / seg ID) for a given version of a single segment. The term "segment ID" is often used interchangeably with the term "root ID" in other sources, but won't be here.
+**segmement/segmentation/seg**\
+The term "segment" refers to a group of supervoxels and how they're conencted together. Each segment is associated with a unique 18-digit numeric identifier ("segment ID" / "seg ID"). If a segment is edited by merging or splitting the resulting segment(s)'s ID(s) will be different, as the new collection(s) of supervoxels will be considered distinct. Each segment, therefore acts as a snapshot in time of a aprticular structure, typically a neuron, and is often associated with various other metrics like synapse counts, 3D volume, and cable length. The terms "segment" and "segment ID" are often used interchangeably with the terms "root" and "root ID" respectively in other sources, but won't be here, as those terms are more broad and can encomapss other things like supervoxels or L2 nodes. 
+
+The term "segmentation" is a bit more broad, and can refer to either the entire set of all segments in a datastack (e.g. the "segmentation layer" in neuroglancer), or to the current way in which a segment is constructed for a particular structure (e.g. "the segmentation of a neuron").
+
+Both "segment" and "segmentation" are often used casually to refer to the 3D mesh in a neuroglancer window, though this is technically inaccurate. The mesh is actually a simplified, smoothed rendering of the true segmentation, which would have a more jagged, blocky, "voxellated" look to it if rendered in 3D. However, this usage is still accurate when looking at the segmentation overlay in the 2D view, which preserves the true shape of each supervoxel.
+
+**split**\
+An edit operation in neuroglancer that separates one segment into two new segments. This is usually done with an automated tool, and is typically associated with multiple line annotations generated by said tool. Typically used to separate two structures that belong to different neurons (see "merger"). Contrast with "merge".
+
+**stale (segment ID)**\
+A stale segment ID is one that's no longer in use in a live production datastack. It represents archival information about a neuron or other structure at a certain point in time. Any time an edit (split or merge) is made to a segment (in the case of splits) or segments (in the case of merges), the resulting segments (in the case of splits) or segment (in the case of merges) will be given a new unique ID (in the case of merges) or two new IDs (in the case of splits). A stale ID acts as a record of all the supervoxels associated with a given segment at a specific point in time, even though those supervoxels won't register as belonging to it anymore when queried. Stale IDs are useful for comparative analyses of the proofreading process, as they allow lookup of historical data associate with that particular timepoint, including synapse counts, 3D volume, cable length, and other metrics. Interchangeable with "old", "outdated", and "historic". Contrast with "fresh".
 
 **supervoxel**\
 The smallest rearrangeable unit of a 3D segment, made up of multiple voxels. Not a consistent size. Sometimes referred to as the "watershed" layer because of [the type of algorithm](https://en.wikipedia.org/wiki/Watershed_(image_processing)) that led to their creation. Supervoxels cannot be broken apart, a quality sometimes referred to as being "atomic" (i.e. the smallest unbreakable constituent part of something). When referenceing the "nodes"/"leaves"/"layers" of the chunkedgraph, supervoxels are L1 - the foundational level. At any given time, a supervoxel will "belong to" a specific segment (and will therefore be associated with that segment's ID), but this assignment will change if that segment is edited.
