@@ -2462,7 +2462,7 @@ import tracertools as tt
 mesh_url = tt.make_mesh_from_points(
     datastack="brain_and_nerve_cord",
     share_url="https://spelunker.cave-explorer.org/#!middleauth+https://global.daf-apis.com/nglstate/api/v1/5892489557835776",
-    bucket_path="nokura://tracers/samples/mesher/best", # replace this with the path to your bucket folder #
+    bucket_path="nokura://tracers/examples/mesher/best", # replace this with the path to your bucket folder #
     print_alphas=True,
     alphas=[
         100,
@@ -2484,7 +2484,7 @@ import tracertools as tt
 mesh_url = tt.make_mesh_from_points(
     datastack="brain_and_nerve_cord",
     share_url="https://spelunker.cave-explorer.org/#!middleauth+https://global.daf-apis.com/nglstate/api/v1/5892489557835776",
-    bucket_path="nokura://tracers/samples/mesher/test", # replace this with the path to your bucket folder #
+    bucket_path="nokura://tracers/examples/mesher/test", # replace this with the path to your bucket folder #
     alphas=[
         200,
         None,
@@ -2601,7 +2601,7 @@ import tracertools as tt
 
 ng_url = tt.make_ng_link(
     datastack="brain_and_nerve_cord",
-    custom_mesh_source="https://c10s.pni.princeton.edu/tracers/samples/mesher/volume_02|neuroglancer-precomputed:",
+    custom_mesh_source="https://c10s.pni.princeton.edu/tracers/examples/mesher/volume_02|neuroglancer-precomputed:",
     custom_mesh_name="Orange you glad you can customize mesh names?",
     custom_mesh_color="#FF7800",
     view_coords=[123757, 180557, 4582],
