@@ -3350,6 +3350,7 @@ def make_mesh_from_points(
     save_objs=False,
     obj_path=None,
     print_alphas=False,
+    nokura=True,
 ):
     """
     Generates a bucket-hosted NG mesh from a shortlink of point annotations and returns a shortlink to it.
@@ -3372,6 +3373,8 @@ def make_mesh_from_points(
             the absolute path where you want the volume to be hosted on a bucket
             last folder name will be the volume folder
             will create new folders where none exist
+            currently set to work with nokura by default
+            if using non-nokura bucket, must set nokura argument to False
         alphas (list of floats or ints, optional, default=None):
             the alpha shape values you want to use for each submesh made from a point annotation layer
             length must match number of point annotation layers in share url
@@ -3389,6 +3392,10 @@ def make_mesh_from_points(
         print_alphas (bool, optional, default=False):
             if set to True, will print out starting and ending alpha values for each submesh
             useful for testing and troubleshooting
+        nokura (bool, optional, default=True):
+            whether or not the bucket being used is the Princeton nokura server
+            by default, modifies passed bucket address to public-facing host format for nokura
+            if using non-nokura bucket, must be set to False
 
     Returns:
         link (str):
@@ -3737,15 +3744,12 @@ def make_mesh_from_points(
     # one named "1:0:1.gz", called the fragment file #
     volume.mesh.put(cv_format_mesh)
 
-    # gets post-nokura section of bucket path
-    short_bucket_path = bucket_path[9:]
+    # corrects bucket address if host is nokura to public-facing format
+    if nokura == True:
+        bucket_path = "https://c10s.pni.princeton.edu/" + bucket_path[9:]
 
-    # generates NG-format source url for bucket-hosted mesh
-    mesh_source_url = (
-        "https://c10s.pni.princeton.edu/"
-        + short_bucket_path
-        + "|neuroglancer-precomputed:"
-    )
+    # adds neuroglancer format suffix to bucket path
+    mesh_source_url = (bucket_path + "|neuroglancer-precomputed:")
 
     # creates empty list to fill with annotation layers
     anno_layers = []
