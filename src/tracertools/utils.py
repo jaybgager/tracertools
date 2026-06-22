@@ -117,12 +117,12 @@ def bucket_delete_folder(folder_path):
             cf.delete(i)
         
         print()
-        print("Folder {folder_path} and all its contents have been deleted.")
+        print(f"Folder {folder_path} and all its contents have been deleted.")
         print()
     
     else:
         print()
-        print("Folder was not deleted.")
+        print(f"Folder {folder_path} was not deleted.")
         print()
 
 
