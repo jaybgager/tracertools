@@ -3565,10 +3565,15 @@ def make_mesh_from_points(
 
             radii = _tet_circumradii(tetras=tets)
 
+            # if no alpha value submitted, sets default to
+            # 1.5x median distance between each point and nearest neighbor
             if alpha is None:
                 kd = cKDTree(points)
                 nn_dist, _ = kd.query(points, k=2)
                 alpha = 1.5 * float(np.median(nn_dist[:, 1]))
+
+            # sets initial alpha value used
+            first_alpha = alpha
 
             def _alpha_shape_once(points, tess, radii, alpha):
                 keep = tess.simplices[radii < alpha]
@@ -3598,7 +3603,10 @@ def make_mesh_from_points(
                 return v, f, alpha
 
             single_piece = None
+
+            # sets variables for current and last alpha value for printing
             cur_alpha = alpha
+            last_alpha = alpha
 
             for _ in range(max_iters):
                 v, f, _ = _alpha_shape_once(points, tess, radii, cur_alpha)
@@ -3611,7 +3619,9 @@ def make_mesh_from_points(
                         single_piece = (v, f, cur_alpha)
                     if m.is_watertight:
                         m.fix_normals()
-                        return np.asarray(m.vertices), np.asarray(m.faces), cur_alpha
+                        return np.asarray(m.vertices), np.asarray(m.faces), first_alpha, cur_alpha, last_alpha
+                # captures most recent alpha for printout
+                last_alpha = cur_alpha
                 cur_alpha *= 1.5
 
             if single_piece is None:
@@ -3622,11 +3632,11 @@ def make_mesh_from_points(
             return single_piece
 
         # sets vertices, faces, and alpha value using alpha_shape_3d function
-        v, f, a = _alpha_shape_3d(points, alpha=alpha, auto_grow=auto_grow)
+        v, f, first_a, a, last_failed_a = _alpha_shape_3d(points, alpha=alpha, auto_grow=auto_grow)
 
         # prints out intitial and final alpha values for troubleshooting output
         if print_alphas == True:
-            print("Submesh", str(alpha_count), "alpha value", alpha, "to", a)
+            print("Submesh", str(alpha_count), "alpha value started at", first_a, ", last failed at", last_failed_a, ", and succeeded at", a)
             alpha_count += 1
 
         # adds whatever alpha value was used to chosen list
