@@ -1169,8 +1169,8 @@ A list of 4 float or int values for setting the tracer-chosen default 3D viewer 
 **"shortlink_server_url"**\
 The address for the link-shortening state service to compress the default full neuroglancer url into shortlinks pointing to saved states that are more usable with common messaging services which impose character limits, if one exists for this datastack.
 
-**"here_be_monsters"**\
-The address for the tracer-created legacy-format neuroglancer volume containing precomputed single-resolution unsharded static meshes of all the known rough spots in a given datastack. Useful for triaging lists of segments during proofreading with the `calc_seg_mesh_intersect` function. Used by the `triage_segs` function for this purpose. These maps are living documents that may be updated at any time during the life of a datastack as new rough spots are found or existing meshes are improved.
+**"swamp_source_url"**\
+The address for the tracer-created legacy-format neuroglancer volume containing a single precomputed single-resolution unsharded static mesh with multiple bodies covering all the known ptaches of rough data in a given datastack. Such areas are referred to as "swamps" because they're muddy and difficult to navigate. Useful for triaging lists of segments during proofreading with the `calc_seg_mesh_intersect` function. Used by the `triage_segs` function for this purpose. These maps are living documents that may be updated at any time during the life of a datastack as new swamps are found or meshing techniques are improved.
 
 **Unique Config Entries**\
 Some datastacks may also have their own unique config entries to suit the needs of the project. Common examples are host urls for the segmentations or meshes of other datastacks that have been aligned for comparison purposes, custom mesh hosting urls for specific structures like nerve bundles, or precomputed annotation layers for synapses, nuclei, organelles, or other structures.
@@ -2276,7 +2276,7 @@ This would create a `brain_and_nerve_cord` volume folder named `image` that cont
 
 ### make_mesh_from_points
 >[!WARNING]
->This function is experimental and may break easily. It currently only works with the Princeton nokura bucket.
+>This function is experimental and may break easily. It currently only works with the Princeton nokura bucket. Changes made on 26 June 2026, including autotightening, decimation, and smoothing have not yet been added to this readme yet, rendering it somewhat inaccurate, particularly regarding the manual setting of alpha values.
 
 Generates a bucket-hosted legacy-format neuroglancer volume containing a precomputed single-resolution unsharded mesh from a neuroglancer state shortlink containing point annotation layers and returns a shortlink to a neuroglancer state with the mesh selected in a segmentation layer. Takes a datastack name as a string with the `datastack` argument, a neuroglancer shortlink as a string with the `share_url` argument, and the absolute path to where you want to host the volume on a bucket as a string with the `bucket_path` argument and returns a shortlink url as a string 
 
