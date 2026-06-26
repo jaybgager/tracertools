@@ -3351,6 +3351,11 @@ def make_mesh_from_points(
     obj_path=None,
     print_alphas=False,
     nokura=True,
+    decimate_mesh=0.0,
+    decimate_submesh=0.0,
+    smooth_submesh=0,
+    smooth_mesh=0,
+    autotighten=True,
 ):
     """
     Generates a bucket-hosted NG mesh from a shortlink of point annotations and returns a shortlink to it.
@@ -3396,6 +3401,29 @@ def make_mesh_from_points(
             whether or not the bucket being used is the Princeton nokura server
             by default, modifies passed bucket address to public-facing host format for nokura
             if using non-nokura bucket, must be set to False
+        decimate_mesh (float, optional, default=0.0):
+            if set to value between 0.0 and 1.0, will attampt to reduce the number of final mesh faces by this proportion
+            e.g. a value of 0.3 would try to reduce a 100-face mesh to 30 faces
+            occurs after smoothing
+        decimate_submesh (float, optional, default=0.0):
+            if set to value between 0.0 and 1.0, will attampt to reduce the number of submesh faces by this proportion
+            e.g. a value of 0.3 would try to reduce a 100-face mesh to 30 faces
+            occurs after smoothing
+        smooth_submesh (int, optional, default=0):
+            how many iterations of smoothing to apply to the submeshes
+            uses trimesh laplacian smoothing operation with taubin filtering
+            occurs before decimation
+            passing a float will drop the decimal point
+        smooth_mesh (int, optional, default=0):
+            how many iterations of smoothing to apply to the submeshes
+            uses trimesh laplacian smoothing operation with taubin filtering
+            occurs before decimation
+            passing a float will drop the decimal point
+        autotighten (bool, optional, default=True):
+            whether or not to automatically tighten each submesh as much as possible
+            works by iteratively trying an alpha value of the average of the last failed and last successful alphas
+            until last failed and last successful are less than 1 apart
+
 
     Returns:
         link (str):
@@ -3614,9 +3642,13 @@ def make_mesh_from_points(
                     cur_alpha *= 1.5
                     continue
                 m = trimesh.Trimesh(vertices=v, faces=f, process=False)
+                
+                # if mesh is single object
                 if m.body_count == 1:
                     if single_piece is None:
                         single_piece = (v, f, cur_alpha)
+                    
+                    # if mesh has no holes, fix normals and return
                     if m.is_watertight:
                         m.fix_normals()
                         return np.asarray(m.vertices), np.asarray(m.faces), first_alpha, cur_alpha, last_alpha
@@ -3632,12 +3664,40 @@ def make_mesh_from_points(
             return single_piece
 
         # sets vertices, faces, and alpha value using alpha_shape_3d function
-        v, f, first_a, a, last_failed_a = _alpha_shape_3d(points, alpha=alpha, auto_grow=auto_grow)
+        v, f, first_a, a, last_a = _alpha_shape_3d(points, alpha=alpha, auto_grow=auto_grow)
 
-        # prints out intitial and final alpha values for troubleshooting output
-        if print_alphas == True:
-            print("Submesh", str(alpha_count), "alpha value started at", first_a, ", last failed at", last_failed_a, ", and succeeded at", a)
-            alpha_count += 1
+        # handles autotightener behavior
+        if autotighten == True:
+
+            # sets variables for current best and last failed alphas
+            current_best = a
+            last_fail = last_a
+
+            # tries alpha that's halfway between last fail and current best
+            # if successful, halves range towards last fail
+            # if fail, tightens range towards current best
+            # stops when last fail is 1 less than current best
+            while current_best > (last_fail + 1):
+
+                # gets half difference between alphas
+                # dif = (current_best - last_fail) / 2
+
+                # sets new alpha to last failed plus half new
+                # new_a = last_fail + dif
+                new_a = (last_fail + current_best) / 2
+
+                v, f, dummy_first_a, a, last_a = _alpha_shape_3d(points, alpha=new_a, auto_grow=auto_grow)
+
+                # if successful, sets final alpha as new best
+                if a == last_a:
+                    current_best = a
+
+                # if unsuccessful, sets last alpha as last fail
+                else:
+                    last_fail = last_a
+
+            # reruns mesher using new tightened alpha
+            v, f, dummy_first_a, a, dummy_last_a = _alpha_shape_3d(points, alpha=current_best, auto_grow=auto_grow)
 
         # adds whatever alpha value was used to chosen list
         chosen_alphas.append(a)
@@ -3645,8 +3705,37 @@ def make_mesh_from_points(
         # generates a trimesh object using vertices and faces
         submesh = trimesh.Trimesh(vertices=v, faces=f, process=False)
 
+        # smooths submeshes if requested
+        if smooth_submesh > 0:
+            trimesh.smoothing.filter_taubin(submesh, lamb=0.5, nu=-0.53, iterations=int(smooth_submesh))
+
+        # if decimation value passed, decimate submesh
+        if 0.0 < decimate_submesh < 1.0:
+            
+            # sets target face number by multiplying current face number by decimation factor (min 4)
+            target = max(4, int(len(submesh.faces) * decimate_submesh))
+            
+            # stores current number of faces as f_before variable
+            f_before = len(submesh.faces)
+            
+            # attempts to use trimesh quadratic decimation, prints error message on failure
+            try:
+                submesh = submesh.simplify_quadric_decimation(face_count=target)
+                print(f"Submesh {str(alpha_count)} decimation successful. {f_before} faces reduced to {len(submesh.faces)} faces.")
+            except Exception as e:
+                print(f"Submesh {str(alpha_count)} decimation failed: ({e}). Keeping un-decimated mesh with {len(submesh.faces)} faces.")
+        elif decimate_submesh != 0.0:
+            print("Submesh decimation failed, decimation value must be a float between 0.0 and 1.0")
+
         # adds each mesh to the list of meshes
         meshes.append(submesh)
+
+        # prints out intitial and final alpha values for troubleshooting output
+        if print_alphas == True:
+            print("Submesh", str(alpha_count), "alpha value started at", first_a, ", last failed at", last_a, ", and succeeded at", a)
+            print("Submesh", str(alpha_count), "has",len(f),"faces.")
+        
+        alpha_count += 1
 
     # merges all submeshes into final mesh using manifold3d engine boolean union
     # boolean operations only work on watertight manifold solids with positive volume
@@ -3655,6 +3744,28 @@ def make_mesh_from_points(
     # prints warning message if final mesh isn't watertight
     if mesh.is_volume != True:
         print("Final mesh is not a watertight manifold solid with postitive volume.")
+
+    # if smoothing value passed, smoothes mesh
+    if smooth_mesh > 0:
+        trimesh.smoothing.filter_taubin(mesh, lamb=0.5, nu=-0.53, iterations=int(smooth_mesh))
+
+    # if decimation value passed, decimate
+    if 0.0 < decimate_mesh < 1.0:
+        
+        # sets target face number by multiplying current face number by decimation factor (min 4)
+        target = max(4, int(len(mesh.faces) * decimate_mesh))
+        
+        # stores current number of faces as f_before variable
+        f_before = len(mesh.faces)
+        
+        # attempts to use trimesh quadratic decimation, prints error message on failure
+        try:
+            mesh = mesh.simplify_quadric_decimation(face_count=target)
+            print(f"Mesh decimation successful. {f_before} faces reduced to {len(mesh.faces)} faces.")
+        except Exception as e:
+            print(f"Mesh decimation failed: ({e}). Keeping un-decimated mesh with {len(mesh.faces)} faces.")
+    elif decimate_mesh != 0.0:
+        print("Mesh decimation failed, decimation value must be a float between 0 and 1.0")
 
     # handles obj save behavior if requested
     if save_objs == True:
