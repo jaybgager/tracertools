@@ -1,5 +1,5 @@
 from caveclient import CAVEclient
-from cloudfiles import CloudFiles
+from cloudfiles import CloudFiles, CloudFile
 import cloudvolume
 from collections import Counter
 import datetime
@@ -62,6 +62,32 @@ def bucket_convert_colons(
 
     return output_file_path
 
+def bucket_copy_folder(source_path,dest_path):
+    """
+    Copies a folder from one location on a cloudfiles-managed bucket to another.
+
+    Args:
+        source_path (str):
+            the absolute path to the bucket folder you want copied
+        dest_path (str):
+            the absolute path to the new folder where you want the contents of the source folder copied
+
+    """
+    
+    #removes trailing slashes if present
+    if source_path[-1] == "/":
+        source_path = source_path[:-1]
+    if dest_path[-1] == "/":
+        dest_path = dest_path[:-1]
+
+    # makes CloudFiles object using source path
+    cfs = CloudFiles(source_path)
+
+    # pulls file names from source folder
+    # copies each to new location in dest folder
+    for i in list(cfs):
+        cf = CloudFile(source_path + "/" + i)
+        cf.transfer_to(dest_path + "/" + i)
 
 def bucket_delete_file(file_path):
     """
