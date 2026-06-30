@@ -2709,7 +2709,7 @@ tt.make_volume_packaging(
 
 ### triage_segs
 >[!WARNING]
->This function currently doesn't work. Rough spot maps are in the process fo being generated as of 16 June 2026.
+>This function currently doesn't work. Rough spot maps are in the process of being generated as of 16 June 2026.
 
 Checks if a list of segments pass through the known rough spots for a given datastack. Takes a datastack name as a string with the `datastack` argument and a list of segment IDs as a list of integers with the `seg_ids` argument, and returns a list of boolean (True/False) values indicating whether each segment passes through a known rough spot.
 
