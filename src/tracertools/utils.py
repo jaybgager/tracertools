@@ -3,10 +3,13 @@ from cloudfiles import CloudFiles, CloudFile
 import cloudvolume
 from collections import Counter
 import datetime
+from functools import partial
 import gspread
 import json
 import microviewer
+from multiprocessing import Pool, cpu_count
 from nglui.statebuilder import *
+from numba import njit
 import numpy as np
 import os
 from osteoid import Skeleton
@@ -570,8 +573,8 @@ def calc_bbox_corners_from_center(
     return corners
 
 def calc_line_triangle_intersect(
-    line, 
-    triangle,
+    line,
+    triangle, 
     precision=0
 ):
     """
@@ -731,6 +734,169 @@ def calc_line_triangle_intersect(
     return result
 
 
+def calc_line_triangle_intersect_inverted(
+    triangle,
+    line, 
+    precision=0
+):
+    """
+    Calculates the intersection point, if any, of a line segment and a triangular plane.
+
+    Args:
+        line ((2,3)-shape numpy array of floats):
+            the point coords of the line segment's ends 
+            e.g. [[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]] 
+        triangle ((3,3)-shape array of floats):
+            a 2D array of shape (3,3) for the point coords of a triangle 
+            e.g.[[1.0, 2.0, 3.0], [4.0 ,5.0, 6.0], [7.0, 8.0, 9.0]] 
+        precision (int, optional, default=0):
+            how precise to be when calculating intersection points
+            specifically, maximum number of decimal points to include when rounding results
+            default 0 rounds to nearest integer as this is fine for most neuroglancer uses
+            using high precision (e.g 16+ digits) with small coord values (e.g. [1,1,1] 
+            for coordinates can result in false negative results, as the float math involved 
+            sometimes produces very tiny discrepancies when checking results
+
+    Returns:
+        result ((3)-shape numpy array of floats or None):
+            if an intersection point was found, returns as array of floats
+            otherwise returns None
+    """
+
+    # defines function for checking half of each line as a ray
+    # breaks line into two opposing rays for math to work
+    # then checks if each ray passes thought triangle individually
+    # if both do, then intersection point is returned
+    def _calc_ray_triangle_intersect(
+        ray_origin, 
+        ray_direction, 
+        triangle,
+    ):
+        """
+        Calculates the intersection point, if any, of a ray and a triangular plane.
+        
+        Uses Möller-Trumbore intersection algorithm.
+        Ray and triangle point coordinates must be in the same voxel resolution.
+
+        Args:
+            ray_origin ((3)-shape numpy array of floats):
+                the point coordinates where the ray begins 
+            ray_direction ((3)-shape numpy array of floats):
+                a vector representing the direction of the ray
+                can be calculated by subtracting the point coords of the origin 
+                from the point coords anywhere along the ray
+            triangle ((3,3)-shape array of floats):
+                point coordinates of the triangle's veritices 
+
+        Returns:
+            intersection_point ((3)-shape numpy array or None):
+                the xyz coordinates where the ray and triangle intersect, or None if none exist
+        """
+
+        # splits triangle into individual vertex coord lists 
+        v0, v1, v2 = triangle
+
+        # unclear what this does 
+        epsilon = 1e-8
+
+        # gets edge vectors (x,y,and z distances) for two sides of triangle 
+        edge1 = v1 - v0
+        edge2 = v2 - v0
+
+        # sets 'h' equal to the cross product of ray direction vector and the second edge vector 
+        h = np.cross(ray_direction, edge2)
+
+        # sets 'a' equal to the dot product of the first edge vector and h 
+        a = np.dot(edge1, h)
+
+        # if absolute value of a is less than epsilon, ray is parallel to triangle 
+        # I think this whole section ultimately checks the dot product of the 
+        # ray's direction vector and triangle's normal vector to see if they're zero?
+        # this indicates ray is parallel to triangle 
+        if abs(a) < epsilon:
+            return None
+
+        # I think this following section uses something called barycentric coordinates 
+        # to determine the point of intersection between the ray and the plane 
+        # the triangle is on, but I'm not sure how #
+
+        # sets 'f' equal to the reciprocal of 'a'
+        f = 1.0 / a
+
+        # sets 's' equal to a distance vector between 
+        # the ray origin and the first point on the triangle 
+        s = ray_origin - v0
+
+        # sets 'u' equal to the dot product of 's' and 'h' times the reciprocal of 'a'
+        u = f * np.dot(s, h)
+
+        # checks if u is between 0 and 1, unsure why 
+        if u < 0.0 or u > 1.0:
+            return None
+
+        # sets 'q' equal to cross product of (distance vector between ray origin and 
+        # first triangle point) and (edge length of first side of triangle)
+        q = np.cross(s, edge1)
+
+        # sets 'v' equal to reciprocal of 'a' times dot product of ray direction vector and 'q' 
+        v = f * np.dot(ray_direction, q)
+
+        # if 'v' is less than 0 or sum of 'u' and 'v' is over 1, no intersection 
+        # unclear why 
+        if v < 0.0 or u + v > 1.0:
+            return None
+
+        # sets 't' to reciprocal of 'a' times dot product of second triangle edge length and 'q' 
+        t = f * np.dot(edge2, q)
+
+        # if 't' is greater than epsilon value, calculates the intersection point of the ray 
+        # and triangle by multiplying ray direction vector by 't' and adding to origin point 
+        if t > epsilon:
+            intersection_point = ray_origin + ray_direction * t
+            return intersection_point
+
+        # if 't' is less than or equal to epsilon, no intersection 
+        return None
+
+    # sets ray origin points 
+    ray_origin_1 = line[0]
+    ray_origin_2 = line[1]
+
+    # creates ray direction vectors in each direction of line 
+    ray_direction_1 = line[1] - line[0]
+    ray_direction_2 = line[0] - line[1]
+
+    # checks if each ray intersects the triangle
+    intersect_1 = _calc_ray_triangle_intersect(ray_origin_1, ray_direction_1, triangle)
+    intersect_2 = _calc_ray_triangle_intersect(ray_origin_2, ray_direction_2, triangle)
+    
+    # if intersect found, rounds results to requested decimals
+    if intersect_1 is not None:
+        intersect_1 = np.round(
+            intersect_1,
+            decimals=precision,
+        )
+    if intersect_2 is not None:
+        intersect_2 = np.round(
+            intersect_2,
+            decimals=precision,
+        )
+
+    # if both rays intersect, returns the intersection point 
+    # otherwise returns None 
+    if (
+        isinstance(intersect_1, np.ndarray)
+        and isinstance(intersect_2, np.ndarray)
+        and all(i1 == i2 for i1, i2 in zip(intersect_1, intersect_2))
+    ):
+        result = intersect_1
+    else:
+        result = None
+
+    return result
+
+
+
 def calc_seg_mesh_intersect(
     datastack, 
     seg_ids, 
@@ -812,10 +978,251 @@ def calc_skeleton_mesh_intersect(
 
     # checks if each line segment in the skeleton passes through any of 
     # the triangles that make up the mesh and adds intersection points to list
-    for line in bones:
+    # uses tqdm to add progress bar
+    for line in tqdm(bones, total=len(bones),desc="Checking bones against mesh triangles..."):
         for triangle in mesh_triangles:
             result = calc_line_triangle_intersect(line, triangle)
             if isinstance(result, np.ndarray):
+                intersections.append(result)
+
+    # if there were no intersections, sets intersections to None 
+    if len(intersections) == 0:
+        intersections = None
+
+    return intersections
+
+def calc_skeleton_mesh_intersect_experimental_pool(
+    bones, 
+    mesh_triangles,
+):
+    """
+    Calculates all the points at which a skeleton intersects a mesh. 
+    
+    Point coordinates for bones and mesh triangles must be in the same voxel resolution.
+
+    Args:
+        bones ((n,2,3)-shape numpy array of floats):
+            an array of pairs of point coordinates that define the edges of a skeleton            
+        mesh_triangles ((n,3,3)-shape numpy array of floats):
+            an array of trios of point coordinates that define the triangles of a mesh 
+            
+
+    Returns:
+        intersections (list of (3)-shape numpy arrays of floats OR None):
+            the intersection points between the skeleton and the mesh if any were found 
+            otherwise returns None 
+    """
+
+    # makes empty list to populate with intersection points 
+    raw_intersections = []
+
+    # checks if each line segment in the skeleton passes through any of 
+    # the triangles that make up the mesh and adds intersection points to list
+    # uses tqdm to add progress bar
+    for line in tqdm(bones, total=len(bones),desc="Checking bones against mesh triangles..."):      
+        with Pool(cpu_count()) as p:
+            intersects = list(p.map(partial(calc_line_triangle_intersect_inverted, line=line), mesh_triangles))
+            raw_intersections.extend(intersects)
+
+    # drops None values
+    intersections = [i for i in raw_intersections if isinstance(i, np.ndarray)]
+
+    # if there were no intersections, sets intersections to None 
+    if len(intersections) == 0:
+        intersections = None
+
+    return intersections
+
+@njit
+def calc_skeleton_mesh_intersect_experimental_numba(
+    bones, 
+    mesh_triangles,
+):
+    """
+    Calculates all the points at which a skeleton intersects a mesh. 
+    
+    Point coordinates for bones and mesh triangles must be in the same voxel resolution.
+
+    Args:
+        bones ((n,2,3)-shape numpy array of floats):
+            an array of pairs of point coordinates that define the edges of a skeleton            
+        mesh_triangles ((n,3,3)-shape numpy array of floats):
+            an array of trios of point coordinates that define the triangles of a mesh 
+            
+
+    Returns:
+        intersections (list of (3)-shape numpy arrays of floats OR None):
+            the intersection points between the skeleton and the mesh if any were found 
+            otherwise returns None 
+    """
+
+    # makes empty list to populate with intersection points 
+    intersections = []
+
+    # checks if each line segment in the skeleton passes through any of 
+    # the triangles that make up the mesh and adds intersection points to list
+    for line in bones:    
+        for triangle in mesh_triangles:
+            
+            # sets ray origin points 
+            ray_origin_1 = line[0]
+            ray_origin_2 = line[1]
+
+            # creates ray direction vectors in each direction of line 
+            ray_direction_1 = line[1] - line[0]
+            ray_direction_2 = line[0] - line[1]
+            
+            # RAY 1
+
+            # splits triangle into individual vertex coord lists 
+            v0, v1, v2 = triangle
+
+            # unclear what this does 
+            epsilon = 1e-8
+
+            # gets edge vectors (x,y,and z distances) for two sides of triangle 
+            edge1 = v1 - v0
+            edge2 = v2 - v0
+
+            # sets 'h' equal to the cross product of ray direction vector and the second edge vector 
+            h = np.cross(ray_direction_1, edge2)
+
+            # sets 'a' equal to the dot product of the first edge vector and h 
+            a = np.dot(edge1, h)
+
+            # if absolute value of a is less than epsilon, ray is parallel to triangle 
+            # I think this whole section ultimately checks the dot product of the 
+            # ray's direction vector and triangle's normal vector to see if they're zero?
+            # this indicates ray is parallel to triangle 
+            if abs(a) < epsilon:
+                intersect_1 = None
+            
+            else:
+
+                # I think this following section uses something called barycentric coordinates 
+                # to determine the point of intersection between the ray and the plane 
+                # the triangle is on, but I'm not sure how #
+
+                # sets 'f' equal to the reciprocal of 'a'
+                f = 1.0 / a
+
+                # sets 's' equal to a distance vector between 
+                # the ray origin and the first point on the triangle 
+                s = ray_origin_1 - v0
+
+                # sets 'u' equal to the dot product of 's' and 'h' times the reciprocal of 'a'
+                u = f * np.dot(s, h)
+
+                # checks if u is between 0 and 1, unsure why 
+                if u < 0.0 or u > 1.0:
+                    intersect_1 = None
+                
+                else:
+
+                    # sets 'q' equal to cross product of (distance vector between ray origin and 
+                    # first triangle point) and (edge length of first side of triangle)
+                    q = np.cross(s, edge1)
+
+                    # sets 'v' equal to reciprocal of 'a' times dot product of ray direction vector and 'q' 
+                    v = f * np.dot(ray_direction_1, q)
+
+                    # if 'v' is less than 0 or sum of 'u' and 'v' is over 1, no intersection 
+                    # unclear why 
+                    if v < 0.0 or u + v > 1.0:
+                        intersect_1 = None
+                    
+                    else:
+
+                        # sets 't' to reciprocal of 'a' times dot product of second triangle edge length and 'q' 
+                        t = f * np.dot(edge2, q)
+
+                        # if 't' is greater than epsilon value, calculates the intersection point of the ray 
+                        # and triangle by multiplying ray direction vector by 't' and adding to origin point 
+                        if t > epsilon:
+                            intersect_1 = ray_origin_1 + ray_direction_1 * t
+                        
+                        else:
+                            # if 't' is less than or equal to epsilon, no intersection 
+                            intersect_1 = None
+
+            # RAY 2
+
+            # sets 'h' equal to the cross product of ray direction vector and the second edge vector 
+            h = np.cross(ray_direction_2, edge2)
+
+            # sets 'a' equal to the dot product of the first edge vector and h 
+            a = np.dot(edge1, h)
+
+            # if absolute value of a is less than epsilon, ray is parallel to triangle 
+            # I think this whole section ultimately checks the dot product of the 
+            # ray's direction vector and triangle's normal vector to see if they're zero?
+            # this indicates ray is parallel to triangle 
+            if abs(a) < epsilon:
+                intersect_2 = None
+            
+            else:
+
+                # I think this following section uses something called barycentric coordinates 
+                # to determine the point of intersection between the ray and the plane 
+                # the triangle is on, but I'm not sure how #
+
+                # sets 'f' equal to the reciprocal of 'a'
+                f = 1.0 / a
+
+                # sets 's' equal to a distance vector between 
+                # the ray origin and the first point on the triangle 
+                s = ray_origin_2 - v0
+
+                # sets 'u' equal to the dot product of 's' and 'h' times the reciprocal of 'a'
+                u = f * np.dot(s, h)
+
+                # checks if u is between 0 and 1, unsure why 
+                if u < 0.0 or u > 1.0:
+                    intersect_2 = None
+                
+                else:
+
+                    # sets 'q' equal to cross product of (distance vector between ray origin and 
+                    # first triangle point) and (edge length of first side of triangle)
+                    q = np.cross(s, edge1)
+
+                    # sets 'v' equal to reciprocal of 'a' times dot product of ray direction vector and 'q' 
+                    v = f * np.dot(ray_direction_2, q)
+
+                    # if 'v' is less than 0 or sum of 'u' and 'v' is over 1, no intersection 
+                    # unclear why 
+                    if v < 0.0 or u + v > 1.0:
+                        intersect_2 = None
+                    
+                    else:
+
+                        # sets 't' to reciprocal of 'a' times dot product of second triangle edge length and 'q' 
+                        t = f * np.dot(edge2, q)
+
+                        # if 't' is greater than epsilon value, calculates the intersection point of the ray 
+                        # and triangle by multiplying ray direction vector by 't' and adding to origin point 
+                        if t > epsilon:
+                            intersect_2 = ray_origin_2 + ray_direction_2 * t
+                        
+                        else:
+                            # if 't' is less than or equal to epsilon, no intersection 
+                            intersect_2 = None
+
+            # if both rays intersect, returns the intersection point 
+            # otherwise returns None 
+            if intersect_1 is not None:
+                if intersect_2 is not None:
+                    # if all(i1 == i2 for i1, i2 in zip(intersect_1, intersect_2)):
+                    if intersect_1[0] == intersect_2[0] and intersect_1[1] == intersect_2[1] and intersect_1[2] == intersect_2[2]:
+                        result = intersect_1
+                    else:
+                        result = None
+                else:
+                    result = None
+            else:
+                result = None
+
+            if result is not None:
                 intersections.append(result)
 
     # if there were no intersections, sets intersections to None 
@@ -1460,7 +1867,7 @@ def get_config(datastack):
             "default_zoom_3d": 360849,
             "default_angle_3d": [0, 1, 0, 0],
             "shortlink_server_url": None,
-            "swamp_source_url": None,
+            "swamp_source_url": "https://c10s.pni.princeton.edu/tracers/swamps/banc/main|neuroglancer-precomputed:",
             # unique entries below this line #
             "manc_seg": "precomputed://gs://lee-lab_brain-and-nerve-cord-fly-connectome/imported_meshes/manc_v1.2.1_meshes_elastix_tpsreg_240721",
         },
@@ -4540,16 +4947,31 @@ def triage_segs(
     swamps = config["swamp_source_url"]
 
     # gets list of triangle point trio arrays from rough spot meshes
-    triangles = get_mesh_triangles(volume_path=swamps)
+    # triangles = get_mesh_triangles(volume_path=swamps)
+    triangles=[]
+
+    for i in [1,2,3,4,5,6,7,8,9,10,11]:
+    # for i in [1,2]:
+        triangles.extend(get_mesh_triangles(volume_path=swamps,mesh_seg_id=i))
 
     # makes empty list to populate with interseection points
     intersects = []
 
+    # creates counter for print messages
+    counter = 1
+    total_skel_number = len(catacombs)
+
     # gets all intersection points for each skeleton, adds list to main 'intersects' list
     # this will add None value instead of list if no intersection points are found
     for skeleton in catacombs:
+
+        # prints message indicating which skeleton is being checked
+        print(f"Checking skeleton {counter}/{total_skel_number}...")
         intersections = calc_skeleton_mesh_intersect(skeleton, triangles)
         intersects.append(intersections)
+
+        # increments counter by one for next iteration of loop
+        counter += 1
 
     # if user requested intersection points, sets return value to intersects list
     # otherwise populates return list with True/False values for each segment
@@ -4559,6 +4981,162 @@ def triage_segs(
         results = [i != None for i in intersects]
 
     return results
+
+
+def triage_segs_pool(
+    datastack, 
+    seg_ids, 
+    return_intersects=False
+):
+    """
+    Skeletonizes list of segs, checks if any pass through known rough spots for a given datastack. 
+    
+    CURRENTLY NONFUNCTIONAL: Rough spot maps are currently a work in progress.
+
+    Args:
+        datastack (str):
+            the name of the datastack that contains the segments
+            e.g. "brain_and_nerve_cord"
+        seg_ids (list of ints):
+            the ids fo the segments to check
+        return_intersects (bool, optional, default=False):
+            optional toggle that will return a list of all the intersection points between 
+            the neuron skeletons and the rough area meshes if True, 
+            otherwise returns list of True/False values for each neuron 
+
+    Returns:
+        results (list of bools OR list of (3)-shape numpy int arrays and/or None values)
+            a list of True/False values for each neuron 
+            OR a list of intersection points if 'return_intersects' is set to True
+    """
+
+    # gets config dict for chosen datastack
+    config = get_config(datastack=datastack)
+
+    # skeletonizes segments using id list and datastack name
+    skeletons = get_seg_skeletons(datastack=datastack,seg_ids=seg_ids)
+
+    # creates list of (n,2,3)-shape arrays of endpoint pairs for each edge in each skeleton
+    catacombs = [get_bones(datastack=datastack, skeleton=skeleton) for skeleton in skeletons]
+
+    # gets hosting url of rough spot mesh from config dict
+    swamps = config["swamp_source_url"]
+
+    # gets list of triangle point trio arrays from rough spot meshes
+    # triangles = get_mesh_triangles(volume_path=swamps)
+    triangles=[]
+
+    for i in [1,2,3,4,5,6,7,8,9,10,11]:
+    # for i in [1,2]:
+        triangles.extend(get_mesh_triangles(volume_path=swamps,mesh_seg_id=i))
+
+    # makes empty list to populate with interseection points
+    intersects = []
+
+    # creates counter for print messages
+    counter = 1
+    total_skel_number = len(catacombs)
+
+    # gets all intersection points for each skeleton, adds list to main 'intersects' list
+    # this will add None value instead of list if no intersection points are found
+    for skeleton in catacombs:
+
+        # prints message indicating which skeleton is being checked
+        print(f"Checking skeleton {counter}/{total_skel_number}...")
+        intersections = calc_skeleton_mesh_intersect_experimental_pool(skeleton, triangles)
+        intersects.append(intersections)
+
+        # increments counter by one for next iteration of loop
+        counter += 1
+
+    # if user requested intersection points, sets return value to intersects list
+    # otherwise populates return list with True/False values for each segment
+    if return_intersects == True:
+        results = intersects
+    else:
+        results = [i != None for i in intersects]
+
+    return results
+
+
+def triage_segs_numba(
+    datastack, 
+    seg_ids, 
+    return_intersects=False
+):
+    """
+    Skeletonizes list of segs, checks if any pass through known rough spots for a given datastack. 
+    
+    CURRENTLY NONFUNCTIONAL: Rough spot maps are currently a work in progress.
+
+    Args:
+        datastack (str):
+            the name of the datastack that contains the segments
+            e.g. "brain_and_nerve_cord"
+        seg_ids (list of ints):
+            the ids fo the segments to check
+        return_intersects (bool, optional, default=False):
+            optional toggle that will return a list of all the intersection points between 
+            the neuron skeletons and the rough area meshes if True, 
+            otherwise returns list of True/False values for each neuron 
+
+    Returns:
+        results (list of bools OR list of (3)-shape numpy int arrays and/or None values)
+            a list of True/False values for each neuron 
+            OR a list of intersection points if 'return_intersects' is set to True
+    """
+
+    # gets config dict for chosen datastack
+    config = get_config(datastack=datastack)
+
+    # skeletonizes segments using id list and datastack name
+    skeletons = get_seg_skeletons(datastack=datastack,seg_ids=seg_ids)
+
+    # creates list of (n,2,3)-shape arrays of endpoint pairs for each edge in each skeleton
+    catacombs = [get_bones(datastack=datastack, skeleton=skeleton) for skeleton in skeletons]
+
+    # gets hosting url of rough spot mesh from config dict
+    swamps = config["swamp_source_url"]
+
+    # gets list of triangle point trio arrays from rough spot meshes
+    # triangles = get_mesh_triangles(volume_path=swamps)
+    triangles=[]
+
+    for i in [1,2,3,4,5,6,7,8,9,10,11]:
+    # for i in [1,2]:
+        triangles.extend(get_mesh_triangles(volume_path=swamps,mesh_seg_id=i))
+
+    # makes empty list to populate with interseection points
+    intersects = []
+
+    # creates counter for print messages
+    counter = 1
+    total_skel_number = len(catacombs)
+
+    # gets all intersection points for each skeleton, adds list to main 'intersects' list
+    # this will add None value instead of list if no intersection points are found
+    for skeleton in catacombs:
+
+        # prints message indicating which skeleton is being checked
+        print(f"Checking skeleton {counter}/{total_skel_number}...")
+        intersections = calc_skeleton_mesh_intersect_experimental_numba(skeleton, triangles)
+        intersects.append(intersections)
+
+        # increments counter by one for next iteration of loop
+        counter += 1
+
+    # if user requested intersection points, sets return value to intersects list
+    # otherwise populates return list with True/False values for each segment
+    if return_intersects == True:
+        results = intersects
+    else:
+        results = [i != None for i in intersects]
+
+    return results
+
+
+
+
 
 
 def visualize_skeletons(datastack, seg_ids):
