@@ -1868,6 +1868,7 @@ def get_config(datastack):
             "default_angle_3d": [0, 1, 0, 0],
             "shortlink_server_url": None,
             "swamp_source_url": "https://c10s.pni.princeton.edu/tracers/swamps/banc/main|neuroglancer-precomputed:",
+            "swamp_ids": [1,2,3,4,5,6,7,8,9,10,11],
             # unique entries below this line #
             "manc_seg": "precomputed://gs://lee-lab_brain-and-nerve-cord-fly-connectome/imported_meshes/manc_v1.2.1_meshes_elastix_tpsreg_240721",
         },
@@ -1901,6 +1902,7 @@ def get_config(datastack):
             "default_angle_3d": [0, 0, 0, -1],
             "shortlink_server_url": "https://globalv1.flywire-daf.com/nglstate/post",
             "swamp_source_url": None,
+            "swamp_ids": None,
         },
         "male_adult_nerve_cord": {
             "resolution": [8, 8, 8],
@@ -1932,6 +1934,7 @@ def get_config(datastack):
             "default_angle_3d": [0, 0, 0, 0],
             "shortlink_server_url": None,
             "swamp_source_url": None,
+            "swamp_ids": None,
             # unique entries below this line #
             "nerve_mesh_url": "precomputed://gs://flyem-vnc-roi-d5f392696f7a48e27f49fa1a9db5ee3b/nerve-roi-202301",
             "presyn_anno_layer": "precomputed://gs://manc-seg-v1p2/manc-v1.2-synapse-partners-minconf-0.0.precomputed",
@@ -1967,6 +1970,7 @@ def get_config(datastack):
             "default_angle_3d": [0, 0, 0, 1],
             "shortlink_server_url": None,  # may be https://spelunker.cave-explorer.org/#!middleauth+https://global.daf-apis.com/nglstate/api/v1/ #
             "swamp_source_url": None,
+            "swamp_ids": None,
         },
         # # template for adding new config dicts #
         # "name" : {
@@ -1999,6 +2003,7 @@ def get_config(datastack):
         #     "default_angle_3d" : [0,0,0,0],
         #     "shortlink_server_url" : "",
         #     "swamp_source_url" : "",
+        #     "swamp_ids": [],
         # },
     }
 
@@ -3132,6 +3137,7 @@ def make_anno_layer(
     annotations,
     layer_type,
     layer_name,
+    layer_color=None,
     descriptions=[],
     linked_segs=[],
     linked_seg_layer_name=None,
@@ -3151,6 +3157,8 @@ def make_anno_layer(
             supported types are "point", "line", "bbox", "sphere"/"ellipsoid", "polyline", and "mixed"
         layer_name (str):
             the name you want the layer to have in neuroglancer
+        layer_color (str, optional, default=None):
+            if a hexadecimal value is passed as a string (e.g. "#00FF00"), this will be the color of the annotations
         descriptions (list of str, optional, default=[]):
             list of annotation descriptions, length must match list of annotations
         linked_segs (list, optional, default=[]):
@@ -3280,6 +3288,10 @@ def make_anno_layer(
         "tab": "annotations",
         "type": "annotation",
     }
+
+    # sets custom annotation color if passed
+    if layer_color is not None:
+        anno_layer_dict["annotationColor"] = layer_color
 
     # turns on linked segmentation if requested
     if len(linked_segs) > 0:
@@ -3693,8 +3705,18 @@ def make_edits_link(datastack, seg_id, separate_layers=False):
 
         # merge and split annotation layer lists
         # includes unlinked and linked layer for each
-        merge_layers = _make_layers(datastack, merge_df, res, layer_name="Merges")
-        split_layers = _make_layers(datastack, split_df, res, layer_name="Splits")
+        merge_layers = _make_layers(
+            datastack, 
+            merge_df, 
+            res, 
+            layer_name="Merges",
+        )
+        split_layers = _make_layers(
+            datastack, 
+            split_df, 
+            res, 
+            layer_name="Splits"
+        )
 
         # adds color coding for split layers
         merge_layers[0]["annotationColor"] = "#00ffff"  # cyan #
@@ -3710,7 +3732,7 @@ def make_edits_link(datastack, seg_id, separate_layers=False):
         anno_layers=anno_layers,
         region_meshes=False,
         seg_colors=["#00ffff", "#ff0000"],  # sets original seg to red, final to cyan #
-        translucent_seg=True,  # makes segs translucent to grey out overlap #
+        seg_opacity=0.99,  # makes segs translucent to grey out overlap #
     )
 
     return link
@@ -4357,13 +4379,15 @@ def make_ng_link(
     anno_layers=[],
     region_meshes=False,
     seg_colors=[],
+    seg_opacity=1.0,
     viewer_site="default",
     custom_mesh_source=None,
     custom_mesh_name=None,
-    custom_mesh_color=None,
+    custom_mesh_seg_ids=None,
+    custom_mesh_colors=None,
+    custom_mesh_opacity=1.0,
     view_coords=None,
     long_url=False,
-    translucent_seg=False,
 ):
     """
     Generates a neuroglancer link from a datastack name, optionally adding a list of segment IDs and various layers. 
@@ -4382,27 +4406,32 @@ def make_ng_link(
             if True, includes a layer with the default region meshes for the volume if any exist
         seg_colors (list of str, optional, default=[]):
             Optional list of hex value colors for segments
+        seg_opacity (float, optional, default=1.0):
+            sets segmentation 3D opacity between 0.0 (invisible) and 1.0 (opaque)
+            this is useful for doing segment proofreading comparisons, where the old seg is set to red (#FF0000)
+            and the proofread seg is set to cyan (#00FFFF); this causes the overlap to turn grey, showing added
+            regions as cyan and removed regions as red (any pair of directly complemetary colors can be used)
         viewer_site (str, optional, default="default"):
             Option to override datastack's default viewer site with custom viewer site url
         custom_mesh_source (str, optional, default=None):
             If a mesh source url is given, will create a custom mesh layer
             Attempts to turn on mesh segment 1, may break if one isn't present
-        custom_mesh_name str, optional, default=None):
+        custom_mesh_name (str, optional, default=None):
             name for custom mesh layer
             default None will name the layer "Custom Mesh"
-        custom_mesh_color (str, optional, default=None):
-            color of custom mesh in hexadecimal notation starting with #
-            default None will set to green "#6DB86B"
+        custom_mesh_seg_ids (list of ints, optional, default=None):
+            the segment IDs of any segments in the custom mesh volume to be selected
+        custom_mesh_colors (list of str, optional, default=None):
+            list of colors of custom mesh in hexadecimal notation starting with #
+            default None will use default color options
+        custom_mesh_opacity (float, optional, default=1.0):
+            sets custom mesh 3D opacity between 0.0 (invisible) and 1.0 (opaque)
         view_coords (optional, list, default=None):
             If volume-resolution point coords are specified, will set the viewer start postiion
             default value of None will use the default start position for the chosen datastack
         long_url (bool, optional, default=False):
             optional toggle to get the default long-form NG url as output instead of using a shortened link 
-        translucent_seg (bool, optional, default=False):
-            if True, sets segmentation 3D opacity to 0.99, making rendering translucent
-            this is useful for doing segment proofreading comparisons, where the old seg is set to red (#FF0000)
-            and the proofread seg is set to cyan (#00FFFF); this causes the overlap to turn grey, showing added
-            regions as cyan and removed regions as red (any pair of directly complemetary colors can be used)
+        
 
     Returns:
         output_link (str):
@@ -4472,8 +4501,8 @@ def make_ng_link(
     ]
 
     # changes 3d opacity to 0.99 if requested
-    if translucent_seg == True:
-        layers[1]["objectAlpha"] = 0.99
+    if seg_opacity <1.0:
+        layers[1]["objectAlpha"] = seg_opacity
 
     # adds any annotation layers passed
     if len(anno_layers) > 0:
@@ -4509,17 +4538,29 @@ def make_ng_link(
     if custom_mesh_source != None:
         if custom_mesh_name == None:
             custom_mesh_name = "Custom Mesh"
-        if custom_mesh_color == None:
-            custom_mesh_color = "#6DB86B"  # green#
-        layers.append(
-            {
-                "type": seg_type,
-                "name": custom_mesh_name,
-                "source": custom_mesh_source,
-                "segments": [1],
-                "segmentColors": {"1": custom_mesh_color},
-            }
-        )
+        if custom_mesh_seg_ids == None:
+            custom_mesh_seg_ids = [1]
+        if custom_mesh_colors == None:
+            custom_mesh_colors = make_color_list(len(custom_mesh_seg_ids))
+        
+        # creates custom color dict from id and color lists
+        custom_colors = {str(seg):color for seg, color in zip(custom_mesh_seg_ids,custom_mesh_colors)}
+        
+        # creates custom mesh layer dict
+        custom_mesh_layer_dict = {
+            "type": seg_type,
+            "name": custom_mesh_name,
+            "source": custom_mesh_source,
+            "segments": custom_mesh_seg_ids,
+            "segmentColors": custom_colors,
+        }
+
+        # adds translucentcy option if requested
+        if custom_mesh_opacity < 1.0:
+            custom_mesh_layer_dict["objectAlpha"] = custom_mesh_opacity
+
+        # adds custom mesh alyer to layer list
+        layers.append(custom_mesh_layer_dict)
 
     # builds state dict
     # conditionally handles outdated flywire json syntax
@@ -5061,7 +5102,8 @@ def triage_segs_pool(
 
 def triage_segs_numba(
     datastack, 
-    seg_ids, 
+    seg_ids,
+    return_links=False, 
     return_intersects=False
 ):
     """
@@ -5075,6 +5117,8 @@ def triage_segs_numba(
             e.g. "brain_and_nerve_cord"
         seg_ids (list of ints):
             the ids fo the segments to check
+        return_links (bool, optional, default=False):
+            if True, will add neuroglancer links to output
         return_intersects (bool, optional, default=False):
             optional toggle that will return a list of all the intersection points between 
             the neuron skeletons and the rough area meshes if True, 
@@ -5082,8 +5126,12 @@ def triage_segs_numba(
 
     Returns:
         results (list of bools OR list of (3)-shape numpy int arrays and/or None values)
-            a list of True/False values for each neuron 
-            OR a list of intersection points if 'return_intersects' is set to True
+            default: 
+                a list of True/False values for each neuron 
+            w/ return_intersects: 
+                a list of intersection points if 'return_intersects' is set to True
+            w/ return_links:
+                2-item list where first item is one of the above options and second item is list of neuroglancer links
     """
 
     # gets config dict for chosen datastack
@@ -5097,17 +5145,21 @@ def triage_segs_numba(
 
     # gets hosting url of rough spot mesh from config dict
     swamps = config["swamp_source_url"]
+    swamp_ids = config["swamp_ids"]
 
     # gets list of triangle point trio arrays from rough spot meshes
     # triangles = get_mesh_triangles(volume_path=swamps)
     triangles=[]
 
-    for i in [1,2,3,4,5,6,7,8,9,10,11]:
-    # for i in [1,2]:
+    for i in swamp_ids:
         triangles.extend(get_mesh_triangles(volume_path=swamps,mesh_seg_id=i))
 
     # makes empty list to populate with interseection points
     intersects = []
+
+    # creates empty link list to populate with links if requested
+    if return_links == True:
+        links = []
 
     # creates counter for print messages
     counter = 1
@@ -5122,8 +5174,58 @@ def triage_segs_numba(
         intersections = calc_skeleton_mesh_intersect_experimental_numba(skeleton, triangles)
         intersects.append(intersections)
 
+        # creates link for this entry if requested
+        if return_links == True:
+
+            # makes skeleton layer dict
+            skeleton_layer = make_anno_layer(
+                datastack=datastack,
+                annotations=skeleton,
+                layer_type="line",
+                layer_name="Skeleton",
+                layer_color="#FFFFFF"
+            )
+
+            # adds skeleton anno layer to layer list
+            anno_layers = [skeleton_layer]
+
+            # if there are any intersection points, makes an anno layer for them
+            if intersections is not None:
+
+                # creates anno layer dict for intersections
+                intersect_layer = make_anno_layer(
+                    datastack=datastack,
+                    annotations=intersections,
+                    layer_type="point",
+                    layer_name="Intersection Points",
+                )
+
+                # adds intersection point anno layer to layer list
+                anno_layers.append(intersect_layer)
+
+            # creates neuroglancer link
+            entry_link = make_ng_link(
+                datastack=datastack,
+                seg_ids=[seg_ids[counter - 1]],
+                anno_layers=anno_layers,
+                # region_meshes=False,
+                # seg_colors=[],
+                # viewer_site="default",
+                custom_mesh_source=swamps,
+                custom_mesh_name="Swamps",
+                custom_mesh_seg_ids=swamp_ids,
+                custom_mesh_colors=["#E01B24" for i in range(len(swamp_ids))],
+                custom_mesh_opacity=0.66,
+                view_coords=None,
+                long_url=False,
+            )
+
+            # adds neuroglancer link to list
+            links.append(entry_link)
+        
         # increments counter by one for next iteration of loop
         counter += 1
+
 
     # if user requested intersection points, sets return value to intersects list
     # otherwise populates return list with True/False values for each segment
@@ -5131,6 +5233,9 @@ def triage_segs_numba(
         results = intersects
     else:
         results = [i != None for i in intersects]
+
+    if return_links == True:
+        results = [results,links]
 
     return results
 
