@@ -5103,8 +5103,6 @@ def triage_segs_pool(
 def triage_segs_numba(
     datastack, 
     seg_ids,
-    return_links=False, 
-    return_intersects=False
 ):
     """
     Skeletonizes list of segs, checks if any pass through known rough spots for a given datastack. 
@@ -5117,21 +5115,12 @@ def triage_segs_numba(
             e.g. "brain_and_nerve_cord"
         seg_ids (list of ints):
             the ids fo the segments to check
-        return_links (bool, optional, default=False):
-            if True, will add neuroglancer links to output
-        return_intersects (bool, optional, default=False):
-            optional toggle that will return a list of all the intersection points between 
-            the neuron skeletons and the rough area meshes if True, 
-            otherwise returns list of True/False values for each neuron 
 
     Returns:
-        results (list of bools OR list of (3)-shape numpy int arrays and/or None values)
-            default: 
-                a list of True/False values for each neuron 
-            w/ return_intersects: 
-                a list of intersection points if 'return_intersects' is set to True
-            w/ return_links:
-                2-item list where first item is one of the above options and second item is list of neuroglancer links
+        results (3-item list)
+            first item is a list of True/False values for each segment 
+            second item is a list of intersection points as 3-shape numpy arrays if any exist
+            third item is list of neuroglancer links
     """
 
     # gets config dict for chosen datastack
@@ -5148,7 +5137,6 @@ def triage_segs_numba(
     swamp_ids = config["swamp_ids"]
 
     # gets list of triangle point trio arrays from rough spot meshes
-    # triangles = get_mesh_triangles(volume_path=swamps)
     triangles=[]
 
     for i in swamp_ids:
@@ -5157,9 +5145,8 @@ def triage_segs_numba(
     # makes empty list to populate with interseection points
     intersects = []
 
-    # creates empty link list to populate with links if requested
-    if return_links == True:
-        links = []
+    # creates empty link list to populate with links
+    links = []
 
     # creates counter for print messages
     counter = 1
@@ -5174,68 +5161,56 @@ def triage_segs_numba(
         intersections = calc_skeleton_mesh_intersect_experimental_numba(skeleton, triangles)
         intersects.append(intersections)
 
-        # creates link for this entry if requested
-        if return_links == True:
+        # makes skeleton layer dict
+        skeleton_layer = make_anno_layer(
+            datastack=datastack,
+            annotations=skeleton,
+            layer_type="line",
+            layer_name="Skeleton",
+            layer_color="#FFFFFF"
+        )
 
-            # makes skeleton layer dict
-            skeleton_layer = make_anno_layer(
+        # adds skeleton anno layer to layer list
+        anno_layers = [skeleton_layer]
+
+        # if there are any intersection points, makes an anno layer for them
+        if intersections is not None:
+
+            # creates anno layer dict for intersections
+            intersect_layer = make_anno_layer(
                 datastack=datastack,
-                annotations=skeleton,
-                layer_type="line",
-                layer_name="Skeleton",
-                layer_color="#FFFFFF"
+                annotations=intersections,
+                layer_type="point",
+                layer_name="Intersection Points",
             )
 
-            # adds skeleton anno layer to layer list
-            anno_layers = [skeleton_layer]
+            # adds intersection point anno layer to layer list
+            anno_layers.append(intersect_layer)
 
-            # if there are any intersection points, makes an anno layer for them
-            if intersections is not None:
+        # creates neuroglancer link
+        entry_link = make_ng_link(
+            datastack=datastack,
+            seg_ids=[seg_ids[counter - 1]],
+            anno_layers=anno_layers,
+            region_meshes=True,
+            custom_mesh_source=swamps,
+            custom_mesh_name="Swamps",
+            custom_mesh_seg_ids=swamp_ids,
+            custom_mesh_colors=["#E01B24" for i in range(len(swamp_ids))],
+            custom_mesh_opacity=0.66,
+            view_coords=None,
+            long_url=False,
+        )
 
-                # creates anno layer dict for intersections
-                intersect_layer = make_anno_layer(
-                    datastack=datastack,
-                    annotations=intersections,
-                    layer_type="point",
-                    layer_name="Intersection Points",
-                )
-
-                # adds intersection point anno layer to layer list
-                anno_layers.append(intersect_layer)
-
-            # creates neuroglancer link
-            entry_link = make_ng_link(
-                datastack=datastack,
-                seg_ids=[seg_ids[counter - 1]],
-                anno_layers=anno_layers,
-                # region_meshes=False,
-                # seg_colors=[],
-                # viewer_site="default",
-                custom_mesh_source=swamps,
-                custom_mesh_name="Swamps",
-                custom_mesh_seg_ids=swamp_ids,
-                custom_mesh_colors=["#E01B24" for i in range(len(swamp_ids))],
-                custom_mesh_opacity=0.66,
-                view_coords=None,
-                long_url=False,
-            )
-
-            # adds neuroglancer link to list
-            links.append(entry_link)
+        # adds neuroglancer link to list
+        links.append(entry_link)
         
         # increments counter by one for next iteration of loop
         counter += 1
 
 
-    # if user requested intersection points, sets return value to intersects list
-    # otherwise populates return list with True/False values for each segment
-    if return_intersects == True:
-        results = intersects
-    else:
-        results = [i != None for i in intersects]
-
-    if return_links == True:
-        results = [results,links]
+    # builds output list from T/F values, intersection points, and link list
+    results = [[i != None for i in intersects], intersects, links]
 
     return results
 
