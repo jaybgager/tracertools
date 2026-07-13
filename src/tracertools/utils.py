@@ -896,7 +896,6 @@ def calc_line_triangle_intersect_inverted(
     return result
 
 
-
 def calc_seg_mesh_intersect(
     datastack, 
     seg_ids, 
@@ -950,91 +949,8 @@ def calc_seg_mesh_intersect(
 
     return results
 
-
-def calc_skeleton_mesh_intersect(
-    bones, 
-    mesh_triangles,
-):
-    """
-    Calculates all the points at which a skeleton intersects a mesh. 
-    
-    Point coordinates for bones and mesh triangles must be in the same voxel resolution.
-
-    Args:
-        bones ((n,2,3)-shape numpy array of floats):
-            an array of pairs of point coordinates that define the edges of a skeleton            
-        mesh_triangles ((n,3,3)-shape numpy array of floats):
-            an array of trios of point coordinates that define the triangles of a mesh 
-            
-
-    Returns:
-        intersections (list of (3)-shape numpy arrays of floats OR None):
-            the intersection points between the skeleton and the mesh if any were found 
-            otherwise returns None 
-    """
-
-    # makes empty list to populate with intersection points 
-    intersections = []
-
-    # checks if each line segment in the skeleton passes through any of 
-    # the triangles that make up the mesh and adds intersection points to list
-    # uses tqdm to add progress bar
-    for line in tqdm(bones, total=len(bones),desc="Checking bones against mesh triangles..."):
-        for triangle in mesh_triangles:
-            result = calc_line_triangle_intersect(line, triangle)
-            if isinstance(result, np.ndarray):
-                intersections.append(result)
-
-    # if there were no intersections, sets intersections to None 
-    if len(intersections) == 0:
-        intersections = None
-
-    return intersections
-
-def calc_skeleton_mesh_intersect_experimental_pool(
-    bones, 
-    mesh_triangles,
-):
-    """
-    Calculates all the points at which a skeleton intersects a mesh. 
-    
-    Point coordinates for bones and mesh triangles must be in the same voxel resolution.
-
-    Args:
-        bones ((n,2,3)-shape numpy array of floats):
-            an array of pairs of point coordinates that define the edges of a skeleton            
-        mesh_triangles ((n,3,3)-shape numpy array of floats):
-            an array of trios of point coordinates that define the triangles of a mesh 
-            
-
-    Returns:
-        intersections (list of (3)-shape numpy arrays of floats OR None):
-            the intersection points between the skeleton and the mesh if any were found 
-            otherwise returns None 
-    """
-
-    # makes empty list to populate with intersection points 
-    raw_intersections = []
-
-    # checks if each line segment in the skeleton passes through any of 
-    # the triangles that make up the mesh and adds intersection points to list
-    # uses tqdm to add progress bar
-    for line in tqdm(bones, total=len(bones),desc="Checking bones against mesh triangles..."):      
-        with Pool(cpu_count()) as p:
-            intersects = list(p.map(partial(calc_line_triangle_intersect_inverted, line=line), mesh_triangles))
-            raw_intersections.extend(intersects)
-
-    # drops None values
-    intersections = [i for i in raw_intersections if isinstance(i, np.ndarray)]
-
-    # if there were no intersections, sets intersections to None 
-    if len(intersections) == 0:
-        intersections = None
-
-    return intersections
-
 @njit
-def calc_skeleton_mesh_intersect_experimental_numba(
+def calc_skeleton_mesh_intersect(
     bones, 
     mesh_triangles,
 ):
@@ -4950,158 +4866,6 @@ def make_volume_packaging(
 
 def triage_segs(
     datastack, 
-    seg_ids, 
-    return_intersects=False
-):
-    """
-    Skeletonizes list of segs, checks if any pass through known rough spots for a given datastack. 
-    
-    CURRENTLY NONFUNCTIONAL: Rough spot maps are currently a work in progress.
-
-    Args:
-        datastack (str):
-            the name of the datastack that contains the segments
-            e.g. "brain_and_nerve_cord"
-        seg_ids (list of ints):
-            the ids fo the segments to check
-        return_intersects (bool, optional, default=False):
-            optional toggle that will return a list of all the intersection points between 
-            the neuron skeletons and the rough area meshes if True, 
-            otherwise returns list of True/False values for each neuron 
-
-    Returns:
-        results (list of bools OR list of (3)-shape numpy int arrays and/or None values)
-            a list of True/False values for each neuron 
-            OR a list of intersection points if 'return_intersects' is set to True
-    """
-
-    # gets config dict for chosen datastack
-    config = get_config(datastack=datastack)
-
-    # skeletonizes segments using id list and datastack name
-    skeletons = get_seg_skeletons(datastack=datastack,seg_ids=seg_ids)
-
-    # creates list of (n,2,3)-shape arrays of endpoint pairs for each edge in each skeleton
-    catacombs = [get_bones(datastack=datastack, skeleton=skeleton) for skeleton in skeletons]
-
-    # gets hosting url of rough spot mesh from config dict
-    swamps = config["swamp_source_url"]
-
-    # gets list of triangle point trio arrays from rough spot meshes
-    # triangles = get_mesh_triangles(volume_path=swamps)
-    triangles=[]
-
-    for i in [1,2,3,4,5,6,7,8,9,10,11]:
-    # for i in [1,2]:
-        triangles.extend(get_mesh_triangles(volume_path=swamps,mesh_seg_id=i))
-
-    # makes empty list to populate with interseection points
-    intersects = []
-
-    # creates counter for print messages
-    counter = 1
-    total_skel_number = len(catacombs)
-
-    # gets all intersection points for each skeleton, adds list to main 'intersects' list
-    # this will add None value instead of list if no intersection points are found
-    for skeleton in catacombs:
-
-        # prints message indicating which skeleton is being checked
-        print(f"Checking skeleton {counter}/{total_skel_number}...")
-        intersections = calc_skeleton_mesh_intersect(skeleton, triangles)
-        intersects.append(intersections)
-
-        # increments counter by one for next iteration of loop
-        counter += 1
-
-    # if user requested intersection points, sets return value to intersects list
-    # otherwise populates return list with True/False values for each segment
-    if return_intersects == True:
-        results = intersects
-    else:
-        results = [i != None for i in intersects]
-
-    return results
-
-
-def triage_segs_pool(
-    datastack, 
-    seg_ids, 
-    return_intersects=False
-):
-    """
-    Skeletonizes list of segs, checks if any pass through known rough spots for a given datastack. 
-    
-    CURRENTLY NONFUNCTIONAL: Rough spot maps are currently a work in progress.
-
-    Args:
-        datastack (str):
-            the name of the datastack that contains the segments
-            e.g. "brain_and_nerve_cord"
-        seg_ids (list of ints):
-            the ids fo the segments to check
-        return_intersects (bool, optional, default=False):
-            optional toggle that will return a list of all the intersection points between 
-            the neuron skeletons and the rough area meshes if True, 
-            otherwise returns list of True/False values for each neuron 
-
-    Returns:
-        results (list of bools OR list of (3)-shape numpy int arrays and/or None values)
-            a list of True/False values for each neuron 
-            OR a list of intersection points if 'return_intersects' is set to True
-    """
-
-    # gets config dict for chosen datastack
-    config = get_config(datastack=datastack)
-
-    # skeletonizes segments using id list and datastack name
-    skeletons = get_seg_skeletons(datastack=datastack,seg_ids=seg_ids)
-
-    # creates list of (n,2,3)-shape arrays of endpoint pairs for each edge in each skeleton
-    catacombs = [get_bones(datastack=datastack, skeleton=skeleton) for skeleton in skeletons]
-
-    # gets hosting url of rough spot mesh from config dict
-    swamps = config["swamp_source_url"]
-
-    # gets list of triangle point trio arrays from rough spot meshes
-    # triangles = get_mesh_triangles(volume_path=swamps)
-    triangles=[]
-
-    for i in [1,2,3,4,5,6,7,8,9,10,11]:
-    # for i in [1,2]:
-        triangles.extend(get_mesh_triangles(volume_path=swamps,mesh_seg_id=i))
-
-    # makes empty list to populate with interseection points
-    intersects = []
-
-    # creates counter for print messages
-    counter = 1
-    total_skel_number = len(catacombs)
-
-    # gets all intersection points for each skeleton, adds list to main 'intersects' list
-    # this will add None value instead of list if no intersection points are found
-    for skeleton in catacombs:
-
-        # prints message indicating which skeleton is being checked
-        print(f"Checking skeleton {counter}/{total_skel_number}...")
-        intersections = calc_skeleton_mesh_intersect_experimental_pool(skeleton, triangles)
-        intersects.append(intersections)
-
-        # increments counter by one for next iteration of loop
-        counter += 1
-
-    # if user requested intersection points, sets return value to intersects list
-    # otherwise populates return list with True/False values for each segment
-    if return_intersects == True:
-        results = intersects
-    else:
-        results = [i != None for i in intersects]
-
-    return results
-
-
-def triage_segs_numba(
-    datastack, 
     seg_ids,
 ):
     """
@@ -5158,7 +4922,7 @@ def triage_segs_numba(
 
         # prints message indicating which skeleton is being checked
         print(f"Checking skeleton {counter}/{total_skel_number}...")
-        intersections = calc_skeleton_mesh_intersect_experimental_numba(skeleton, triangles)
+        intersections = calc_skeleton_mesh_intersect(skeleton, triangles)
         intersects.append(intersections)
 
         # makes skeleton layer dict
@@ -5213,10 +4977,6 @@ def triage_segs_numba(
     results = [[i != None for i in intersects], intersects, links]
 
     return results
-
-
-
-
 
 
 def visualize_skeletons(datastack, seg_ids):
