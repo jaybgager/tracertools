@@ -2709,11 +2709,9 @@ tt.make_volume_packaging(
 
 ### triage_segs
 >[!WARNING]
->This function currently doesn't work. Rough spot maps are in the process of being generated as of 16 June 2026.
+>This function is currently experimental. Rough spot maps are in the process of being generated as of 13 July 2026.
 
-Checks if a list of segments pass through the known rough spots for a given datastack. Takes a datastack name as a string with the `datastack` argument and a list of segment IDs as a list of integers with the `seg_ids` argument, and returns a list of boolean (True/False) values indicating whether each segment passes through a known rough spot.
-
-Optionally get the point coordinates of each intersection as output instead by setting the `return_intersects` argument to `True`. Returns a list of items that will either be lists of 3-integer lists representing any intersection points for a given segment or a None value if none exist.
+Checks if a list of segments pass through the known rough spots for a given datastack. Takes a datastack name as a string with the `datastack` argument and a list of segment IDs as a list of integers with the `seg_ids` argument, and returns a list of 3 items. The first is a list of boolean (True/False) values indicating whether each segment passes through a known rough spot. The second is a list where each item is either a list of 3-item lists representing any intersection points for a given segment or a None value if none exist. The thirs is a list of neuroglancer links containing the segment in question, its skeleton as a line annotation layer, the swamp map meshes as a segmentation layer, and a point annotation layer with any intersection points mapped.
 
 >[!NOTE]
 >Specifically, this function first skeletonizes the segments and then checks if those skeletons intersect the rough spot meshes. For this reason it's possible (though unlikely) to get false positives and/or false negatives if a segment's skeleton doesn't accurately represent its shape, as can happen ocasionally for very blobby structures like mergers, glia, or cell bodies. This shouldn't be an issue for typical neuronal processes, which is what the function is designed for.
