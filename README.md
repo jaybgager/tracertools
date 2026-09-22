@@ -1,7 +1,72 @@
 # Overview
-The tracertools package is a collection of Python functions designed to streamline common tasks for connectomics researchers, particularly those related to the proofreading process. 
+The tracertools package is a collection of Python functions designed to streamline common tasks for connectomics researchers, particularly those related to the proofreading process.
 
-# Installation
+# Table of Contents
+- [Installation](#installation)
+- [Glossary of Common Terms](#glossary-of-common-terms)
+- [Functions](#functions)
+  - [Function Cluster Notes](#function-cluster-notes)
+    - [Google Sheet Functions](#google-sheet-functions)
+  - [Function Descriptions, Instructions, and Examples](#function-descriptions-instructions-and-examples)
+    - [bucket_convert_colons](#bucket_convert_colons)
+    - [bucket_delete_file](#bucket_delete_file)
+    - [bucket_download_file](#bucket_download_file)
+    - [bucket_download_folder](#bucket_download_folder)
+    - [bucket_move_file](#bucket_rename_file)
+    - [bucket_upload_file](#bucket_upload_file)
+    - [bucket_upload_folder](#bucket_upload_folder)
+    - [calc_3d_distance](#calc_3d_distance)
+    - [calc_avg_point_coords](#calc_avg_point_coords)
+    - [calc_bbox_corners_from_center](#calc_bbox_corners_from_center)
+    - [calc_line_triangle_intersect](#calc_line_triangle_intersect)
+    - [calc_mesh_seg_intersect](#calc_mesh_seg_intersect)
+    - [calc_skeleton_mesh_intersect](#calc_skeleton_mesh_intersect)
+    - [check_seg_freshness](#check_seg_freshness)
+    - [check_seg_proofread_status](#check_seg_proofread_status)
+    - [convert_coord_res](#convert_coord_res)
+    - [count_synapses](#count_synapses)
+    - [count_user_sv_contribution](#count_user_sv_contribution)
+    - [get_anno_array_from_state_file](#get_anno_array_from_state_file)
+    - [get_bones](#get_bones)
+    - [get_cable_lengths](#get_cable_lengths)
+    - [get_cave_stacks](#get_cave_stacks)
+    - [get_cave_stack_info](#get_cave_stack_info)
+    - [get_cave_stack_tables](#get_cave_stack_tables)
+    - [get_cave_table](#get_cave_table)
+    - [get_cave_table_info](#get_cave_table_info)
+    - [get_config](#get_config)
+    - [get_current_seg_ids](#get_current_seg_ids)
+    - [et_json_state_from_url](#et_json_state_from_url)
+    - [get_mesh_triangles](#get_mesh_triangles)
+    - [get_original_seg_ids](#get_original_seg_ids)
+    - [get_roots_from_points](#get_roots_from_points)
+    - [get_seg_3d_volume](#get_seg_3d_volume)
+    - [get_seg_changelog](#get_seg_changelog)
+    - [get_seg_details](#get_seg_details)
+    - [get_seg_edits](#get_seg_edits)
+    - [get_seg_from_sv](#get_seg_from_sv)
+    - [get_seg_skeletons](#get_seg_skeletons)
+    - [get_svs_from_seg](#get_svs_from_seg)
+    - [get_supported_configs](#get_supported_configs)
+    - [gsheet_add_column](#gsheet_add_column)
+    - [gsheet_add_row](#gsheet_add_row)
+    - [gsheet_add_seg_details](#gsheet_add_seg_details)
+    - [gsheet_get_col_as_list](#gsheet_get_col_as_list)
+    - [gsheet_get_tab_as_df](#gsheet_get_tab_as_df)
+    - [host_ng_volume_locally](#host_ng_volume_locally)
+    - [make_edits_link](#make_edits_link)
+    - [make_local_volume_from_obj](#make_local_volume_from_obj)
+    - [make_mesh_from_points](#make_mesh_from_points)
+    - [make_ng_link](#make_ng_link)
+    - [make_objs_from_state_file](#make_objs_from_state_file)
+    - [make_point_cloud_from_state_file](#make_point_cloud_from_state_file)
+    - [make_volume_mesh_from_state_file](#make_volume_mesh_from_state_file)
+    - [make_volume_packaging](#make_volume_packaging)
+    - [triage_segs](#triage_segs)
+    - [visualize_skeletons](#visualize_skeletons)
+- [License](#license)
+
+# Installation [Back to Table of Contents](#table-of-contents)
 Quick installation from the Python Package Index (PyPI) with pip isn't supported yet (but is planned for the future), so you'll have to intall the tracertools package manually from this GitHub repository by doing the following:
 
 1. Open a terminal and navigate to the directory where you want the tracertools package to be stored.
@@ -32,7 +97,7 @@ fresh_ids = tt.get_current_seg_ids(
 >[!NOTE]
 >Remember to periodically update your package by navigating tot he `tracertools` folder in the terminal and running the command `git pull` to get the latest changes from the github repository. If you've got an active kernel that was started before running the pull command (e.g. you've been using tracertools in a jupyter notebook), remember to restart the kernel after updating the package in order for the changes to take effect!
 
-# Glossary of Common Terms
+# Glossary of Common Terms [Back to Table of Contents](#table-of-contents)
 Some terms used in the function descriptions are either uncommon or are used here to mean something very specific in the context of this package. These are defined below:
 
 **backbone (neuron)**\
@@ -164,13 +229,13 @@ A collection of neuroglancer-related assets that can include 2D image layers, 3D
 **voxel**\
 One unit of 3D space, shaped like a rectangular prism, the actual spatial dimensions of which vary from datastack to datastack. Compare to a 2-dimensional pixel. Multiple voxels are grouped together to form a supervoxel.
 
-# Functions
+# Functions [Back to Table of Contents](#table-of-contents)
 In this section you'll find descriptions of each function in the `tracertools` package, with instructions on their use and examples, as well as notes and warnings about known issues, dependencies, or limitations they may have.
 
-## Function Cluster Notes
+## Function Cluster Notes [Back to Table of Contents](#table-of-contents)
 The tracertools package includes several groups of functions that all work in a similar way or rely on a similar set of tools. Rather than rewrite the general information for these in each description, it's summarized here for brevity.
 
-### Google Sheet Functions
+### Google Sheet Functions [Back to Table of Contents](#table-of-contents)
 All the Google-sheet-related functions in this package (those beginning with the `gsheet_` prefix) depend on the [gspread](https://docs.gspread.org/en/latest/) Python package and currently require a Google authentication token to be set up prior to use. The process for doing so is explained [here](https://docs.gspread.org/en/latest/oauth2.html#oauth-client-id). Support for Google service accounts will likely be added in the future.
 
 You'll need permission to read and/or write the specific Google sheets you intend to work with, as well as their sheet keys. The sheet key for a Google sheet can be found in the url between `https://docs.google.com/spreadsheets/d/` and `/edit?`. For example, the sheet key used in the `gsheet_add_column` example above is `1AqIyrqSaEJFGD5Ff1fergwJ8-q0x2l0xCgO025C401c`.
@@ -178,10 +243,9 @@ You'll need permission to read and/or write the specific Google sheets you inten
 > [!WARNING]
 > When uploading floats or integers to Google sheets, large numbers may sometimes be converted to scientific notation - particularly if they end in several 0s. To avoid this for things like segment IDs, it's recommended to convert all numbers to strings prior to uploading.
 
-## Function Descriptions, Instructions, and Examples
+## Function Descriptions, Instructions, and Examples [Back to Table of Contents](#table-of-contents)
 
-
-### bucket_convert_colons
+### bucket_convert_colons [Back to Table of Contents](#table-of-contents)
 Converts file names that include colons to a Windows-safe alternative and back. Takes a string with the `file_path` argument. By default, converts any colons `:` in the string to triple-underscores `___`. If the `to_windows` argument is set to `False`, converts triple underscores back to colons. Used to allow creation and download/upload of neuroglancer legacy-format volumes (which by necessity must include colons in several file names) on Windows machines (which strictly prohibit the use of colons in file names).
 
 Example (to Windows):
@@ -229,10 +293,10 @@ print(
 "home/user/volumes/vol_01/mesh/1:0:1"
 ```
 
-### bucket_delete_file
+### bucket_delete_file [Back to Table of Contents](#table-of-contents)
 Deletes a file on a cloudfiles-managed bucket. Takes an absolute file path on a cloudfiles-managed bucket as a string with the `file_path` argument and deletes the file.
 
-### bucket_delete_folder
+### bucket_delete_folder [Back to Table of Contents](#table-of-contents)
 Deletes a folder and all its contents on a cloudfiles-managed bucket. Takes an absolute folder path on a cloudfiles-managed bucket as a string with the `folder_path` argument and deletes the folder, including everything contained within. Prompts the user with a confirmation window where they must type `DELETE` and hit enter to prevent accidental deletion. 
 
 > [!NOTE]
