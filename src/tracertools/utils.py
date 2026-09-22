@@ -2832,7 +2832,7 @@ def gsheet_add_seg_details(
 
         # gets fresh seg ID
         try:
-            fresh_seg = get_current_seg_ids(datastack=datastack, seg_id=[seg_id])[0]
+            fresh_seg = get_current_seg_ids(datastack=datastack, seg_ids=[seg_id])[0]
         except:
             try:
                 fresh_seg = get_current_seg_ids(datastack=datastack, seg_ids=[seg_id])[0]
@@ -4289,11 +4289,623 @@ def make_mesh_from_points(
     return link
 
 
+def make_mesh_from_points_experimental(
+    datastack,
+    share_url,
+    bucket_path,
+    alphas=None,
+    auto_grow=True,
+    save_objs=False,
+    obj_path=None,
+    print_alphas=False,
+    nokura=True,
+    decimate_mesh=0.0,
+    decimate_submesh=0.0,
+    smooth_submesh=0,
+    smooth_mesh=0,
+    expand_submesh=0,
+    expand_mesh=0,
+    autotighten=True,
+):
+    """
+    Generates a bucket-hosted NG mesh from a shortlink of point annotations and returns a shortlink to it.
+
+    !!!WARNING!!!: This function is extremely experimental and may break easily. 
+    Currently only works with BANC dataset and hosting from nokura princeton server
+    Generates a neuroglancer legacy-format volume with one single-resolution unsharded mesh made by combining
+    all the point annotation layers within a neuroglancer json state pulled from a shortened spelunker-format 
+    state url, uploads this volume to a bucket, and generates a neuroglancer link to the result.
+    Optionally save the submeshes created for each layer and the final mesh as OBJ files.
+
+    Args:
+        datastack (str):
+            the name of the datastack the state url is from
+            e.g. 'brain_and_nerve_cord'
+            for a list of currently-supported datastacks use get_supported_configs()
+        share_url (str):
+            the shortened spelunker url of a NG state
+        bucket_path (str):
+            the absolute path where you want the volume to be hosted on a bucket
+            last folder name will be the volume folder
+            will create new folders where none exist
+            currently set to work with nokura by default
+            if using non-nokura bucket, must set nokura argument to False
+        alphas (list of floats or ints, optional, default=None):
+            the alpha shape values you want to use for each submesh made from a point annotation layer
+            length must match number of point annotation layers in share url
+            passing an alpha value of None will attempt to generate one automatically
+            the default value of None sets all the individual list values to None
+        auto_grow (bool, optional, default=True):
+            default value of True allows for iterative increase of alpha until a watertight mesh is produced
+            if set to False, will only try first alpha value for each submesh, which is prone to failure
+        save_objs (bool, optional, default=False):
+            if True, will save an OBJ file for each of the submeshes and the final mesh
+            saves in location specified by obj_path argument
+        obj_path (str, optional, default=None):
+            the absolute path to the folder where you want OBJ files produced by the save_objs=True toggle
+            default value of None attempts to find default home/Downloads folder
+        print_alphas (bool, optional, default=False):
+            if set to True, will print out starting and ending alpha values for each submesh
+            useful for testing and troubleshooting
+        nokura (bool, optional, default=True):
+            whether or not the bucket being used is the Princeton nokura server
+            by default, modifies passed bucket address to public-facing host format for nokura
+            if using non-nokura bucket, must be set to False
+        decimate_mesh (float, optional, default=0.0):
+            if set to value between 0.0 and 1.0, will attampt to reduce the number of final mesh faces by this proportion
+            e.g. a value of 0.3 would try to reduce a 100-face mesh to 30 faces
+            occurs after smoothing and expansion
+        decimate_submesh (float, optional, default=0.0):
+            if set to value between 0.0 and 1.0, will attampt to reduce the number of submesh faces by this proportion
+            e.g. a value of 0.3 would try to reduce a 100-face mesh to 30 faces
+            occurs after smoothing and expansion
+        smooth_submesh (int, optional, default=0):
+            how many iterations of smoothing to apply to the submeshes
+            uses trimesh laplacian smoothing operation with taubin filtering
+            occurs before decimation but after expansion
+            passing a float will drop the decimal point
+        smooth_mesh (int, optional, default=0):
+            how many iterations of smoothing to apply to the submeshes
+            uses trimesh laplacian smoothing operation with taubin filtering
+            occurs before decimation but after expansion
+            passing a float will drop the decimal point
+        expand_submesh (int, optional, default=0):
+            if greater than 0, will expand submeshes along vertex normals
+            value is how many nanometers to expand
+            occurs before smoothing and decimation
+        expand_mesh (int, optional, default=0):
+            if greater than 0, will expand mesh along vertex normals
+            value is how many nanometers to expand
+            occurs before smoothing and decimation
+        autotighten (bool, optional, default=True):
+            whether or not to automatically tighten each submesh as much as possible
+            works by iteratively trying an alpha value of the average of the last failed and last successful alphas
+            until last failed and last successful are less than 1 apart
+
+
+    Returns:
+        link (str):
+            the shortened link to the spelunker NG state containing the final mesh
+            includes all the annotation layers that created it for inspecting accuracy
+            mesh layer name includes final alpha values used for each submesh
+
+        In addition to returning the link, this function also saves a neuroglancer legacy-format volume
+        containing a single-resolution mesh on the specified bucket. This is required to generate the link,
+        as it serves aas the host for the mesh layer. It also optionally saves OBJ files
+        for each submesh and the final mesh if the save_objs argument is set to True.
+    """
+
+    # sets coordinate resolution and chunk size for volume
+    chunk_size = [512, 512, 16] 
+
+    # sets client using datastack name
+    client = CAVEclient(datastack)
+
+    # splits share url into components between slashes
+    split_url = share_url.split("/")
+
+    # gets state ID, which is always last component
+    state_id = int(split_url[-1])
+
+    # retreives JSON from state server using state ID
+    json_dict = client.state.get_state_json(state_id)
+
+    # gets config info dict for chosen datastack
+    try:
+        config = get_config(datastack=datastack)
+    except KeyError:
+        raise KeyError(
+            "The datastack name isn't in the list of currently-supported configs. To see a list of currently-supported datastack names, use the get_supported_configs() function."
+        )
+
+    # pulls voxel xyz dimensions from config dict
+    resolution = config["resolution"]
+
+    # makes empty list to fill with annotation layer names
+    layer_names = []
+
+    # selectively gets layer names from JSON state file
+    for layer in json_dict["layers"]:
+        # avoids archived and hidden layers
+        if "archived" not in layer:
+            if "visible" not in layer:
+                # avoids non-annotation layers
+                if layer["type"] == "annotation":
+                    # avoids empty annotation layers
+                    if len(layer["annotations"]) > 0:
+                        # avoids non-point annotation layers
+                        if layer["tool"] == "annotatePoint":
+                            layer_names.append(layer["name"])
+
+    # makes empty list to fill with point arrays
+    point_arrays = []
+
+    # iterates through layer names and generates an obj for each
+    for layer_name in layer_names:
+
+        # searches the full dict for the annotation layer specified and pulls it out as a separate list
+        for layer in json_dict["layers"]:
+            if layer["name"] == layer_name:
+                anno_raw_list = layer["annotations"]
+
+        # creates an empty list to fill with points
+        points = []
+
+        # pulls the actual coordinate info out of the layer list
+        for anno in anno_raw_list:
+            points.append(anno["point"])
+
+        # converts points list to numpy array
+        points = np.array(points)
+
+        # converts coords to numpy array of nm-resolution point coord numpy arrays
+        nm_points = np.array(
+            [
+                convert_coord_res(
+                    point_coords=point, res_current=resolution, res_desired=[1, 1, 1]
+                )
+                for point in points
+            ]
+        )
+
+        # adds point array to list
+        point_arrays.append(nm_points)
+
+    # makes empty list to populate with meshes
+    meshes = []
+
+    # if no alpha list passed, generates list of None values matched to length of meshes
+    if alphas == None:
+        alphas = [None for points in point_arrays]
+
+    # makes empty list to fill with point clouds for anno layers
+    point_clouds = []
+
+    # makes empty list to fill with chosen alpha values
+    chosen_alphas = []
+
+    # sets counter for alpha printouts #
+    alpha_count = 1
+
+    # generates mesh for each points annotation layer in json state
+    for points, alpha in zip(point_arrays, alphas):
+
+        # makes version of points in viewer resolution for final link anno layer
+        # appends to list of point clouds
+        point_clouds.append(
+            [[point[0] / 4, point[1] / 4, point[2] / 45] for point in points]
+        )
+
+        # defines function to generate list of verts, faces, and alpha value for mesh
+        def _alpha_shape_3d(points, alpha=None, auto_grow=True, max_iters=15):
+            """3D alpha shape (concave hull) via Delaunay tetrahedralization."""
+
+            # ensures points are formatted as array of floats
+            points = np.asarray(points, dtype=float)
+
+            # uses Delaunay "triangulation" to generate "triangulation" map
+            # tess is a Delaunay object made of "simplices" (triangles in 2D)
+            # Delaunay objects made from 3D coords will generate tetrahedron simplices
+            # simplices are stored as index numbers of vertices in original list
+            # https://thearn.github.io/docs/generated/scipy.spatial.Delaunay.html
+            # https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.Delaunay.html
+            tess = Delaunay(points)
+
+            # gets numpy array of simplices from Delaunay object
+            tets = points[tess.simplices]
+
+            def _tet_circumradii(tetras):
+
+                # makes array of first vertex in each tetra
+                p0 = tetras[:, 0]
+                # makes array of directed a-vectors from second to first vertices
+                a = tetras[:, 1] - p0
+                # makes array of directed b-vectors from third to first vertices
+                b = tetras[:, 2] - p0
+                # makes array of directed c-vectors from fourth to first vertices
+                c = tetras[:, 3] - p0
+
+                # makes new array with columns for a-, b-, and c-vectors
+                # this serves as the coefficient matrix
+                A = np.stack([a, b, c], axis=1)
+
+                # makes a new array with columns for the sum of the squared vector distances for each vector
+                # each row corresponds to a tetra's halved [a-vector square sum, b..., c...]
+                # this is called the right-hand (Riemann) sum
+                rhs = 0.5 * np.stack(
+                    [(a * a).sum(1), (b * b).sum(1), (c * c).sum(1)], axis=1
+                )
+
+                try:
+                    # tries to use linear algebra solver to get solution vector x
+                    # feeds in coefficient matrix A and constant vector (normally called b) based on right-hand sums
+                    x = np.linalg.solve(A, rhs[..., None])[..., 0]
+                except np.linalg.LinAlgError:
+                    x = np.zeros_like(rhs)
+                    for i in range(A.shape[0]):
+                        try:
+                            x[i] = np.linalg.solve(A[i], rhs[i])
+                        except np.linalg.LinAlgError:
+                            x[i] = np.full(3, np.inf)
+                return np.linalg.norm(x, axis=1)
+
+            radii = _tet_circumradii(tetras=tets)
+
+            # if no alpha value submitted, sets default to
+            # 1.5x median distance between each point and nearest neighbor
+            if alpha is None:
+                kd = cKDTree(points)
+                nn_dist, _ = kd.query(points, k=2)
+                alpha = 1.5 * float(np.median(nn_dist[:, 1]))
+
+            # sets initial alpha value used
+            first_alpha = alpha
+
+            def _alpha_shape_once(points, tess, radii, alpha):
+                keep = tess.simplices[radii < alpha]
+                if len(keep) == 0:
+                    return None, None, 0
+                face_counter = Counter()
+                for tet in keep:
+                    for combo in ((0, 1, 2), (0, 1, 3), (0, 2, 3), (1, 2, 3)):
+                        face_counter[tuple(sorted(int(tet[i]) for i in combo))] += 1
+                faces = np.array(
+                    [f for f, c in face_counter.items() if c == 1], dtype=np.int64
+                )
+                if len(faces) == 0:
+                    return None, None, len(keep)
+                used = np.unique(faces.ravel())
+                remap = -np.ones(len(points), dtype=np.int64)
+                remap[used] = np.arange(len(used))
+                return points[used], remap[faces], len(keep)
+
+            # if auto_grow is set to False, only uses the first alpha value for each submesh and stops
+            if not auto_grow:
+                v, f, _ = _alpha_shape_once(points, tess, radii, alpha)
+                if v is None:
+                    raise ValueError(
+                        f"alpha={alpha:.1f} produced no boundary triangles."
+                    )
+                return v, f, alpha
+
+            single_piece = None
+
+            # sets variables for current and last alpha value for printing
+            cur_alpha = alpha
+            last_alpha = alpha
+
+            for _ in range(max_iters):
+                v, f, _ = _alpha_shape_once(points, tess, radii, cur_alpha)
+                if v is None:
+                    cur_alpha *= 1.5
+                    continue
+                m = trimesh.Trimesh(vertices=v, faces=f, process=False)
+                
+                # if mesh is single object
+                if m.body_count == 1:
+                    if single_piece is None:
+                        single_piece = (v, f, cur_alpha)
+                    
+                    # if mesh has no holes, fix normals and return
+                    if m.is_watertight:
+                        m.fix_normals()
+                        return np.asarray(m.vertices), np.asarray(m.faces), first_alpha, cur_alpha, last_alpha
+                # captures most recent alpha for printout
+                last_alpha = cur_alpha
+                cur_alpha *= 1.5
+
+            if single_piece is None:
+                raise ValueError(
+                    f"alpha shape failed to produce a single-component mesh up to {cur_alpha:.1f}."
+                )
+
+            return single_piece
+
+        # sets vertices, faces, and alpha value using alpha_shape_3d function
+        v, f, first_a, a, last_a = _alpha_shape_3d(points, alpha=alpha, auto_grow=auto_grow)
+
+        # handles autotightener behavior
+        if autotighten == True:
+
+            # sets variables for current best and last failed alphas
+            current_best = a
+            last_fail = last_a
+
+            # tries alpha that's halfway between last fail and current best
+            # if successful, halves range towards last fail
+            # if fail, tightens range towards current best
+            # stops when last fail is 1 less than current best
+            while current_best > (last_fail + 1):
+
+                # gets half difference between alphas
+                # dif = (current_best - last_fail) / 2
+
+                # sets new alpha to last failed plus half new
+                # new_a = last_fail + dif
+                new_a = (last_fail + current_best) / 2
+
+                v, f, dummy_first_a, a, last_a = _alpha_shape_3d(points, alpha=new_a, auto_grow=auto_grow)
+
+                # if successful, sets final alpha as new best
+                if a == last_a:
+                    current_best = a
+
+                # if unsuccessful, sets last alpha as last fail
+                else:
+                    last_fail = last_a
+
+            # reruns mesher using new tightened alpha
+            v, f, dummy_first_a, a, dummy_last_a = _alpha_shape_3d(points, alpha=current_best, auto_grow=auto_grow)
+
+        # adds whatever alpha value was used to chosen list
+        chosen_alphas.append(a)
+
+        # generates a trimesh object using vertices and faces
+        submesh = trimesh.Trimesh(vertices=v, faces=f, process=False)
+
+        # expands submesh along vertex normals by requested number of nanaometers
+        if expand_submesh > 0:
+
+            # gets the vertex normals for the submesh
+            normals = submesh.vertex_normals
+
+            # moves vertices along normals by requested number of nanometers
+            expanded_vertices = submesh.vertices + (normals * expand_submesh)
+
+            # update the submesh vertices
+            submesh = trimesh.Trimesh(vertices=expanded_vertices, faces=submesh.faces)
+
+        # smooths submeshes if requested
+        if smooth_submesh > 0:
+            trimesh.smoothing.filter_taubin(submesh, lamb=0.5, nu=-0.53, iterations=int(smooth_submesh))
+
+        # if decimation value passed, decimate submesh
+        if 0.0 < decimate_submesh < 1.0:
+            
+            # sets target face number by multiplying current face number by decimation factor (min 4)
+            target = max(4, int(len(submesh.faces) * decimate_submesh))
+            
+            # stores current number of faces as f_before variable
+            f_before = len(submesh.faces)
+            
+            # attempts to use trimesh quadratic decimation, prints error message on failure
+            try:
+                submesh = submesh.simplify_quadric_decimation(face_count=target)
+                print(f"Submesh {str(alpha_count)} decimation successful. {f_before} faces reduced to {len(submesh.faces)} faces.")
+            except Exception as e:
+                print(f"Submesh {str(alpha_count)} decimation failed: ({e}). Keeping un-decimated mesh with {len(submesh.faces)} faces.")
+        elif decimate_submesh != 0.0:
+            print("Submesh decimation failed, decimation value must be a float between 0.0 and 1.0")
+
+        # adds each mesh to the list of meshes
+        meshes.append(submesh)
+
+        # prints out intitial and final alpha values for troubleshooting output
+        if print_alphas == True:
+            print("Submesh", str(alpha_count), "alpha value started at", first_a, ", last failed at", last_a, ", and succeeded at", a)
+            print("Submesh", str(alpha_count), "has",len(f),"faces.")
+        
+        alpha_count += 1
+
+    # merges all submeshes into final mesh using manifold3d engine boolean union
+    # boolean operations only work on watertight manifold solids with positive volume
+    mesh = trimesh.boolean.boolean_manifold(meshes=meshes, operation="union")
+
+    # prints warning message if final mesh isn't watertight
+    if mesh.is_volume != True:
+        print("Final mesh is not a watertight manifold solid with postitive volume.")
+
+    # expands mesh along vertex normals by requested number of nanometers
+    if expand_mesh > 0:
+
+        # gets the vertex normals for the submesh
+        normals = mesh.vertex_normals
+
+        # moves vertices along normals by requested number of nanometers
+        expanded_vertices = mesh.vertices + (normals * expand_mesh)
+
+        # update the submesh vertices
+        mesh = trimesh.Trimesh(vertices=expanded_vertices, faces=mesh.faces)
+
+    # if smoothing value passed, smoothes mesh
+    if smooth_mesh > 0:
+        trimesh.smoothing.filter_taubin(mesh, lamb=0.5, nu=-0.53, iterations=int(smooth_mesh))
+
+    # if decimation value passed, decimate
+    if 0.0 < decimate_mesh < 1.0:
+        
+        # sets target face number by multiplying current face number by decimation factor (min 4)
+        target = max(4, int(len(mesh.faces) * decimate_mesh))
+        
+        # stores current number of faces as f_before variable
+        f_before = len(mesh.faces)
+        
+        # attempts to use trimesh quadratic decimation, prints error message on failure
+        try:
+            mesh = mesh.simplify_quadric_decimation(face_count=target)
+            print(f"Mesh decimation successful. {f_before} faces reduced to {len(mesh.faces)} faces.")
+        except Exception as e:
+            print(f"Mesh decimation failed: ({e}). Keeping un-decimated mesh with {len(mesh.faces)} faces.")
+    elif decimate_mesh != 0.0:
+        print("Mesh decimation failed, decimation value must be a float between 0 and 1.0")
+
+    # handles obj save behavior if requested
+    if save_objs == True:
+
+        # tries to get the user's Downloads folder path if none specified #
+        if obj_path == None:
+            try:
+                obj_path = str(Path.home() / "Downloads")
+            except:
+                raise Exception(
+                    "Default download folder couldn't be found, please specify the absolute path to a folder using the 'obj_path' argument."
+                )
+
+        # adds trailing slash if not present
+        if obj_path[-1] != "/":
+            obj_path += "/"
+
+        # makes list of all submeshes and final mesh
+        export_meshes = meshes + [mesh]
+
+        # names and exports each mesh
+        for i in range(len(export_meshes)):
+
+            # handles naming difference for submeshes and final mesh
+            if i < len(export_meshes) - 1:
+                # creates obj export path from output_path
+                subpath = obj_path + "submesh_" + str(i + 1) + ".obj"
+            else:
+                subpath = obj_path + "final_mesh.obj"
+
+            # saves mesh as obj file at output path location
+            export_meshes[i].export(subpath, file_type="obj")
+        
+        # currently unused
+        # except:
+        #     raise Exception("OBJ save process failed.")
+
+    # calculates centerpoint from mesh boundaries
+    centerpoint = list(map(int, np.mean(mesh.bounds, axis=0)))
+
+    # converts centerpoint from nm to volume resolution
+    centerpoint = convert_coord_res(
+        point_coords=centerpoint, res_current=[1, 1, 1], res_desired=resolution
+    )
+
+    # gets volume size from config
+    volume_size = config["volume_size"]
+
+    # creates bucket paths for image and mesh folder
+    image_path = bucket_path
+    mesh_path = image_path + "/mesh"
+
+    # creates cloudfiles objects for volume image and mesh folders using bucket paths
+    image_cf = CloudFiles(image_path)
+    mesh_cf = CloudFiles(mesh_path)
+
+    # sets content for cloudvolume image info file
+    image_info = cloudvolume.CloudVolume.create_new_info(
+        num_channels=1,
+        layer_type="segmentation",
+        data_type="uint64",  # channel images might be 'uint8' #
+        # encoding options are raw, png, jpeg, compressed_segmentation, fpzip, kempressed, zfpc, compresso, crackle #
+        encoding="raw",  
+        resolution=resolution,
+        voxel_offset=[0, 0, 0],  # x,y,z offset in voxels from the origin #
+        mesh="mesh",
+        # pick a convenient size for your underlying chunk representation #
+        # powers of two are recommended, doesn't need to cover image exactly #
+        chunk_size=chunk_size,
+        volume_size=volume_size,
+    )
+
+    # sets content for precomputed legacy unsharded mesh info file
+    mesh_info = {
+        "@type": "neuroglancer_legacy_mesh",
+        "transform": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0],
+    }
+
+    # adds volume info file to bucket
+    image_cf.put("info", json.dumps(image_info))
+
+    # adds mesh info file to bucket
+    mesh_cf.put("info", json.dumps(mesh_info))
+
+    # creates cloudvolume object using bucket image path
+    volume = cloudvolume.CloudVolume(image_path)
+
+    # creates cloudvolume mesh object using trimesh mesh
+    cv_format_mesh = cloudvolume.Mesh(vertices=mesh.vertices, faces=mesh.faces)
+
+    # gives the mesh a segment id of 1
+    cv_format_mesh.segid = 1
+
+    # adds the mesh into the volume's list of meshes,
+    # generates two files in 'mesh' folder
+    # one named '1:0', called the manifest file and
+    # one named "1:0:1.gz", called the fragment file #
+    volume.mesh.put(cv_format_mesh)
+
+    # corrects bucket address if host is nokura to public-facing format
+    if nokura == True:
+        bucket_path = "https://c10s.pni.princeton.edu/" + bucket_path[9:]
+
+    # adds neuroglancer format suffix to bucket path
+    mesh_source_url = (bucket_path + "|neuroglancer-precomputed:")
+
+    # creates empty list to fill with annotation layers
+    anno_layers = []
+
+    # creates empty list to fill with anno layer names
+    anno_layer_names = []
+
+    # creates empty string to fill with mesh name using alpha values
+    mesh_name = ""
+
+    # generates anno and mesh layer names
+    for i in range(len(chosen_alphas)):
+        anno_layer_names.append("m" + str(i + 1))
+        mesh_name += "m" + str(i + 1) + "a" + str(int(chosen_alphas[i])) + "_"
+
+    # drops trailing underscore from mesh name
+    mesh_name = mesh_name[:-1]
+
+    # creates spelunker-format annotation layer to feed into link builder and add to list
+    for point_cloud, layer_name in zip(point_clouds, anno_layer_names):
+        anno_layer = make_anno_layer(
+            datastack=datastack,
+            annotations=point_cloud,
+            layer_type="point",
+            layer_name=layer_name,
+        )
+        anno_layers.append(anno_layer)
+
+    # generates list of colors for annotation points based on number of layers
+    colors = make_color_list(len(anno_layers))
+
+    # sets colors of annotation layers based on number
+    for layer, color in zip(anno_layers, colors):
+        layer["annotationColor"] = color
+
+    # makes NG link using original anno points and hosted mesh
+    link = make_ng_link(
+        datastack=datastack,
+        anno_layers=anno_layers,
+        custom_mesh_source=mesh_source_url,
+        custom_mesh_name=mesh_name,
+        view_coords=centerpoint,
+    )
+
+    return link
+
+
 def make_ng_link(
     datastack,
     seg_ids=[],
     anno_layers=[],
     region_meshes=False,
+    region_meshes_on=True,
     seg_colors=[],
     seg_opacity=1.0,
     viewer_site="default",
@@ -4320,6 +4932,8 @@ def make_ng_link(
             a list of annotation layer dictionaries to make ng layers out of
         region_meshes (bool, optional, default=False):
             if True, includes a layer with the default region meshes for the volume if any exist
+        region_meshes_on (bool, optional, default=True):
+            if set to False and region_meshes is True, will hide the region mesh layer
         seg_colors (list of str, optional, default=[]):
             Optional list of hex value colors for segments
         seg_opacity (float, optional, default=1.0):
@@ -4431,19 +5045,26 @@ def make_ng_link(
 
     # adds region mesh layer if present
     if region_meshes == True and config["main_stack_mesh_url"] != None:
-        layers.append(
-            {
-                "type": seg_type,
-                "name": "Region Outlines",
-                "source": config["main_stack_mesh_url"],
-                "segments": [1],
-                "segmentColors": {
-                    "1": region_color,
-                },
-                "objectAlpha": region_alpha,
-                "meshSilhouetteRendering": 2,
-            }
-        )
+        
+        # creates region mesh dict
+        region_mesh_dict = {
+            "type": seg_type,
+            "name": "Region Outlines",
+            "source": config["main_stack_mesh_url"],
+            "segments": [1],
+            "segmentColors": {
+                "1": region_color,
+            },
+            "objectAlpha": region_alpha,
+            "meshSilhouetteRendering": 2,
+        }
+
+        # deselects region mesh layer if requested
+        if region_meshes_on != True:
+            region_mesh_dict["visible"] = False
+
+        # adds region mesh layer dict to layers list
+        layers.append(region_mesh_dict)
 
     # avoids crash if http mesh source is passed to a flywire link
     if datastack == "flywire_fafb_production" and custom_mesh_source[:4] == "http":
@@ -4471,7 +5092,7 @@ def make_ng_link(
             "segmentColors": custom_colors,
         }
 
-        # adds translucentcy option if requested
+        # adds translucency option if requested
         if custom_mesh_opacity < 1.0:
             custom_mesh_layer_dict["objectAlpha"] = custom_mesh_opacity
 
@@ -4867,6 +5488,8 @@ def make_volume_packaging(
 def triage_segs(
     datastack, 
     seg_ids,
+    custom_volume_address=None,
+    custom_volume_seg_ids=None,
 ):
     """
     Skeletonizes list of segs, checks if any pass through known rough spots for a given datastack. 
@@ -4897,8 +5520,12 @@ def triage_segs(
     catacombs = [get_bones(datastack=datastack, skeleton=skeleton) for skeleton in skeletons]
 
     # gets hosting url of rough spot mesh from config dict
-    swamps = config["swamp_source_url"]
-    swamp_ids = config["swamp_ids"]
+    if custom_volume_address == None:
+        swamps = config["swamp_source_url"]
+        swamp_ids = config["swamp_ids"]
+    else:
+        swamps = custom_volume_address
+        swamp_ids = custom_volume_seg_ids
 
     # gets list of triangle point trio arrays from rough spot meshes
     triangles=[]
@@ -4957,6 +5584,7 @@ def triage_segs(
             seg_ids=[seg_ids[counter - 1]],
             anno_layers=anno_layers,
             region_meshes=True,
+            region_meshes_on=False,
             custom_mesh_source=swamps,
             custom_mesh_name="Swamps",
             custom_mesh_seg_ids=swamp_ids,
