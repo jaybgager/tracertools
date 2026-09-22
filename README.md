@@ -1,5 +1,4 @@
-# Overview
-The tracertools package is a collection of Python functions designed to streamline common tasks for connectomics researchers, particularly those related to the proofreading process.
+
 
 # Table of Contents
 
@@ -35,9 +34,11 @@ The tracertools package is a collection of Python functions designed to streamli
 </details>
 <a href="https://github.com/jaybgager/tracertools#license">License</a>
 
+# Overview
+The tracertools package is a collection of Python functions designed to streamline common tasks for connectomics researchers, particularly those related to the proofreading process.
 
-# Installation
-Quick installation from the Python Package Index (PyPI) with pip isn't supported yet (but is planned for the future), so you'll have to intall the tracertools package manually from this GitHub repository by doing the following:
+## Installation
+Quick installation from the Python Package Index (PyPI) with pip isn't supported yet (but is planned for the future), so you'll have to install the tracertools package manually from this GitHub repository by doing the following:
 
 1. Open a terminal and navigate to the directory where you want the tracertools package to be stored.
 2. Run the code `git clone https://github.com/jaybgager/tracertools.git` to make a local copy of the package at the location you navigated to in step one. This will create a folder named `tracertools` that's linked to the GitHub repository in the location you were in when you ran the `clone` command.
@@ -65,9 +66,9 @@ fresh_ids = tt.get_current_seg_ids(
 ```
 
 >[!NOTE]
->Remember to periodically update your package by navigating tot he `tracertools` folder in the terminal and running the command `git pull` to get the latest changes from the github repository. If you've got an active kernel that was started before running the pull command (e.g. you've been using tracertools in a jupyter notebook), remember to restart the kernel after updating the package in order for the changes to take effect!
+>Remember to periodically update your package by navigating to the `tracertools` folder in the terminal and running the command `git pull` to get the latest changes from the github repository. If you've got an active kernel that was started before running the pull command (e.g. you've been using tracertools in a jupyter notebook), remember to restart the kernel after updating the package in order for the changes to take effect!
 
-# Glossary of Common Terms
+## Glossary of Common Terms
 Some terms used in the function descriptions are either uncommon or are used here to mean something very specific in the context of this package. These are defined below:
 
 **backbone (neuron)**\
