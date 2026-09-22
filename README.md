@@ -19,19 +19,18 @@ The tracertools package is a collection of Python functions designed to streamli
         <summary>
             <a href="https://github.com/jaybgager/tracertools#function-cluster-notes">Function Cluster Notes</a>
         </summary>
-        <details>
-            <summary>
-                <a href="https://github.com/jaybgager/tracertools#google-sheet-functions">Google Sheet Functions</a>
+        <a href="https://github.com/jaybgager/tracertools#google-sheet-functions">Google Sheet Functions</a>
             </summary>
-        </details>
     </details>
     <details>
         <summary>
             <a href="https://github.com/jaybgager/tracertools#function-descriptions-instructions-and-examples">Function Descriptions, Instructions, and Examples</a>
         </summary>
-        <a href="https://github.com/jaybgager/tracertools#bucket_convert_colons">bucket_convert_colons</a>
-        <a href="https://github.com/jaybgager/tracertools#bucket_delete_file">bucket_delete_file</a>
-        <a href="https://github.com/jaybgager/tracertools#bucket_download_file">bucket_download_file</a>
+        <p>
+            <a href="https://github.com/jaybgager/tracertools#bucket_convert_colons">bucket_convert_colons</a>
+            <a href="https://github.com/jaybgager/tracertools#bucket_delete_file">bucket_delete_file</a>
+            <a href="https://github.com/jaybgager/tracertools#bucket_download_file">bucket_download_file</a>
+        </p>
     </details>
 </details>
 <a href="https://github.com/jaybgager/tracertools#license">License</a>
