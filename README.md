@@ -3,90 +3,38 @@ The tracertools package is a collection of Python functions designed to streamli
 
 # Table of Contents
 
-><details>
->    <summary>
->        <a href="https://github.com/jaybgager/tracertools#overview">Overview</a>
->    </summary>
->    <details>
->        <summary>
->            <a href="https://github.com/jaybgager/tracertools#installation">Installation</a>
->        </summary>
->    </details>
->    <details>
->        <summary>
->            <a href="https://github.com/jaybgager/tracertools#glossary-of-common-terms">Glossary of Common Terms</a>
->        </summary>
->    </details>
-></details>
-><details>
->    <summary>[Functions](#functions)</summary>
->    <details>
->        <summary>[Function Cluster Notes](#function-cluster-notes)</summary>
->        <details>
->            <summary>[Google Sheet Functions](#google-sheet-functions)</summary>
->        </details>
->    </details>
->    <details>
->        <summary>[Function Descriptions, Instructions, and Examples](#function-descriptions-instructions-and-examples)</summary>
->        - [bucket_convert_colons](#bucket_convert_colons)
->        - [bucket_delete_file](#bucket_delete_file)
->        - [bucket_download_file](#bucket_download_file)
->        - [bucket_download_folder](#bucket_download_folder)
->        - [bucket_move_file](#bucket_rename_file)
->        - [bucket_upload_file](#bucket_upload_file)
->        - [bucket_upload_folder](#bucket_upload_folder)
->        - [calc_3d_distance](#calc_3d_distance)
->        - [calc_avg_point_coords](#calc_avg_point_coords)
->        - [calc_bbox_corners_from_center](#calc_bbox_corners_from_center)
->        - [calc_line_triangle_intersect](#calc_line_triangle_intersect)
->        - [calc_mesh_seg_intersect](#calc_mesh_seg_intersect)
->        - [calc_skeleton_mesh_intersect](#calc_skeleton_mesh_intersect)
->        - [check_seg_freshness](#check_seg_freshness)
->        - [check_seg_proofread_status](#check_seg_proofread_status)
->        - [convert_coord_res](#convert_coord_res)
->        - [count_synapses](#count_synapses)
->        - [count_user_sv_contribution](#count_user_sv_contribution)
->        - [get_anno_array_from_state_file](#get_anno_array_from_state_file)
->        - [get_bones](#get_bones)
->        - [get_cable_lengths](#get_cable_lengths)
->        - [get_cave_stacks](#get_cave_stacks)
->        - [get_cave_stack_info](#get_cave_stack_info)
->        - [get_cave_stack_tables](#get_cave_stack_tables)
->        - [get_cave_table](#get_cave_table)
->        - [get_cave_table_info](#get_cave_table_info)
->        - [get_config](#get_config)
->        - [get_current_seg_ids](#get_current_seg_ids)
->        - [get_json_state_from_url](#et_json_state_from_url)
->        - [get_mesh_triangles](#get_mesh_triangles)
->        - [get_original_seg_ids](#get_original_seg_ids)
->        - [get_roots_from_points](#get_roots_from_points)
->        - [get_seg_3d_volume](#get_seg_3d_volume)
->        - [get_seg_changelog](#get_seg_changelog)
->        - [get_seg_details](#get_seg_details)
->        - [get_seg_edits](#get_seg_edits)
->        - [get_seg_from_sv](#get_seg_from_sv)
->        - [get_seg_skeletons](#get_seg_skeletons)
->        - [get_svs_from_seg](#get_svs_from_seg)
->        - [get_supported_configs](#get_supported_configs)
->        - [gsheet_add_column](#gsheet_add_column)
->        - [gsheet_add_row](#gsheet_add_row)
->        - [gsheet_add_seg_details](#gsheet_add_seg_details)
->        - [gsheet_get_col_as_list](#gsheet_get_col_as_list)
->        - [gsheet_get_tab_as_df](#gsheet_get_tab_as_df)
->        - [host_ng_volume_locally](#host_ng_volume_locally)
->        - [make_edits_link](#make_edits_link)
->        - [make_local_volume_from_obj](#make_local_volume_from_obj)
->        - [make_mesh_from_points](#make_mesh_from_points)
->        - [make_ng_link](#make_ng_link)
->        - [make_objs_from_state_file](#make_objs_from_state_file)
->        - [make_point_cloud_from_state_file](#make_point_cloud_from_state_file)
->        - [make_volume_mesh_from_state_file](#make_volume_mesh_from_state_file)
->        - [make_volume_packaging](#make_volume_packaging)
->        - [triage_segs](#triage_segs)
->        - [visualize_skeletons](#visualize_skeletons)
->    </details>
-></details>
-><a href="https://github.com/jaybgager/tracertools#license">License</a>
+<details>
+    <summary>
+        <a href="https://github.com/jaybgager/tracertools#overview">Overview</a>
+    </summary>
+        <a href="https://github.com/jaybgager/tracertools#installation">Installation</a>
+        <a href="https://github.com/jaybgager/tracertools#glossary-of-common-terms">Glossary of Common Terms</a>
+    </details>
+</details>
+<details>
+    <summary>
+        <a href="https://github.com/jaybgager/tracertools#functions">Functions</a>
+    </summary>
+    <details>
+        <summary>
+            <a href="https://github.com/jaybgager/tracertools#function-cluster-notes">Function Cluster Notes</a>
+        </summary>
+        <details>
+            <summary>
+                <a href="https://github.com/jaybgager/tracertools#google-sheet-functions">Google Sheet Functions</a>
+            </summary>
+        </details>
+    </details>
+    <details>
+        <summary>
+            <a href="https://github.com/jaybgager/tracertools#function-descriptions-instructions-and-examples">Function Descriptions, Instructions, and Examples</a>
+        </summary>
+        <a href="https://github.com/jaybgager/tracertools#bucket_convert_colons">bucket_convert_colons</a>
+        <a href="https://github.com/jaybgager/tracertools#bucket_delete_file">bucket_delete_file</a>
+        <a href="https://github.com/jaybgager/tracertools#bucket_download_file">bucket_download_file</a>
+    </details>
+</details>
+<a href="https://github.com/jaybgager/tracertools#license">License</a>
 
 
 # Installation
