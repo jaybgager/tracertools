@@ -2,8 +2,22 @@
 The tracertools package is a collection of Python functions designed to streamline common tasks for connectomics researchers, particularly those related to the proofreading process.
 
 # Table of Contents
-[Installation](#installation)
-[Glossary of Common Terms](#glossary-of-common-terms)
+
+<details>
+    <summary>
+        <a href="https://github.com/jaybgager/tracertools#overview">Overview</a>
+    </summary>
+    <details>
+        <summary>
+            <a href="https://github.com/jaybgager/tracertools#installation">Installation</a>
+        </summary>
+    </details>
+    <details>
+        <summary>
+            <a href="https://github.com/jaybgager/tracertools#glossary-of-common-terms">Glossary of Common Terms</a>
+        </summary>
+    </details>
+</details>
 <details>
     <summary>[Functions](#functions)</summary>
     <details>
@@ -71,12 +85,11 @@ The tracertools package is a collection of Python functions designed to streamli
         - [triage_segs](#triage_segs)
         - [visualize_skeletons](#visualize_skeletons)
     </details>
-    <details>
-        <summary>[License](#license)</summary>
-    </details>
 </details>
+<a href="https://github.com/jaybgager/tracertools#license">License</a>
 
-# Installation [Back to Table of Contents](#table-of-contents)
+
+# Installation
 Quick installation from the Python Package Index (PyPI) with pip isn't supported yet (but is planned for the future), so you'll have to intall the tracertools package manually from this GitHub repository by doing the following:
 
 1. Open a terminal and navigate to the directory where you want the tracertools package to be stored.
@@ -107,7 +120,7 @@ fresh_ids = tt.get_current_seg_ids(
 >[!NOTE]
 >Remember to periodically update your package by navigating tot he `tracertools` folder in the terminal and running the command `git pull` to get the latest changes from the github repository. If you've got an active kernel that was started before running the pull command (e.g. you've been using tracertools in a jupyter notebook), remember to restart the kernel after updating the package in order for the changes to take effect!
 
-# Glossary of Common Terms [Back to Table of Contents](#table-of-contents)
+# Glossary of Common Terms
 Some terms used in the function descriptions are either uncommon or are used here to mean something very specific in the context of this package. These are defined below:
 
 **backbone (neuron)**\
@@ -239,13 +252,13 @@ A collection of neuroglancer-related assets that can include 2D image layers, 3D
 **voxel**\
 One unit of 3D space, shaped like a rectangular prism, the actual spatial dimensions of which vary from datastack to datastack. Compare to a 2-dimensional pixel. Multiple voxels are grouped together to form a supervoxel.
 
-# Functions [Back to Table of Contents](#table-of-contents)
+# Functions
 In this section you'll find descriptions of each function in the `tracertools` package, with instructions on their use and examples, as well as notes and warnings about known issues, dependencies, or limitations they may have.
 
-## Function Cluster Notes [Back to Table of Contents](#table-of-contents)
+## Function Cluster Notes
 The tracertools package includes several groups of functions that all work in a similar way or rely on a similar set of tools. Rather than rewrite the general information for these in each description, it's summarized here for brevity.
 
-### Google Sheet Functions [Back to Table of Contents](#table-of-contents)
+### Google Sheet Functions
 All the Google-sheet-related functions in this package (those beginning with the `gsheet_` prefix) depend on the [gspread](https://docs.gspread.org/en/latest/) Python package and currently require a Google authentication token to be set up prior to use. The process for doing so is explained [here](https://docs.gspread.org/en/latest/oauth2.html#oauth-client-id). Support for Google service accounts will likely be added in the future.
 
 You'll need permission to read and/or write the specific Google sheets you intend to work with, as well as their sheet keys. The sheet key for a Google sheet can be found in the url between `https://docs.google.com/spreadsheets/d/` and `/edit?`. For example, the sheet key used in the `gsheet_add_column` example above is `1AqIyrqSaEJFGD5Ff1fergwJ8-q0x2l0xCgO025C401c`.
@@ -253,9 +266,9 @@ You'll need permission to read and/or write the specific Google sheets you inten
 > [!WARNING]
 > When uploading floats or integers to Google sheets, large numbers may sometimes be converted to scientific notation - particularly if they end in several 0s. To avoid this for things like segment IDs, it's recommended to convert all numbers to strings prior to uploading.
 
-## Function Descriptions, Instructions, and Examples [Back to Table of Contents](#table-of-contents)
+## Function Descriptions, Instructions, and Examples
 
-### bucket_convert_colons [Back to Table of Contents](#table-of-contents)
+### bucket_convert_colons
 Converts file names that include colons to a Windows-safe alternative and back. Takes a string with the `file_path` argument. By default, converts any colons `:` in the string to triple-underscores `___`. If the `to_windows` argument is set to `False`, converts triple underscores back to colons. Used to allow creation and download/upload of neuroglancer legacy-format volumes (which by necessity must include colons in several file names) on Windows machines (which strictly prohibit the use of colons in file names).
 
 Example (to Windows):
@@ -303,10 +316,10 @@ print(
 "home/user/volumes/vol_01/mesh/1:0:1"
 ```
 
-### bucket_delete_file [Back to Table of Contents](#table-of-contents)
+### bucket_delete_file
 Deletes a file on a cloudfiles-managed bucket. Takes an absolute file path on a cloudfiles-managed bucket as a string with the `file_path` argument and deletes the file.
 
-### bucket_delete_folder [Back to Table of Contents](#table-of-contents)
+### bucket_delete_folder
 Deletes a folder and all its contents on a cloudfiles-managed bucket. Takes an absolute folder path on a cloudfiles-managed bucket as a string with the `folder_path` argument and deletes the folder, including everything contained within. Prompts the user with a confirmation window where they must type `DELETE` and hit enter to prevent accidental deletion. 
 
 > [!NOTE]
