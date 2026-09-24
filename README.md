@@ -1,39 +1,3 @@
-
-
-# Table of Contents
-
-<details>
-    <summary>
-        <a href="https://github.com/jaybgager/tracertools#overview">Overview</a>
-    </summary>
-        <a href="https://github.com/jaybgager/tracertools#installation">Installation</a>
-        <a href="https://github.com/jaybgager/tracertools#glossary-of-common-terms">Glossary of Common Terms</a>
-    </details>
-</details>
-<details>
-    <summary>
-        <a href="https://github.com/jaybgager/tracertools#functions">Functions</a>
-    </summary>
-    <details>
-        <summary>
-            <a href="https://github.com/jaybgager/tracertools#function-cluster-notes">Function Cluster Notes</a>
-        </summary>
-        <a href="https://github.com/jaybgager/tracertools#google-sheet-functions">Google Sheet Functions</a>
-            </summary>
-    </details>
-    <details>
-        <summary>
-            <a href="https://github.com/jaybgager/tracertools#function-descriptions-instructions-and-examples">Function Descriptions, Instructions, and Examples</a>
-        </summary>
-        <p>
-            <a href="https://github.com/jaybgager/tracertools#bucket_convert_colons">bucket_convert_colons</a>
-            <a href="https://github.com/jaybgager/tracertools#bucket_delete_file">bucket_delete_file</a>
-            <a href="https://github.com/jaybgager/tracertools#bucket_download_file">bucket_download_file</a>
-        </p>
-    </details>
-</details>
-<a href="https://github.com/jaybgager/tracertools#license">License</a>
-
 # Overview
 The tracertools package is a collection of Python functions designed to streamline common tasks for connectomics researchers, particularly those related to the proofreading process.
 
