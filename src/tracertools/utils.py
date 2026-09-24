@@ -3722,10 +3722,10 @@ def make_mesh_from_points(
     obj_path=None,
     print_alphas=False,
     nokura=True,
-    decimate_mesh=0.0,
-    decimate_submesh=0.0,
     smooth_mesh=0,
     smooth_submesh=0,
+    decimate_mesh=0.0,
+    decimate_submesh=0.0,
     autotighten=True,
 ):
     """
@@ -3772,14 +3772,6 @@ def make_mesh_from_points(
             whether or not the bucket being used is the Princeton nokura server
             by default, modifies passed bucket address to public-facing host format for nokura
             if using non-nokura bucket, must be set to False
-        decimate_mesh (float, optional, default=0.0):
-            if set to value between 0.0 and 1.0, will attempt to reduce the number of final mesh faces by this proportion
-            e.g. a value of 0.3 would try to reduce a 100-face mesh to 30 faces
-            occurs after smoothing
-        decimate_submesh (float, optional, default=0.0):
-            if set to value between 0.0 and 1.0, will attempt to reduce the number of submesh faces by this proportion
-            e.g. a value of 0.3 would try to reduce a 100-face mesh to 30 faces
-            occurs after smoothing
         smooth_mesh (int, optional, default=0):
             how many iterations of smoothing to apply to the final mesh
             uses trimesh laplacian smoothing operation with taubin filtering
@@ -3790,6 +3782,14 @@ def make_mesh_from_points(
             uses trimesh laplacian smoothing operation with taubin filtering
             occurs before decimation
             passing a float will drop the decimal point
+        decimate_mesh (float, optional, default=0.0):
+            if set to value between 0.0 and 1.0, will attempt to reduce the number of final mesh faces by this proportion
+            e.g. a value of 0.3 would try to reduce a 100-face mesh to 30 faces
+            occurs after smoothing
+        decimate_submesh (float, optional, default=0.0):
+            if set to value between 0.0 and 1.0, will attempt to reduce the number of submesh faces by this proportion
+            e.g. a value of 0.3 would try to reduce a 100-face mesh to 30 faces
+            occurs after smoothing
         autotighten (bool, optional, default=True):
             whether or not to automatically tighten each submesh as much as possible
             works by iteratively trying an alpha value of the average of the last failed and last successful alphas
