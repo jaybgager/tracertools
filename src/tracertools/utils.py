@@ -4089,7 +4089,7 @@ def make_mesh_from_points(
             # stores current number of faces as f_before variable
             f_before = len(submesh.faces)
             
-            # attempts to use trimesh quadratic decimation, prints error message on failure
+            # attempts to use trimesh quadric decimation, prints error message on failure
             try:
                 submesh = submesh.simplify_quadric_decimation(face_count=target)
                 print(f"Submesh {str(alpha_count)} decimation successful. {f_before} faces reduced to {len(submesh.faces)} faces.")
@@ -4129,7 +4129,7 @@ def make_mesh_from_points(
         # stores current number of faces as f_before variable
         f_before = len(mesh.faces)
         
-        # attempts to use trimesh quadratic decimation, prints error message on failure
+        # attempts to use trimesh quadric decimation, prints error message on failure
         try:
             mesh = mesh.simplify_quadric_decimation(face_count=target)
             print(f"Mesh decimation successful. {f_before} faces reduced to {len(mesh.faces)} faces.")
@@ -4688,7 +4688,7 @@ def make_mesh_from_points_experimental(
             # stores current number of faces as f_before variable
             f_before = len(submesh.faces)
             
-            # attempts to use trimesh quadratic decimation, prints error message on failure
+            # attempts to use trimesh quadric decimation, prints error message on failure
             try:
                 submesh = submesh.simplify_quadric_decimation(face_count=target)
                 print(f"Submesh {str(alpha_count)} decimation successful. {f_before} faces reduced to {len(submesh.faces)} faces.")
@@ -4740,7 +4740,7 @@ def make_mesh_from_points_experimental(
         # stores current number of faces as f_before variable
         f_before = len(mesh.faces)
         
-        # attempts to use trimesh quadratic decimation, prints error message on failure
+        # attempts to use trimesh quadric decimation, prints error message on failure
         try:
             mesh = mesh.simplify_quadric_decimation(face_count=target)
             print(f"Mesh decimation successful. {f_before} faces reduced to {len(mesh.faces)} faces.")
