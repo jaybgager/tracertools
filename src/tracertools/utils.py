@@ -3724,8 +3724,8 @@ def make_mesh_from_points(
     nokura=True,
     decimate_mesh=0.0,
     decimate_submesh=0.0,
-    smooth_submesh=0,
     smooth_mesh=0,
+    smooth_submesh=0,
     autotighten=True,
 ):
     """
@@ -3780,12 +3780,12 @@ def make_mesh_from_points(
             if set to value between 0.0 and 1.0, will attempt to reduce the number of submesh faces by this proportion
             e.g. a value of 0.3 would try to reduce a 100-face mesh to 30 faces
             occurs after smoothing
-        smooth_submesh (int, optional, default=0):
-            how many iterations of smoothing to apply to the submeshes
+        smooth_mesh (int, optional, default=0):
+            how many iterations of smoothing to apply to the final mesh
             uses trimesh laplacian smoothing operation with taubin filtering
             occurs before decimation
             passing a float will drop the decimal point
-        smooth_mesh (int, optional, default=0):
+        smooth_submesh (int, optional, default=0):
             how many iterations of smoothing to apply to the submeshes
             uses trimesh laplacian smoothing operation with taubin filtering
             occurs before decimation
