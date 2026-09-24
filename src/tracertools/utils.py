@@ -3773,11 +3773,11 @@ def make_mesh_from_points(
             by default, modifies passed bucket address to public-facing host format for nokura
             if using non-nokura bucket, must be set to False
         decimate_mesh (float, optional, default=0.0):
-            if set to value between 0.0 and 1.0, will attampt to reduce the number of final mesh faces by this proportion
+            if set to value between 0.0 and 1.0, will attempt to reduce the number of final mesh faces by this proportion
             e.g. a value of 0.3 would try to reduce a 100-face mesh to 30 faces
             occurs after smoothing
         decimate_submesh (float, optional, default=0.0):
-            if set to value between 0.0 and 1.0, will attampt to reduce the number of submesh faces by this proportion
+            if set to value between 0.0 and 1.0, will attempt to reduce the number of submesh faces by this proportion
             e.g. a value of 0.3 would try to reduce a 100-face mesh to 30 faces
             occurs after smoothing
         smooth_submesh (int, optional, default=0):
