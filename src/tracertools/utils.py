@@ -2534,7 +2534,7 @@ def get_seg_from_sv(
     sv_id,
 ):
     """
-    Gets segment ID using supervoxel ID and dataset.
+    Gets a segment ID using a supervoxel ID and a datastack name.
 
     Args:
         datastack (str):
