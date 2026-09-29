@@ -1565,7 +1565,7 @@ def get_bones(
         datastack (str):
             the name of the CAVE datastack the skeleton is from 
             e.g. 'brain_and_nerve_cord'
-        skeleton
+        skeleton (osteoid skeleton object):
             the osteoid-format skeleton object in nanometer [1,1,1] voxel resolution
 
     Returns:
