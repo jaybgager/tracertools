@@ -903,9 +903,10 @@ def calc_seg_mesh_intersect(
     return_intersects=False,
 ):
     """
-    Calculates the point at which the skeletons of a list of segments intersect a mesh, if any.
+    Calculates the points at which the skeletons of a list of segments intersect a mesh, if any.
 
-    By default returns a list of True/False values, optional toggle allows for lists of intersection points.
+    By default returns a list of True/False values indicating whether or not any intersection exists.
+    Optional toggle allows for lists of intersection points instead.
 
     Args:
         datastack (str):
@@ -918,8 +919,24 @@ def calc_seg_mesh_intersect(
             e.g. "https://c10s.pni.princeton.edu/tracers/jay/mesher_demo/example_01|neuroglancer-precomputed:"
         return_intersects (bool, optional, default=False):
             optional toggle that will return a list of all the intersection points between 
-            the neuron skeletons and the rough area meshes if True, 
-            otherwise returns list of True/False values for each neuron 
+            the segment skeletons and the mesh if True, 
+            otherwise returns list of True/False values for each segment 
+
+    Returns:
+        results (list of bools or list of coordinates)
+            default behavior returns list of True/False values indicating whether each segment intersects the mesh
+            if "return intersects" argument is set to True, instead returns list where each item is either 
+            a list of 3-item lists of coordinates or a None value if no intersections exist e.g.:
+            [
+                [
+                    [1,2,3]
+                ],
+                None,
+                [
+                    [4, 5, 6],
+                    [7, 8, 9]
+                ]
+            ]
     """
 
     # skeletonizes segments using id list and datastack name
