@@ -1525,7 +1525,7 @@ def get_anno_array_from_state_file(
             e.g. "annotation1"
         json_path (str):
             the absolute path to the NG JSON state file to pull annotations from
-            e.g. '/home/username/ng_jsons/state.json'
+            e.g. "/home/username/ng_jsons/state.json"
 
     Returns:
         points ((n,3)-shape numpy array of ints):
