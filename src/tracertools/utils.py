@@ -912,7 +912,7 @@ def calc_seg_mesh_intersect(
             the name of the datastack that contains the segments
             e.g. "brain_and_nerve_cord"
         seg_ids (list of ints):
-            the ids fo the segments to check
+            the ids of the segments to check
         mesh_address (str):
             the hosting address of the mesh to check the skeletons against
             e.g. "https://c10s.pni.princeton.edu/tracers/jay/mesher_demo/example_01|neuroglancer-precomputed:"
