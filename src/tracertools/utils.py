@@ -1180,7 +1180,7 @@ def check_seg_freshness(
 
     Returns:
     freshness_list (list of bools):
-        a list of True/False values for each segment ID in the list submitted
+        a list of True/False values for each seg ID, denoting whether they're fresh or not
     """
 
     # sets client using datastack name
