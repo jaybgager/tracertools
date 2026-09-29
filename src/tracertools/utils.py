@@ -903,7 +903,7 @@ def calc_seg_mesh_intersect(
     return_intersects=False,
 ):
     """
-    Calculate the point at which the skeletons of a list of segments intersect a mesh, if any.
+    Calculates the point at which the skeletons of a list of segments intersect a mesh, if any.
 
     By default returns a list of True/False values, optional toggle allows for lists of intersection points.
 
