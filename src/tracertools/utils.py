@@ -1698,7 +1698,7 @@ def get_cave_table(
     table_name,
 ):
     """
-    Get the data as a pandas dataframe for a specific table in a specific CAVE datastack.
+    Get the data for a specific table in a specific CAVE datastack as a pandas dataframe.
 
     Some tables may have limits on the number of rows you can pull at once.
 
