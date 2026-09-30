@@ -2123,9 +2123,9 @@ def get_mesh_triangles(
     Gets an array of the vertices for each face of a neuroglancer precomputed mesh.
 
     Args:
-        volume_path
+        volume_path (str)
             the absolute path to the directory of the volume that contains the mesh 
-            e.g. '/home/username/ng_meshes/image' (str)
+            e.g. '/home/username/ng_meshes/image'
         mesh_seg_id (int, optional, default=1):
             the segment ID of the mesh within the neuroglancer volume
         local (bool, optional, default=False):
