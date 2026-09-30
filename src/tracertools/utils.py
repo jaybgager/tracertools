@@ -1978,7 +1978,7 @@ def get_current_seg_ids(
             the potentially-outdated IDs of the segments you want the current IDs for
         include_ratio (bool, optional, default=False):
             if True will include proportion of stale segment's supervoxels that
-            are contained within fresh rosegmentot
+            are contained within the fresh segment
         full_list (bool, optional, default=False):
             if True will return a list of all the fresh IDs associated with 
             supervoxels from the "stale" ID instead of just the top candidate
@@ -1994,8 +1994,8 @@ def get_current_seg_ids(
         result (varies):
             output depends on input toggles
             by default returns a list of integer segment ids of the most likely current segments
-            if include_ratio is True, retruns a list of 2-item lists [seg_id, ratio]
-            if full_list is true, returns a list of lists of all candidate current ids as ints
+            if include_ratio is True, returns a list of 2-item lists [seg_id, ratio]
+            if full_list is True, returns a list of lists of all candidate current ids as ints
             if both include_ratio and full_list are True, returns list of lists of 2-item lists [seg_id, ratio]
     """
 
