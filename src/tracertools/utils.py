@@ -2194,10 +2194,10 @@ def get_original_seg_ids(
 
     Args:
         datastack (str):
-            the name of the CAVE datastack the IDs are from
+            the name of the CAVE datastack the ID is from
             e.g. "brain_and_nerve_cord"
         seg_id (int)
-            the ID of the segment you want the origina segment IDs for
+            the ID of the segment you want the original segment IDs for
 
     Returns:
         seg_ids (list of ints):
@@ -2220,7 +2220,7 @@ def get_roots_from_points(
     sv=False,
 ):
     """
-    Get IDs for the segment or supervoxel at a list of point coordinates.
+    Gets IDs for the segment or supervoxel at a list of point coordinates.
 
     Args:
         datastack (str):
