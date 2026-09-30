@@ -1755,7 +1755,7 @@ def get_cave_table_info(
 
 def get_config(datastack):
     """
-    Gets the in-house tracer-format config dictionary for a given dataset. 
+    Gets the in-house tracer-format config dictionary for a given datastack. 
     
     Useful for building neuroglancer states and querying backend cave tables.
 
