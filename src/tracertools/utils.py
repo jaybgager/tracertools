@@ -1569,7 +1569,7 @@ def get_bones(
             the osteoid-format skeleton object in nanometer [1,1,1] voxel resolution
 
     Returns:
-        bones ((n,2,3)-shape numpy array)
+        bones ((n,2,3)-shape numpy array of floats)
             array of endpoint pairs for each edge of the skeleton in volume resolution
     """
 
