@@ -2387,7 +2387,7 @@ def get_seg_details(
     Returns:
         out_rows (list of lists):
             a list of lists, for which each entry will be structured as
-            [original ID, current id, volume, cable length, ougoing syns, incoming sysns, total syns]
+            [original ID, current id, volume, cable length, ougoing syns, incoming syns, total syns]
     """
 
     # gets current ids for each seg
