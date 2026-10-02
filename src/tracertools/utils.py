@@ -2588,7 +2588,7 @@ def get_seg_skeletons(
             a list of the segment IDs you want skeletons for
 
     Returns:
-        intersect_list (list of objects):
+        intersect_list (list of osteoid Skeleton objects):
             a list of osteoid skeleton objects in the same order as the submitted segment IDs
     """
 
