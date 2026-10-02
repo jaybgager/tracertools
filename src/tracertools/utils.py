@@ -3490,10 +3490,14 @@ def make_edits_link(datastack, seg_id, separate_layers=False):
 
     Args:
         datastack (str):
-            the name of the CAVEdatastack the segment ID is from
+            the name of the CAVE datastack the segment ID is from
             e.g. "brain_and_nerve_cord"
         seg_id (int):
             a segment ID to build the edit link for
+
+    Returns:
+        link (str):
+            the url for the NG state with the requested segment's edits
     """
 
     # sets client using datastack name
