@@ -3748,6 +3748,7 @@ def make_mesh_from_points(
     decimate_mesh=0.0,
     decimate_submesh=0.0,
     autotighten=True,
+    austin_debug=False,
 ):
     """
     Generates a bucket-hosted NG mesh from a shortlink of point annotations and returns a shortlink to it.
@@ -4235,6 +4236,11 @@ def make_mesh_from_points(
         "@type": "neuroglancer_legacy_mesh",
         "transform": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0],
     }
+
+    # TEMPORARY DEBUG PRINT #
+    if austin_debug == True:
+        print(image_info)
+    # TEMPORARY DEBUG PRINT #
 
     # adds volume info file to bucket
     image_cf.put("info", json.dumps(image_info))
