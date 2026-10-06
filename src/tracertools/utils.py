@@ -4961,7 +4961,7 @@ def make_ng_link(
             sets segmentation 3D opacity between 0.0 (invisible) and 1.0 (opaque)
             this is useful for doing segment proofreading comparisons, where the old seg is set to red (#FF0000)
             and the proofread seg is set to cyan (#00FFFF); this causes the overlap to turn grey, showing added
-            regions as cyan and removed regions as red (any pair of directly complemetary colors can be used)
+            regions as cyan and removed regions as red (any pair of directly complementary colors can be used)
         viewer_site (str, optional, default="default"):
             Option to override datastack's default viewer site with custom viewer site url
         custom_mesh_source (str, optional, default=None):
@@ -5420,13 +5420,13 @@ def make_volume_packaging(
 
     Args:
         output_path (str):
-            the absolute path to the folder where you want to create the mesh, e.g. 'home/username/ng_meshes" (str)
-        resolution (list of ints, optional, default [1,1,1]):
+            the absolute path to the folder where you want to create the mesh, e.g. "home/username/ng_meshes"
+        resolution (list of ints, optional, default=[1,1,1]):
             the voxel scale in nm of the datastack the mesh belongs to
             e.g. [4,4,45] for "brain_and_nerve_cord"
-        chunk_size (list of ints, optional, default [512,512,16]):
+        chunk_size (list of ints, optional, default=[512,512,16]):
             the size of the chunks in voxels for the datastack the mesh belongs to
-        volume_size (list of ints, optional, default [250000,250000,25000]):
+        volume_size (list of ints, optional, default=[250000,250000,25000]):
             the size of the entire volume in voxels
             e.g. [250000,250000,25000]
     """
@@ -5522,7 +5522,7 @@ def triage_segs(
             the name of the datastack that contains the segments
             e.g. "brain_and_nerve_cord"
         seg_ids (list of ints):
-            the ids fo the segments to check
+            the ids of the segments to check
 
     Returns:
         results (3-item list)
