@@ -3,12 +3,9 @@ from cloudfiles import CloudFiles, CloudFile
 import cloudvolume
 from collections import Counter
 import datetime
-from functools import partial
 import gspread
 import json
 import microviewer
-from multiprocessing import Pool, cpu_count
-from nglui.statebuilder import *
 from numba import njit
 import numpy as np
 import os
@@ -16,9 +13,7 @@ from osteoid import Skeleton
 import pandas as pd
 from pathlib import Path
 import platform
-import plotly.graph_objects as go
 from scipy.spatial import Delaunay, cKDTree
-import statistics
 import sys
 import time
 from tqdm import tqdm
@@ -4929,7 +4924,7 @@ def make_ng_link(
 
     # handles link construction for long-form url
     if long_url == True:
-        from urllib.parse import quote  # might be unnecessary #
+        # from urllib.parse import quote  # delete if nothing breaks #
 
         # json-encodes state dict
         encoded = quote(json.dumps(state, separators=(",", ":")))
