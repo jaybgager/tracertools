@@ -4794,7 +4794,7 @@ def make_ng_link(
                 "voxelSize": voxel_dimensions,
                 "voxelCoodrinates": config["default_view_point"],
             },
-            "zoomFactor": 13.2,
+            "zoomFactor": config["default_zoom_2d"],
         }
         region_alpha = 0.2
         region_color = "#808080"
@@ -4896,7 +4896,7 @@ def make_ng_link(
 
     # builds state dict
     # conditionally handles outdated flywire json syntax
-    if datastack == "flywire_fafb_production":
+    if datastack == "flywire_fafb_production" or datastack == "mrgd":
         state = {
             "layers": layers,
             "navigation": nav_dict,
