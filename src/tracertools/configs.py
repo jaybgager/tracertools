@@ -99,6 +99,7 @@ def get_config(datastack):
             # proofreading review table
             "proofreading_review_table_name": "proofreading_review_public_v1",
         },
+        # last updated 2026/10/7
         "male_adult_nerve_cord": {
             "cave_id": None,
             "publisher_description" : None,
@@ -143,6 +144,7 @@ def get_config(datastack):
             # annotation layer for postsynaptic points #
             "postsyn_anno_layer_source_url": "precomputed://gs://manc-seg-v1p2/manc-v1.2-synapse-partners-minconf-0.0.precomputed",
         },
+        # last updated 2026/10/7
         "minnie65_phase3_v1" : {
             "cave_id": 1,
             "publisher_description" : "This is the second alignment of the IARPA 'minnie65' dataset, completed in the spring of 2020 that used the seamless approach. This is the first version of Minnie that has proofreading enabled. Was first enabled on June 24, 2020.",
@@ -181,6 +183,7 @@ def get_config(datastack):
             "swamp_ids": None,
             # --- unique entries below this line --- #
         },
+        # last updated 2026/10/7
         "mrgd" : {
             "cave_id": 10,
             "publisher_description" : "Mouse dorsal spine",
@@ -219,6 +222,7 @@ def get_config(datastack):
             "swamp_ids": None,
             # --- unique entries below this line --- #
         },
+        # last updated 2026/10/7
         "stroeh_mouse_retina": {
             "cave_id": 14,
             "publisher_description" : None,
@@ -257,6 +261,7 @@ def get_config(datastack):
             "swamp_ids": None,
             # --- unique entries below this line --- #
         },
+        # last updated 2026/10/7
         "zheng_ca3" : {
             "cave_id": 12,
             "publisher_description" : None,
@@ -364,7 +369,8 @@ def get_supported_configs():
         "brain_and_nerve_cord",
         "flywire_fafb_production",
         "male_adult_nerve_cord (not CAVE-supported, incomplete)",
-        "pni_mec",
+        "minnie65_phase3_v1 (linkbuilder currently has bug with 3d rotation failing)",
+        "mrgd",
         "stroeh_mouse_retina",
         "zheng_ca3 (linkbuilder currently has bug with 3d rotation failing)"
     ]
