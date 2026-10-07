@@ -4786,8 +4786,8 @@ def make_ng_link(
         "z": [config["resolution"][2] * 1e-9, "m"],
     }
 
-    # handles flywire jenk for JSON syntax
-    if datastack == "flywire_fafb_production":
+    # handles flywire/mrgd jenk for JSON syntax
+    if datastack == "flywire_fafb_production" or datastack == "mrgd":
         seg_type = "segmentation_with_graph"
         nav_dict = {
             "pose": {
