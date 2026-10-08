@@ -16,10 +16,13 @@ def get_config(datastack):
 
     # defines dictionary of config dicts for the supported datastacks
     configs = {
-        # last updated 2026/10/7
+        # last updated 2026/10/8
         "brain_and_nerve_cord": {
-            "cave_id": 9,
-            "publisher_description" : 'The BANC (said "the bank") is the Brain And Nerve Cord, a GridTape transmission electron microscopy dataset of a female adult Drosophila melanogaster\'s entire central nervous system. Visit https://banc.community for more information.',
+            "dataset_name":"brain_and_nerve_cord",
+            "dataset_display_name": "BANC",
+            "dataset_id": 9,
+            "dataset_description" : 'The BANC (said "the bank") is the Brain And Nerve Cord, a GridTape transmission electron microscopy dataset of a female adult Drosophila melanogaster\'s entire central nervous system. Visit https://banc.community for more information.',
+            "datastack_description":None,
             "resolution": [4, 4, 45],
             "volume_size": [262144, 294912, 7010],
             "min_coord" : [0,0,0],
@@ -57,10 +60,13 @@ def get_config(datastack):
             # hosting url for MANC datastack aligned comparison mesh
             "manc_seg_source_url": "precomputed://gs://lee-lab_brain-and-nerve-cord-fly-connectome/imported_meshes/manc_v1.2.1_meshes_elastix_tpsreg_240721",
         },
-        # last updated 2026/10/7
+        # last updated 2026/10/8
         "flywire_fafb_production": {
-            "cave_id": 2,
-            "publisher_description" : "The seung lab's realignment of the FAFB dataset",
+            "dataset_name":"fafb_seung_alignment_v0",
+            "dataset_display_name": "FAFB_v14",
+            "dataset_id": 2,
+            "dataset_description" : "The seung lab's realignment of the FAFB dataset",
+            "datastack_description":"The production segmentation for the flywire segmentation",
             "resolution": [4, 4, 40],
             "volume_size": [270336, 147456, 7062], # estimated #
             "min_coord" : [0,0,0],
@@ -99,10 +105,13 @@ def get_config(datastack):
             # proofreading review table
             "proofreading_review_table_name": "proofreading_review_public_v1",
         },
-        # last updated 2026/10/7
+        # last updated 2026/10/8
         "male_adult_nerve_cord": {
-            "cave_id": None,
-            "publisher_description" : None,
+            "dataset_name": None,
+            "dataset_display_name": None,
+            "dataset_id": None,
+            "dataset_description": None,
+            "datastack_description": None,
             "resolution": [8, 8, 8],
             "volume_size": [],
             "min_coord" : [],
@@ -132,7 +141,7 @@ def get_config(datastack):
             "default_view_point": None,
             "default_zoom_2d": 10,
             "default_zoom_3d": 10000,
-            "default_angle_3d": [0, 0, 0, 0],
+            "default_angle_3d": [0, 0, 0, 1],
             "shortlink_server_url": None,
             "swamp_source_url": None,
             "swamp_ids": None,
@@ -144,10 +153,13 @@ def get_config(datastack):
             # annotation layer for postsynaptic points #
             "postsyn_anno_layer_source_url": "precomputed://gs://manc-seg-v1p2/manc-v1.2-synapse-partners-minconf-0.0.precomputed",
         },
-        # last updated 2026/10/7
+        # last updated 2026/10/8
         "minnie65_phase3_v1" : {
-            "cave_id": 1,
-            "publisher_description" : "This is the second alignment of the IARPA 'minnie65' dataset, completed in the spring of 2020 that used the seamless approach. This is the first version of Minnie that has proofreading enabled. Was first enabled on June 24, 2020.",
+            "dataset_name": "minnie65_phase3",
+            "dataset_display_name": "Minnie65",
+            "dataset_id": 1,
+            "dataset_description": "This is the second alignment of the IARPA 'minnie65' dataset, completed in the spring of 2020 that used the seamless approach.",
+            "datastack_description": "This is the first version of Minnie that has proofreading enabled. Was first enabled on June 24, 2020.",
             "resolution" : [4,4,40],
             "volume_size" : [384848, 262102, 13008],
             "min_coord" : [52770,60616,14850],
@@ -177,16 +189,19 @@ def get_config(datastack):
             "default_view_point" : [245194, 191667, 21354],
             "default_zoom_2d" : 3,
             "default_zoom_3d" : 1215104,
-            "default_angle_3d" : [0,0,0,0],
+            "default_angle_3d" : [0,0,0,1],
             "shortlink_server_url" : None,
             "swamp_source_url" : None,
             "swamp_ids": None,
             # --- unique entries below this line --- #
         },
-        # last updated 2026/10/7
+        # last updated 2026/10/8
         "mrgd" : {
-            "cave_id": 10,
-            "publisher_description" : "Mouse dorsal spine",
+            "dataset_name": "mrgd",
+            "dataset_display_name": "MrgD",
+            "dataset_id": 10,
+            "dataset_description": "Mouse dorsal spine",
+            "datastack_description": None,
             "resolution" : [4,4,45],
             "volume_size" : [201727, 82943, 498],
             "min_coord" : [0,0,0],
@@ -222,10 +237,13 @@ def get_config(datastack):
             "swamp_ids": None,
             # --- unique entries below this line --- #
         },
-        # last updated 2026/10/7
+        # last updated 2026/10/8
         "stroeh_mouse_retina": {
-            "cave_id": 14,
-            "publisher_description" : None,
+            "dataset_name": "stroeh_mouse_retina",
+            "dataset_display_name": None,
+            "dataset_id": 14,
+            "dataset_description": None,
+            "datastack_description": None,
             "resolution": [16, 16, 40],
             "volume_size": [81920,81920,2065], # estimated #
             "min_coord" : [0,0,0],
@@ -261,10 +279,13 @@ def get_config(datastack):
             "swamp_ids": None,
             # --- unique entries below this line --- #
         },
-        # last updated 2026/10/7
+        # last updated 2026/10/8
         "zheng_ca3" : {
-            "cave_id": 12,
-            "publisher_description" : None,
+            "dataset_name":"zheng_ca3",
+            "dataset_display_name": "Zheng CA3",
+            "dataset_id": 12,
+            "dataset_description" : None,
+            "datastack_description": None,
             "resolution" : [18,18,45],
             "volume_size" : [51420, 57384, 2047], # estimated #
             "min_coord" : [20511, 19839, 96], # estimated #
@@ -294,7 +315,7 @@ def get_config(datastack):
             "default_view_point" : [46221, 48531, 1119],
             "default_zoom_2d" : 1.65,
             "default_zoom_3d" : 66402,
-            "default_angle_3d" : [0,0,0,0],
+            "default_angle_3d" : [0,0,0,1],
             "shortlink_server_url" : None,
             "swamp_source_url" : None,
             "swamp_ids": None,
@@ -302,8 +323,11 @@ def get_config(datastack):
         },
         # # template for adding new config dicts #
         # "name" : {
-        #     "cave_id": 0,
-        #     "publisher_description" : "",
+        #     "dataset_name": "",
+        #     "dataset_display_name": "",
+        #     "dataset_id": 0,
+        #     "dataset_description" : "",
+        #     "datastack_description": "",
         #     "resolution" : [],
         #     "volume_size" : [],
         #     "min_coord" : [],
