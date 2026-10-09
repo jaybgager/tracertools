@@ -4786,9 +4786,9 @@ def make_ng_link(
         "z": [config["resolution"][2] * 1e-9, "m"],
     }
 
-    if "flywire" in datastack:
-        flywire_dstack = True
-
+    # sets variable used to toggle flywire-specific behavior
+    flywire_dstack = "flywire" in datastack
+    
     # handles flywire/mrgd jenk for JSON syntax
     if flywire_dstack == True or datastack == "mrgd":
         seg_type = "segmentation_with_graph"
@@ -4865,9 +4865,10 @@ def make_ng_link(
         layers.append(region_mesh_dict)
 
     # avoids crash if http mesh source is passed to a flywire link
-    if flywire_dstack == True and custom_mesh_source[:4] == "http":
-        print("Error: flywire doesn't support http mesh hosting")
-        custom_mesh_source = None
+    if flywire_dstack == True and custom_mesh_source != None:
+        if custom_mesh_source[:4] == "http":
+            print("Error: flywire doesn't support http mesh hosting")
+            custom_mesh_source = None
 
     # is a custom mesh source url is provided, adds a custom mesh layer to the layer list
     if custom_mesh_source != None:
