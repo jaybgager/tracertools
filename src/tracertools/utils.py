@@ -4787,7 +4787,7 @@ def make_ng_link(
     }
 
     # sets variable used to toggle flywire-specific behavior
-    flywire_dstack = "flywire" in datastack
+    flywire_dstack = "fafb" in datastack
     
     # handles flywire/mrgd jenk for JSON syntax
     if flywire_dstack == True or datastack == "mrgd":
