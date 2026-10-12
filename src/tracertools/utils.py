@@ -2482,6 +2482,7 @@ def gsheet_add_column(
     sheet_key,
     tab_name,
     col_data,
+    oauth=False,
 ):
     """
     Adds a list as a column to a tab in a google sheet.
@@ -2501,10 +2502,16 @@ def gsheet_add_column(
             a list of values that you want to append as a column to the end of the current data in the sheet
             be aware that large integers passed may sometimes be converted to scientific notation
             it's recommended to pass all data to the spreadsheet as strings if possible to avoid this
+        oauth (bool, optional, default=False):
+            by default, assumes you want to use google service account
+            setting this to True will attempt to use OAuth token instead
     """
 
     # sets up google credentials
-    gc = gspread.oauth()
+    if oauth == True:
+        gc = gspread.oauth()
+    else:
+        gc = gspread.service_account()
 
     # opens sheet as object using sheet key
     sheet = gc.open_by_key(sheet_key)
@@ -2519,7 +2526,12 @@ def gsheet_add_column(
     tab.insert_cols(values=[col_data], col=col)
 
 
-def gsheet_add_row(sheet_key, tab_name, row_data):
+def gsheet_add_row(
+    sheet_key, 
+    tab_name, 
+    row_data,
+    oauth=False,
+):
     """
     Adds a list as a row to a tab in a google sheet.
 
@@ -2538,10 +2550,16 @@ def gsheet_add_row(sheet_key, tab_name, row_data):
             a list of values that you want to append as a row to the end of the current data in the sheet
             be aware that large integers passed may sometimes be converted to scientific notation
             it's recommended to pass all data to the spreadsheet as strings if possible to avoid this
+        oauth (bool, optional, default=False):
+            by default, assumes you want to use google service account
+            setting this to True will attempt to use OAuth token instead
     """
 
     # sets up google credentials
-    gc = gspread.oauth()
+    if oauth == True:
+        gc = gspread.oauth()
+    else:
+        gc = gspread.service_account()
 
     # opens sheet as object using sheet key
     sheet = gc.open_by_key(sheet_key)
@@ -2561,6 +2579,7 @@ def gsheet_add_seg_details(
     cable_length=True,
     synapse_counts=True,
     proofreading=True,
+    oauth=False,
 ):
     """
     Gets neuron details for a list of segment IDs in a google sheet and adds them to the sheet.
@@ -2586,10 +2605,16 @@ def gsheet_add_seg_details(
             whether or not to include synapse data
         proofreading (bool, optional, default=True):
             whether or not to proofreading status
+        oauth (bool, optional, default=False):
+            by default, assumes you want to use google service account
+            setting this to True will attempt to use OAuth token instead
     """
 
     # sets up google credentials
-    gc = gspread.oauth()
+    if oauth == True:
+        gc = gspread.oauth()
+    else:
+        gc = gspread.service_account()
 
     # opens sheet as object using sheet key
     sheet = gc.open_by_key(sheet_key)
@@ -2629,10 +2654,10 @@ def gsheet_add_seg_details(
 
         # gets fresh seg ID
         try:
-            fresh_seg = get_current_seg_ids(datastack=datastack, seg_ids=[seg_id])[0]
+            fresh_seg = get_current_seg_ids(datastack=datastack, seg_ids=[seg_id])[0][0]
         except:
             try:
-                fresh_seg = get_current_seg_ids(datastack=datastack, seg_ids=[seg_id])[0]
+                fresh_seg = get_current_seg_ids(datastack=datastack, seg_ids=[seg_id])[0][0]
             except:
                 fresh_seg = "ERROR"
 
@@ -2722,7 +2747,13 @@ def gsheet_add_seg_details(
         last_row += 1
 
 
-def gsheet_get_col_as_list(sheet_key, tab_name, col_num=1, ignore_header=False):
+def gsheet_get_col_as_list(
+    sheet_key, 
+    tab_name, 
+    col_num=1, 
+    ignore_header=False,
+    oauth=False,
+):
     """
     Gets data from a column in a google sheet as a list.
 
@@ -2740,14 +2771,20 @@ def gsheet_get_col_as_list(sheet_key, tab_name, col_num=1, ignore_header=False):
             column numbers start at 1 for column A, which is the default
         ignore_header (bool, optional, default=False):
             if True, will skip the first row of the column
+        oauth (bool, optional, default=False):
+            by default, assumes you want to use google service account
+            setting this to True will attempt to use OAuth token instead
 
     Returns:
         col (list):
             a list of the values in the column
     """
 
-    # sets up google authentication using token
-    gc = gspread.oauth()
+    # sets up google credentials
+    if oauth == True:
+        gc = gspread.oauth()
+    else:
+        gc = gspread.service_account()
 
     # creates gsheet object using sheet key
     sheet = gc.open_by_key(sheet_key)
@@ -2764,8 +2801,66 @@ def gsheet_get_col_as_list(sheet_key, tab_name, col_num=1, ignore_header=False):
 
     return col
 
+def gsheet_get_row_as_list(
+    sheet_key, 
+    tab_name, 
+    row_num=1, 
+    ignore_index=False,
+    oauth=False,
+):
+    """
+    Gets data from a row in a google sheet as a list.
 
-def gsheet_get_tab_as_df(sheet_key, tab_name, has_headers=True):
+    This function requires a Google authentication token to be set up prior to use.
+    The process for doing so is explained here: https://docs.gspread.org/en/latest/oauth2.html#oauth-client-id
+
+    Args:
+        sheet_key (str):
+            the key for the google sheet to be updated, found in the url between '/d/' and '/edit?'
+        tab_name (str):
+            the name of the google sheet tab the list of IDs are in
+            "tab" is an informal term, officially these are called "worksheets" within Google's documentation
+        row_num (int, optional, default=1):
+            the number of the row you want to convert
+            row numbers start at 1, which is the default
+        ignore_index (bool, optional, default=False):
+            if True, will skip the first column of the row
+        oauth (bool, optional, default=False):
+            by default, assumes you want to use google service account
+            setting this to True will attempt to use OAuth token instead
+
+    Returns:
+        row (list):
+            a list of the values in the row
+    """
+
+    # sets up google credentials
+    if oauth == True:
+        gc = gspread.oauth()
+    else:
+        gc = gspread.service_account()
+
+    # creates gsheet object using sheet key
+    sheet = gc.open_by_key(sheet_key)
+
+    # creates worksheet object using tab name
+    tab = sheet.worksheet(tab_name)
+
+    # creates list of column values using column number
+    row = tab.row_values(row_num)
+
+    # pops first value if ignore header is true
+    if ignore_index == True:
+        row.pop(0)
+
+    return row
+
+def gsheet_get_tab_as_df(
+    sheet_key, 
+    tab_name, 
+    has_headers=True,
+    oauth=False,
+):
     """
     Gets the data from a google sheet tab as a dataframe.
 
@@ -2782,6 +2877,9 @@ def gsheet_get_tab_as_df(sheet_key, tab_name, has_headers=True):
             whether or not the original data includes headers
             if set to False, will generate numeric column names automatically
             this avoids first row being used for dataframe column names
+        oauth (bool, optional, default=False):
+            by default, assumes you want to use google service account
+            setting this to True will attempt to use OAuth token instead
 
     Returns:
         df (pandas DataFrame object):
@@ -2789,7 +2887,10 @@ def gsheet_get_tab_as_df(sheet_key, tab_name, has_headers=True):
     """
 
     # sets up google credentials
-    gc = gspread.oauth()
+    if oauth == True:
+        gc = gspread.oauth()
+    else:
+        gc = gspread.service_account()
 
     # opens sheet as object using sheet key
     sheet = gc.open_by_key(sheet_key)
