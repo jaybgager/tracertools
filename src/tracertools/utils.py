@@ -17,7 +17,7 @@ from scipy.spatial import Delaunay, cKDTree
 import sys
 import time
 from tqdm import tqdm
-from tracertools.configs import get_config, get_supported_configs
+from tracertools.configs import get_config, get_supported_configs, get_table_format_dict, get_supported_table_formats
 import trimesh
 from urllib.error import HTTPError
 from urllib.parse import quote
@@ -1221,8 +1221,11 @@ def check_seg_proofread_status(
         return
 
     # gets column names from config
-    seg_col = config["proofreading_table_seg_col"]
-    proof_col = config["proofreading_table_status_col"]
+    proof_table_format = get_table_format_dict(
+        table_format = config["proofreading_table_format"]
+    )
+    seg_col = proof_table_format["seg"]
+    proof_col = proof_table_format["proofread"]
 
     # makes dataframe of all seg_ids that appear in proofreading table 
     df = client.materialize.query_table(
@@ -1329,9 +1332,12 @@ def count_synapses(
             "The requested datastack doesn't have a supported synapse table."
         )
 
-    # sets names of columns for pre- and post-synaptic seg ids
-    pre_name = config["syn_pre_seg_col"]
-    post_name = config["syn_post_seg_col"]
+    # gets column names from config
+    syn_table_format = get_table_format_dict(
+        table_format = config["synapse_table_format"]
+    )
+    pre_name = syn_table_format["pre_seg"]
+    post_name = syn_table_format["post_seg"]
 
     # makes dfs of incoming and outgoing synapses entries for all seg_ids in list
     in_df = client.materialize.query_table(
@@ -1486,7 +1492,7 @@ def count_user_sv_contribution(
 #     config = get_config(datastack=datastack)
 
 #     # sets resolution using config
-#     res = config["resolution"]
+#     res = config["viewer_res"]
 
 #     # converts bbox corner point coords to nanometer resolution
 #     bbox = [tt.convert_coord_res(bound,res_current=res) for bound in bbox]
@@ -1581,7 +1587,7 @@ def get_bones(
     config = get_config(datastack=datastack)
 
     # gets voxel resolution from config dict 
-    res = config["resolution"]
+    res = config["viewer_res"]
 
     # creates empty list to populate with volume-resolution bones 
     bones = []
@@ -2048,7 +2054,7 @@ def get_roots_from_points(
     config = get_config(datastack=datastack)
 
     # gets segmentation address
-    seg_url = config["seg_source_url"]
+    seg_url = config["seg_source"]
 
     # sets cloud volume
     volume = cloudvolume.CloudVolume(
@@ -2060,7 +2066,7 @@ def get_roots_from_points(
     mip0_res = volume.meta.resolution(0)
 
     # gets viewer resolution
-    viewer_res = config["resolution"]
+    viewer_res = config["viewer_res"]
 
     # creates a conversion template for going from viewer to mip0 coords
     res_conversion = [mip0 / viewer for mip0, viewer in zip(mip0_res, viewer_res)]
@@ -2396,7 +2402,7 @@ def get_seg_skeletons(
     config = get_config(datastack=datastack)
 
     # gets datastack esolution from config 
-    stack_res = config["resolution"]
+    stack_res = config["viewer_res"]
 
     # creates matrix using datastack resolution for converting skeleton coords from nm res 
     matrix = np.array(
@@ -2979,9 +2985,9 @@ def make_anno_layer(
 
     # sets voxel scale dimensions using config
     dims = {
-        "x": [config["resolution"][0] * 1e-9, "m"],
-        "y": [config["resolution"][1] * 1e-9, "m"],
-        "z": [config["resolution"][2] * 1e-9, "m"],
+        "x": [config["viewer_res"][0] * 1e-9, "m"],
+        "y": [config["viewer_res"][1] * 1e-9, "m"],
+        "z": [config["viewer_res"][2] * 1e-9, "m"],
     }
 
     # make output layer dict
@@ -3046,7 +3052,7 @@ def make_bucket_volume_from_obj(datastack, obj_path, bucket_path):
         )
 
     # pulls voxel xyz dimensions from config dict
-    resolution = config["resolution"]
+    resolution = config["viewer_res"]
 
     # gets volume size from config
     volume_size = config["volume_size"]
@@ -3281,7 +3287,7 @@ def make_edits_link(datastack, seg_id, separate_layers=False):
     config = get_config(datastack=datastack)
 
     # pulls voxel resolution from tracer config_dict
-    res = config["resolution"]
+    res = config["viewer_res"]
 
     # creates df of all edits
     change_df = get_seg_edits(datastack=datastack, seg_id=seg_id)
@@ -3478,7 +3484,7 @@ def make_local_volume_from_obj(datastack, obj_path, output_path):
         )
 
     # pulls voxel xyz dimensions from config dict
-    resolution = config["resolution"]
+    resolution = config["viewer_res"]
 
     # imports obj as trimesh object
     obj_mesh = trimesh.load(obj_path)
@@ -3627,7 +3633,7 @@ def make_mesh_from_points(
         )
 
     # pulls voxel xyz dimensions from config dict
-    resolution = config["resolution"]
+    resolution = config["viewer_res"]
 
     # makes empty list to fill with annotation layer names
     layer_names = []
@@ -4214,7 +4220,7 @@ def make_mesh_from_points_experimental(
         )
 
     # pulls voxel xyz dimensions from config dict
-    resolution = config["resolution"]
+    resolution = config["viewer_res"]
 
     # makes empty list to fill with annotation layer names
     layer_names = []
@@ -4781,9 +4787,9 @@ def make_ng_link(
 
     # sets voxel dimensions in meters
     voxel_dimensions = {
-        "x": [config["resolution"][0] * 1e-9, "m"],
-        "y": [config["resolution"][1] * 1e-9, "m"],
-        "z": [config["resolution"][2] * 1e-9, "m"],
+        "x": [config["viewer_res"][0] * 1e-9, "m"],
+        "y": [config["viewer_res"][1] * 1e-9, "m"],
+        "z": [config["viewer_res"][2] * 1e-9, "m"],
     }
 
     # sets variable used to toggle flywire-specific behavior
@@ -4795,9 +4801,9 @@ def make_ng_link(
         nav_dict = {
             "pose": {
                 "voxelSize": voxel_dimensions,
-                "voxelCoodrinates": config["default_view_point"],
+                "voxelCoodrinates": config["viewer_start_coords"],
             },
-            "zoomFactor": config["default_zoom_2d"],
+            "zoomFactor": config["viewer_2d_zoom"],
         }
         region_alpha = 0.2
         region_color = "#808080"
@@ -4809,20 +4815,20 @@ def make_ng_link(
     if view_coords != None:
         start_position = view_coords
     else:
-        start_position = config["default_view_point"]
+        start_position = config["viewer_start_coords"]
 
     # creates EM image and segmentation layer dicts
     layers = [
         {
             "type": "image",
             "name": "EM",
-            "source": config["em_source_url"],
+            "source": config["image_source"],
             "tab": "source",
         },
         {
             "type": seg_type,
             "name": "Segmentation",
-            "source": config["seg_source_url"],
+            "source": config["seg_source"],
             "segments": seg_ids,
             "tab": "segments",
         },
@@ -4841,14 +4847,14 @@ def make_ng_link(
     if len(seg_colors) > 0:
         layers[1]["segmentColors"] = color_dict
 
-    # adds region mesh layer if present
-    if region_meshes == True and config["main_stack_mesh_url"] != None:
+    # adds whole stack mesh layer if present
+    if region_meshes == True and config["whole_stack_mesh_source"] != None:
         
         # creates region mesh dict
         region_mesh_dict = {
             "type": seg_type,
             "name": "Region Outlines",
-            "source": config["main_stack_mesh_url"],
+            "source": config["whole_stack_mesh_source"],
             "segments": [1],
             "segmentColors": {
                 "1": region_color,
@@ -4905,8 +4911,8 @@ def make_ng_link(
             "layers": layers,
             "navigation": nav_dict,
             "showDefaultAnnotations": False,
-            "perspectiveOrientation": config["default_angle_3d"],
-            "perspectiveZoom": config["default_zoom_3d"],
+            "perspectiveOrientation": config["viewer_3d_angle"],
+            "perspectiveZoom": config["viewer_3d_zoom"],
             "showSlices": False,
             "layout": "xy-3d",
         }
@@ -4914,9 +4920,9 @@ def make_ng_link(
         state = {
             "dimensions": voxel_dimensions,
             "position": start_position,
-            "crossSectionScale": config["default_zoom_2d"],
-            "projectionOrientation": config["default_angle_3d"],
-            "projectionScale": config["default_zoom_3d"],
+            "crossSectionScale": config["viewer_2d_zoom"],
+            "projectionOrientation": config["viewer_3d_angle"],
+            "projectionScale": config["viewer_3d_zoom"],
             "layers": layers,
             "showSlices": False,
             "layout": "xy-3d",
@@ -4924,7 +4930,7 @@ def make_ng_link(
 
     # sets viewer site base url if none given
     if viewer_site == "default":
-        viewer_site = config["viewer_site_url"]
+        viewer_site = config["viewer_site"]
 
     # handles link construction for long-form url
     if long_url == True:
@@ -4980,7 +4986,7 @@ def make_objs_from_state_file(datastack, json_path, output_path):
         output_path += "/"
 
     # pulls voxel xyz dimensions from config dict
-    resolution = config["resolution"]
+    resolution = config["viewer_res"]
 
     # opens json file and convert to python dict
     with open(json_path, "r") as json_file:
@@ -5062,7 +5068,7 @@ def make_point_cloud_from_state_file(
         )
 
     # gets resolution of volume
-    resolution = config["resolution"]
+    resolution = config["viewer_res"]
 
     # creates numpy array of points
     points = get_anno_array_from_state_file(
@@ -5130,7 +5136,7 @@ def make_volume_mesh_from_state_file(
         )
 
     # pulls voxel xyz dimensions from config dict
-    resolution = config["resolution"]
+    resolution = config["viewer_res"]
 
     # extracts annotation coords as list of lists from JSON state using layer name
     points = get_anno_array_from_state_file(
@@ -5320,8 +5326,8 @@ def triage_segs(
 
     # gets hosting url of rough spot mesh from config dict
     if custom_volume_address == None:
-        swamps = config["swamp_source_url"]
-        swamp_ids = config["swamp_ids"]
+        swamps = config["swamp_mesh_source"]
+        swamp_ids = config["swamp_seg_ids"]
     else:
         swamps = custom_volume_address
         swamp_ids = custom_volume_seg_ids
