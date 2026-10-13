@@ -2483,6 +2483,8 @@ def gsheet_add_column(
     tab_name,
     col_data,
     oauth=False,
+    cred_path_override=None,
+    oauth_user_override=None,
 ):
     """
     Adds a list as a column to a tab in a google sheet.
@@ -2505,13 +2507,22 @@ def gsheet_add_column(
         oauth (bool, optional, default=False):
             by default, assumes you want to use google service account
             setting this to True will attempt to use OAuth token instead
+        cred_path_override (string, optional, default=None):
+            optionally override the default location where gspread looks for credentials file with a custom path
+            must be absolute path
+            works for service account or oauth
+        oauth_user_override (string, optional, default=None):
+            optionally override the default location where gspread looks for oauth authorized user file with a custom path
+            must be absolute path
+            only necessary for oauth, not service account
     """
 
-    # sets up google credentials
-    if oauth == True:
-        gc = gspread.oauth()
-    else:
-        gc = gspread.service_account()
+    # makes Google sheets authentication credentials object
+    gc = gsheet_set_credentials(
+        oauth = oauth,
+        cred_path_override = cred_path_override,
+        oauth_user_override = oauth_user_override,
+    )
 
     # opens sheet as object using sheet key
     sheet = gc.open_by_key(sheet_key)
@@ -2531,6 +2542,8 @@ def gsheet_add_row(
     tab_name, 
     row_data,
     oauth=False,
+    cred_path_override=None,
+    oauth_user_override=None,
 ):
     """
     Adds a list as a row to a tab in a google sheet.
@@ -2553,13 +2566,22 @@ def gsheet_add_row(
         oauth (bool, optional, default=False):
             by default, assumes you want to use google service account
             setting this to True will attempt to use OAuth token instead
+        cred_path_override (string, optional, default=None):
+            optionally override the default location where gspread looks for credentials file with a custom path
+            must be absolute path
+            works for service account or oauth
+        oauth_user_override (string, optional, default=None):
+            optionally override the default location where gspread looks for oauth authorized user file with a custom path
+            must be absolute path
+            only necessary for oauth, not service account
     """
 
-    # sets up google credentials
-    if oauth == True:
-        gc = gspread.oauth()
-    else:
-        gc = gspread.service_account()
+    # makes Google sheets authentication credentials object
+    gc = gsheet_set_credentials(
+        oauth = oauth,
+        cred_path_override = cred_path_override,
+        oauth_user_override = oauth_user_override,
+    )
 
     # opens sheet as object using sheet key
     sheet = gc.open_by_key(sheet_key)
@@ -2580,6 +2602,8 @@ def gsheet_add_seg_details(
     synapse_counts=True,
     proofreading=True,
     oauth=False,
+    cred_path_override=None,
+    oauth_user_override=None,
 ):
     """
     Gets neuron details for a list of segment IDs in a google sheet and adds them to the sheet.
@@ -2608,13 +2632,22 @@ def gsheet_add_seg_details(
         oauth (bool, optional, default=False):
             by default, assumes you want to use google service account
             setting this to True will attempt to use OAuth token instead
+        cred_path_override (string, optional, default=None):
+            optionally override the default location where gspread looks for credentials file with a custom path
+            must be absolute path
+            works for service account or oauth
+        oauth_user_override (string, optional, default=None):
+            optionally override the default location where gspread looks for oauth authorized user file with a custom path
+            must be absolute path
+            only necessary for oauth, not service account
     """
 
-    # sets up google credentials
-    if oauth == True:
-        gc = gspread.oauth()
-    else:
-        gc = gspread.service_account()
+    # makes Google sheets authentication credentials object
+    gc = gsheet_set_credentials(
+        oauth = oauth,
+        cred_path_override = cred_path_override,
+        oauth_user_override = oauth_user_override,
+    )
 
     # opens sheet as object using sheet key
     sheet = gc.open_by_key(sheet_key)
@@ -2753,6 +2786,8 @@ def gsheet_get_col_as_list(
     col_num=1, 
     ignore_header=False,
     oauth=False,
+    cred_path_override=None,
+    oauth_user_override=None,
 ):
     """
     Gets data from a column in a google sheet as a list.
@@ -2774,17 +2809,26 @@ def gsheet_get_col_as_list(
         oauth (bool, optional, default=False):
             by default, assumes you want to use google service account
             setting this to True will attempt to use OAuth token instead
+        cred_path_override (string, optional, default=None):
+            optionally override the default location where gspread looks for credentials file with a custom path
+            must be absolute path
+            works for service account or oauth
+        oauth_user_override (string, optional, default=None):
+            optionally override the default location where gspread looks for oauth authorized user file with a custom path
+            must be absolute path
+            only necessary for oauth, not service account
 
     Returns:
         col (list):
             a list of the values in the column
     """
 
-    # sets up google credentials
-    if oauth == True:
-        gc = gspread.oauth()
-    else:
-        gc = gspread.service_account()
+    # makes Google sheets authentication credentials object
+    gc = gsheet_set_credentials(
+        oauth = oauth,
+        cred_path_override = cred_path_override,
+        oauth_user_override = oauth_user_override,
+    )
 
     # creates gsheet object using sheet key
     sheet = gc.open_by_key(sheet_key)
@@ -2807,6 +2851,8 @@ def gsheet_get_row_as_list(
     row_num=1, 
     ignore_index=False,
     oauth=False,
+    cred_path_override=None,
+    oauth_user_override=None,
 ):
     """
     Gets data from a row in a google sheet as a list.
@@ -2828,17 +2874,26 @@ def gsheet_get_row_as_list(
         oauth (bool, optional, default=False):
             by default, assumes you want to use google service account
             setting this to True will attempt to use OAuth token instead
+        cred_path_override (string, optional, default=None):
+            optionally override the default location where gspread looks for credentials file with a custom path
+            must be absolute path
+            works for service account or oauth
+        oauth_user_override (string, optional, default=None):
+            optionally override the default location where gspread looks for oauth authorized user file with a custom path
+            must be absolute path
+            only necessary for oauth, not service account
 
     Returns:
         row (list):
             a list of the values in the row
     """
 
-    # sets up google credentials
-    if oauth == True:
-        gc = gspread.oauth()
-    else:
-        gc = gspread.service_account()
+    # makes Google sheets authentication credentials object
+    gc = gsheet_set_credentials(
+        oauth = oauth,
+        cred_path_override = cred_path_override,
+        oauth_user_override = oauth_user_override,
+    )
 
     # creates gsheet object using sheet key
     sheet = gc.open_by_key(sheet_key)
@@ -2860,6 +2915,8 @@ def gsheet_get_tab_as_df(
     tab_name, 
     has_headers=True,
     oauth=False,
+    cred_path_override=None,
+    oauth_user_override=None,
 ):
     """
     Gets the data from a google sheet tab as a dataframe.
@@ -2880,17 +2937,26 @@ def gsheet_get_tab_as_df(
         oauth (bool, optional, default=False):
             by default, assumes you want to use google service account
             setting this to True will attempt to use OAuth token instead
+        cred_path_override (string, optional, default=None):
+            optionally override the default location where gspread looks for credentials file with a custom path
+            must be absolute path
+            works for service account or oauth
+        oauth_user_override (string, optional, default=None):
+            optionally override the default location where gspread looks for oauth authorized user file with a custom path
+            must be absolute path
+            only necessary for oauth, not service account
 
     Returns:
         df (pandas DataFrame object):
             a dataframe of the values from the submitted spreadsheet tab
     """
 
-    # sets up google credentials
-    if oauth == True:
-        gc = gspread.oauth()
-    else:
-        gc = gspread.service_account()
+    # makes Google sheets authentication credentials object
+    gc = gsheet_set_credentials(
+        oauth = oauth,
+        cred_path_override = cred_path_override,
+        oauth_user_override = oauth_user_override,
+    )
 
     # opens sheet as object using sheet key
     sheet = gc.open_by_key(sheet_key)
@@ -2910,6 +2976,78 @@ def gsheet_get_tab_as_df(
 
     return df
 
+def gsheet_set_credentials(
+    oauth=False,
+    cred_path_override=None,
+    oauth_user_override=None,
+):
+    """
+    Create a Google credentials object for use with gsheet functions using service account or OAuth token.
+
+    Args:
+        oauth (bool, optional, default=False):
+            by default, assumes you want to use google service account
+            setting this to True will attempt to use OAuth token instead
+        cred_path_override (string, optional, default=None):
+            optionally override the default location where gspread looks for credentials file with a custom path
+            must be absolute path
+            works for service account or OAuth
+        oauth_user_override (string, optional, default=None):
+            optionally override the default location where gspread looks for OAuth authorized user file with a custom path
+            must be absolute path, mandatory if using custom OAuth credentials path
+            only necessary for OAuth, not service account
+
+    Returns:
+        gc (gspread credentials object):
+            used to authenticate other gsheet_ functions in this package
+    """
+
+    # sets up google credentials
+    # handles behavior for OAuth tokens
+    if oauth == True:
+        # tries to get oauth from default location
+        if cred_path_override == None:
+            try:
+                gc = gspread.oauth()
+            except:
+                raise Exception(
+                    "Failed to find OAuth credentials in default location. If stored in custom location, please pass with cred_path_override. Otherwise, read gspread setup guide at https://docs.gspread.org/en/latest/oauth2.html#for-end-users-using-oauth-client-id"
+                )
+        # tries to get oauth from custom location
+        else:
+            # handles cases where user fails to pass oauth_user_override
+            if oauth_user_override == None:
+                raise Exception("If using cred_path_override with OAuth you must also pass the path to the authorized user file with oauth_user_override. For more info, read gspread setup guide at read setup guide at https://docs.gspread.org/en/latest/oauth2.html#for-end-users-using-oauth-client-id")
+            else:
+                try:
+                    gc = gspread.oauth(
+                        credentials_filename = cred_path_override,
+                        authorized_user_filename = oauth_user_override,
+                    )
+                # handles bad path or missing files
+                except:
+                    raise Exception("Failed to find required OAuth credential files. Please make sure both cred_path_override and oauth_user_override paths are correct and point to existing files. For more info, read gspread setup guide at read setup guide at https://docs.gspread.org/en/latest/oauth2.html#for-end-users-using-oauth-client-id")
+    # handles behavior for service accounts
+    else:
+        # tries to get from default location
+        if cred_path_override == None:
+            try:
+                gc = gspread.service_account()
+            except:
+                raise Exception(
+                    "Failed to find Google service account credentials in default location. If stored in custom location, please pass with cred_path_override. Otherwise, read gspread setup guide at https://docs.gspread.org/en/latest/oauth2.html#for-bots-using-service-account"
+                )
+        else:
+            try:
+                gc = gspread.service_account(
+                    credentials_filename = cred_path_override,
+                )
+            # handles bad service account credential path or missing file
+            except:
+                raise Exception(
+                    "Failed to find Google service account credentials file in passed location. Please make sure cred_path_override path is correct and points to an existing file. For more info, read gspread setup guide at read setup guide at https://docs.gspread.org/en/latest/oauth2.html#for-bots-using-service-account"
+                )
+    return gc
 
 def host_ng_volume_locally(volume_path):
     """
