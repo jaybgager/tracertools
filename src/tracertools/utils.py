@@ -1359,10 +1359,15 @@ def count_synapses(
     in_counts = in_df[post_name].value_counts()
     out_counts = out_df[pre_name].value_counts()
 
+    # creates list to fill with potentially outdated IDs
+    likely_stale_ids = []
+
     # handles 0-synapse segments
     for seg_id in seg_ids:
         if seg_id not in in_counts:
             in_counts[seg_id] = 0
+            if seg_id not in out_counts:
+                likely_stale_ids.append(seg_id)
         if seg_id not in out_counts:
             out_counts[seg_id] = 0
 
@@ -1392,6 +1397,11 @@ def count_synapses(
     else:
         # makes list of summed incoming and outgoing numbers for each seg_id
         synapses = [int(in_counts[seg_id] + out_counts[seg_id]) for seg_id in seg_ids]
+
+    # prints list of likely stale IDs with message if any exist
+    if len(likely_stale_ids) != 0:
+        print(f"The following segment IDs weren't present in the queried synapse table and are therefore likely to be outdated or malformed. Try a passing a different timestamp for any that are legitimate.")
+        print(likely_stale_ids)
 
     return synapses    
 
