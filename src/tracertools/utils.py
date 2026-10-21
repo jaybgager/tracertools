@@ -1400,8 +1400,10 @@ def count_synapses(
 
     # prints list of likely stale IDs with message if any exist
     if len(likely_stale_ids) != 0:
-        print(f"The following segment IDs weren't present in the queried synapse table and are therefore likely to be outdated or malformed. Try a passing a different timestamp for any that are legitimate.")
+        print("The following segment IDs weren't present in the queried synapse table and are therefore likely to be outdated or malformed.")
+        print("Try passing a different timestamp for any that are legitimate with the 'timestamp' argument.")
         print(likely_stale_ids)
+        print()
 
     return synapses    
 
