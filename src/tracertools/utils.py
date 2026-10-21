@@ -1288,6 +1288,7 @@ def count_synapses(
     datastack, 
     seg_ids, 
     detailed_results=False,
+    timestamp = None,
 ):
     """
     Gets synapse counts for a list of segment IDs.
@@ -1301,6 +1302,9 @@ def count_synapses(
         detailed_results (bool, optional, default=False):
             optional toggle to get dictionary output with incoming and outgoing numbers
             by default only returns total synapse number 
+        timestamp (datetime object, optional, default=None):
+            the timestamp to feed into the synapse query
+            default value of None assumes live query of current IDs
 
     Returns:
         synapses (list of ints OR dict):
@@ -1343,10 +1347,12 @@ def count_synapses(
     in_df = client.materialize.query_table(
         table_name,
         filter_in_dict={post_name: seg_ids},
+        timestamp = timestamp,
     )
     out_df = client.materialize.query_table(
         table_name,
         filter_in_dict={pre_name: seg_ids},
+        timestamp = timestamp,
     )
 
     # counts occurrences of each unique value in dfs
@@ -1831,7 +1837,11 @@ def get_current_seg_ids(
                 if full_list == True:
                     fresh_seg = [fresh_seg]
 
-                fresh_segs.append(fresh_seg)
+                # handles formatting for differing output requirements
+                if include_ratio == False and full_list == False:
+                    fresh_segs.append(seg_id)
+                else:
+                    fresh_segs.append(fresh_seg)
 
             # if id isn't already fresh, runs freshener
             else:        
