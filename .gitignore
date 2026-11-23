@@ -3,3 +3,6 @@ sandbox.ipynb
 
 # all local pycache files
 **/__pycache__/
+
+# all local csv files
+**.csv
